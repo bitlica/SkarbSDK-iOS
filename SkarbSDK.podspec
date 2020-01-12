@@ -12,8 +12,10 @@ Pod::Spec.new do |s|
   s.license      = "MIT"
   s.author       = { "Artem Hitrik" => "artfire90@gmail.com" }
   s.platform     = :ios, "11.0"
-  s.source       = { :git => "https://artfire@bitbucket.org/applefriends/sdk.git", :tag => "#{s.version}" }
+  s.source       = { :git => "https://bitbucket.org/applefriends/sdk/src/master", :tag => "#{s.version}" }
   s.source_files  = "SkarbSDK/Source/**/*"
   s.static_framework = true
-  s.vendored_frameworks = 'SkarbSDK/Frameworks/*.framework'
+  #s.vendored_frameworks = 'SkarbSDK/Frameworks/*.framework'
+  s.frameworks = 'Foundation'
+
 end

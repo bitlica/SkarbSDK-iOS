@@ -156,7 +156,14 @@ private extension SKServerAPIImplementaton {
     params["bundle_id"] = Bundle.main.bundleIdentifier
     params["bundle_ver"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     params["device_id"] = UIDevice.current.identifierForVendor?.uuidString
-    params["date"] = Formatter.iso8601.string(from: Date())
+    let installedDate: String
+    if let installedDateISO8601 = SKServiceRegistry.userDefaultsService.string(forKey: .installedDateISO8601) {
+      installedDate = installedDateISO8601
+    } else {
+      installedDate = Formatter.iso8601.string(from: Date())
+      SKServiceRegistry.userDefaultsService.setValue(installedDate, forKey: .installedDateISO8601)
+    }
+    params["date"] = installedDate
     params["timestamp"] = "\(Int(Date().timeIntervalSince1970 * 1000000))"
     params["client_id"] = "prodinf"
     params["idfa"] = ASIdentifierManager.shared().advertisingIdentifier.uuidString

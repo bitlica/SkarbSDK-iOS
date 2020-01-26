@@ -16,6 +16,7 @@ class SKUserDefaultsService {
     case price = "sk_price_key"
     case currency = "sk_currency_key"
     case requestTypeToSync = "sk_request_to_sync"
+    case installedDateISO8601 = "sk_installed_date_ISO8601"
   }
   
   private let userDefaults: UserDefaults

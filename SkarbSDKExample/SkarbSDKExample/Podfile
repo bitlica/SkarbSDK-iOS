@@ -1,5 +1,10 @@
 # Uncomment the next line to define a global platform for your project
 platform :ios, '11.0'
+
+# Insert your own private specs repo source
+source 'https://github.com/Artfire/SkarbSDK'
+
+# Standard cocoapods specs source
 source 'https://github.com/CocoaPods/Specs.git'
 
 target 'SkarbSDKExample' do

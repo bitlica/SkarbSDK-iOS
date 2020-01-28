@@ -21,9 +21,9 @@ class ViewController: UIViewController {
 //    SKServiceRegistry.serverAPI.sendInstall { error in
 //      print("error = \(error)")
 //    }
-    SKServiceRegistry.serverAPI.sendSource(source: .facebook, features: ["source": "facebookTest"], completion: { error in
-      print("error = \(error)")
-    })
+//    SKServiceRegistry.serverAPI.sendSource(source: .facebook, features: ["source": "facebookTest"], completion: { error in
+//      print("error = \(error)")
+//    })
 //    SKServiceRegistry.serverAPI.sendTest(name: "testFacebook", group: "A")
 //    SKServiceRegistry.serverAPI.sendPurchase(paywall: "facebook", price: 120.99, currency: "BYN")
   }

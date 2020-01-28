@@ -18,7 +18,13 @@ class SKServerAPIImplementaton: SKServerAPI {
   private let userCallsConcurrentQueue = DispatchQueue(label: "com.skserverAPI.usercalls", qos: .userInitiated, attributes: [.concurrent])
   
   func sendInstall(completion: @escaping (SKResponseError?) -> Void) {
-    syncAllData(initRequestType: .install, completion: completion)
+    let requestType = SKRequestType.install
+    guard !SKServiceRegistry.userDefaultsService.bool(forKey: .skRequestType(requestType.storingName)) else {
+      SKSyncLog.logInfo("Send install called, but SDK have already sent install event successful before")
+      completion(nil)
+      return
+    }
+    syncAllData(initRequestType: requestType, completion: completion)
   }
   
   func sendTest(name: String, group: String, completion: @escaping (SKResponseError?) -> Void) {
@@ -74,6 +80,7 @@ class SKServerAPIImplementaton: SKServerAPI {
                                 switch result {
                                   case .success(_):
                                     SKServiceRegistry.userDefaultsService.setValue(nil, forKey: .requestTypeToSync)
+                                    SKServiceRegistry.userDefaultsService.setValue(true, forKey: .skRequestType(initRequestType.storingName))
                                     completion(nil)
                                   case .failure(let error):
                                     SKServiceRegistry.userDefaultsService.setValue(initRequestType.rawValue, forKey: .requestTypeToSync)

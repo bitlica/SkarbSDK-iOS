@@ -27,6 +27,7 @@
 		4F735C1C23D8445400A8A537 /* UserDefaultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C1B23D8445400A8A537 /* UserDefaultsService.swift */; };
 		4F735C1F23D9FBB100A8A537 /* SKSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C1E23D9FBB100A8A537 /* SKSyncService.swift */; };
 		4F735C2123D9FBC800A8A537 /* SKSyncServiceImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C2023D9FBC800A8A537 /* SKSyncServiceImplementation.swift */; };
+		4F735C4B23DEF3E600A8A537 /* SkarbSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C4A23DEF3E600A8A537 /* SkarbSDK.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -52,6 +53,7 @@
 		4F735C1B23D8445400A8A537 /* UserDefaultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsService.swift; sourceTree = "<group>"; };
 		4F735C1E23D9FBB100A8A537 /* SKSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKSyncService.swift; sourceTree = "<group>"; };
 		4F735C2023D9FBC800A8A537 /* SKSyncServiceImplementation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKSyncServiceImplementation.swift; sourceTree = "<group>"; };
+		4F735C4A23DEF3E600A8A537 /* SkarbSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkarbSDK.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -107,6 +109,7 @@
 		4F735BF323D727AB00A8A537 /* Classes */ = {
 			isa = PBXGroup;
 			children = (
+				4F735C4A23DEF3E600A8A537 /* SkarbSDK.swift */,
 				4F735C0B23D727F600A8A537 /* Services */,
 				4F735BFA23D727AB00A8A537 /* Util */,
 				4F735BFE23D727AB00A8A537 /* Extensions */,
@@ -274,6 +277,7 @@
 				4F735C1F23D9FBB100A8A537 /* SKSyncService.swift in Sources */,
 				4F735C1523D727F600A8A537 /* SKRequest.swift in Sources */,
 				4F735C1723D7286500A8A537 /* SKServiceRegistry.swift in Sources */,
+				4F735C4B23DEF3E600A8A537 /* SkarbSDK.swift in Sources */,
 				4F735C1C23D8445400A8A537 /* UserDefaultsService.swift in Sources */,
 				4F735C0823D727AB00A8A537 /* SKSyncLog.swift in Sources */,
 				4F735BE123D7279400A8A537 /* SceneDelegate.swift in Sources */,

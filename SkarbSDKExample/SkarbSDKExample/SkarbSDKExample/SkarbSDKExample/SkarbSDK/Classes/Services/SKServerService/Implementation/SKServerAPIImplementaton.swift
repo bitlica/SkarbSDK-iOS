@@ -32,8 +32,8 @@ class SKServerAPIImplementaton: SKServerAPI {
     syncAllData(initRequestType: .test, completion: completion)
   }
   
-  func sendSource(source: SKSource, features: JSONObject, completion: @escaping (SKResponseError?) -> Void) {
-    var params: JSONObject = [:]
+  func sendSource(source: SKSource, features: [String: Any], completion: @escaping (SKResponseError?) -> Void) {
+    var params: [String: Any] = [:]
     params["broker"] = source.name
     params["features"] = features
     SKServiceRegistry.userDefaultsService.setValue(params, forKey: .source)
@@ -48,7 +48,7 @@ class SKServerAPIImplementaton: SKServerAPI {
   }
   
   func syncAllData(initRequestType: SKRequestType, completion: @escaping (SKResponseError?) -> Void) {
-    var params: JSONObject = [:]
+    var params: [String: Any] = [:]
     params["application"] = prepateApplicationData()
     params["device"] = prepateDeviceData()
     if let testJSON = SKServiceRegistry.userDefaultsService.json(forKey: .test) {
@@ -110,7 +110,7 @@ private extension SKServerAPIImplementaton {
           return
         }
         do {
-          if let json = try JSONSerialization.jsonObject(with: data, options: []) as? JSONObject {
+          if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
             skRequest.parsingHandler(.success(json))
           } else {
             skRequest.parsingHandler(.failure(SKResponseError(serverStatusCode: 0, message: nil)))
@@ -140,7 +140,7 @@ private extension SKServerAPIImplementaton {
         }
         
         do {
-          if let json = try JSONSerialization.jsonObject(with: data, options: []) as? JSONObject,
+          if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
             let errorMessage = json["error"] as? String {
             return SKResponseError(serverStatusCode: response.statusCode, message: errorMessage)
           }
@@ -158,8 +158,8 @@ private extension SKServerAPIImplementaton {
     return SKServerAPIImplementaton.serverName + urlAction
   }
   
-  func prepateApplicationData() -> JSONObject {
-    var params: JSONObject = [:]
+  func prepateApplicationData() -> [String: Any] {
+    var params: [String: Any] = [:]
     params["bundle_id"] = Bundle.main.bundleIdentifier
     params["bundle_ver"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     params["device_id"] = UIDevice.current.identifierForVendor?.uuidString
@@ -178,8 +178,8 @@ private extension SKServerAPIImplementaton {
     return params
   }
   
-  func prepateDeviceData() -> JSONObject {
-    var params: JSONObject = [:]
+  func prepateDeviceData() -> [String: Any] {
+    var params: [String: Any] = [:]
     if let preferredLanguage = Locale.preferredLanguages.first {
       params["locale"] = preferredLanguage
     } else {
@@ -198,22 +198,22 @@ private extension SKServerAPIImplementaton {
     return params
   }
   
-  func prepateTestData(name: String, group: String) -> JSONObject? {
-    var params: JSONObject = [:]
+  func prepateTestData(name: String, group: String) -> [String: Any]? {
+    var params: [String: Any] = [:]
     params["name"] = name
     params["group"] = group
     return params
   }
   
-  func prepateSourceData(source: SKSource, features: JSONObject) -> JSONObject? {
-    var params: JSONObject = [:]
+  func prepateSourceData(source: SKSource, features: [String: Any]) -> [String: Any]? {
+    var params: [String: Any] = [:]
     params["broker"] = source.name
     params["features"] = features
     
     return params
   }
   
-  func prepatePurchaseData() -> JSONObject? {
+  func prepatePurchaseData() -> [String: Any]? {
     guard let paywall = SKServiceRegistry.userDefaultsService.string(forKey: .paywall),
        let price = SKServiceRegistry.userDefaultsService.float(forKey: .price),
        let currency = SKServiceRegistry.userDefaultsService.string(forKey: .currency),
@@ -221,7 +221,7 @@ private extension SKServerAPIImplementaton {
       let recieptData = try? Data(contentsOf: appStoreReceiptURL) else {
       return nil
     }
-    var params: JSONObject = [:]
+    var params: [String: Any] = [:]
     params["paywall"] = paywall
     params["price"] = price
     params["currency"] = currency

@@ -33,16 +33,16 @@ public class SKRequest {
 
   let request: URLRequest
   let requestType: SKRequestType
-  let params: JSONObject
-  let parsingHandler: (Result<JSONObject, SKResponseError>) -> Void
+  let params: [String: Any]
+  let parsingHandler: (Result<[String: Any], SKResponseError>) -> Void
 
   private(set) var remainingRetryCount: Int
 
   init(request: URLRequest,
        requestType: SKRequestType,
-       params: JSONObject,
+       params: [String: Any],
        retryCount: Int = SKServerAPIImplementaton.maxNumberOfRequestRetries,
-       parsingHandler: @escaping (Result<JSONObject, SKResponseError>) -> Void) {
+       parsingHandler: @escaping (Result<[String: Any], SKResponseError>) -> Void) {
 
     self.request = request
     self.requestType = requestType

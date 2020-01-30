@@ -101,6 +101,14 @@ public class SKSyncLog {
 //MARK: Private
 private extension SKSyncLog {
 
+  static var isDebug: Bool {
+    var result = false
+    #if DEBUG
+      result = true
+    #endif
+    return result
+  }
+  
   static func prepareNSError(prefix: String, file: StaticString, function: StaticString, message: String) -> NSError {
     let fileString = "\(file)"
     let names = fileString.components(separatedBy: "/")

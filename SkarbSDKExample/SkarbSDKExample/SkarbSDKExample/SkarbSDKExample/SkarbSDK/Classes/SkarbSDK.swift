@@ -10,8 +10,8 @@ import Foundation
 
 class SkarbSDK {
   static func initialize(clientId: String) {
-    // TODO: Save clientId later
     SKServiceRegistry.initialize()
+    SKServiceRegistry.userDefaultsService.setValue(clientId, forKey: .clientId)
     SKServiceRegistry.serverAPI.sendInstall(completion: { _ in })
   }
   

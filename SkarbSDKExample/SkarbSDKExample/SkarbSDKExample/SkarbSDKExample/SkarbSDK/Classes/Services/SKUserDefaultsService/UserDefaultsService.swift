@@ -18,6 +18,7 @@ class SKUserDefaultsService {
     case requestTypeToSync
     case installedDateISO8601
     case skRequestType(String)
+    case clientId
     
     var keyName: String {
       switch self {
@@ -37,6 +38,8 @@ class SKUserDefaultsService {
           return "sk_installed_date_ISO8601"
         case .skRequestType(let name):
           return name
+        case .clientId:
+          return "sk_client_id"
       }
     }
   }

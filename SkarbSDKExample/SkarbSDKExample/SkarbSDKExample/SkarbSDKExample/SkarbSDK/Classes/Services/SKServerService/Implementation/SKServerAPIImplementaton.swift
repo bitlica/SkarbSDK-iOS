@@ -49,15 +49,15 @@ class SKServerAPIImplementaton: SKServerAPI {
   
   func syncAllData(initRequestType: SKRequestType, completion: @escaping (SKResponseError?) -> Void) {
     var params: [String: Any] = [:]
-    params["application"] = prepateApplicationData()
-    params["device"] = prepateDeviceData()
+    params["application"] = prepareApplicationData()
+    params["device"] = prepareDeviceData()
     if let testJSON = SKServiceRegistry.userDefaultsService.json(forKey: .test) {
       params["test"] = testJSON
     }
     if let sourceJSON = SKServiceRegistry.userDefaultsService.json(forKey: .source) {
       params["source"] = sourceJSON
     }
-    params["purchase"] = prepatePurchaseData()
+    params["purchase"] = preparePurchaseData()
     
     let urlString = prepareBaseURLString(urlAction: "/appgate")
     guard let url = URL(string: urlString) else { return }
@@ -158,11 +158,15 @@ private extension SKServerAPIImplementaton {
     return SKServerAPIImplementaton.serverName + urlAction
   }
   
-  func prepateApplicationData() -> [String: Any] {
+  func prepareApplicationData() -> [String: Any] {
     var params: [String: Any] = [:]
     params["bundle_id"] = Bundle.main.bundleIdentifier
     params["bundle_ver"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-    params["device_id"] = UIDevice.current.identifierForVendor?.uuidString
+    var deviceId = UIDevice.current.identifierForVendor?.uuidString
+    #if DEBUG
+    deviceId = "dev-" + (deviceId ?? "")
+    #endif
+    params["device_id"] = deviceId
     let installedDate: String
     if let installedDateISO8601 = SKServiceRegistry.userDefaultsService.string(forKey: .installedDateISO8601) {
       installedDate = installedDateISO8601
@@ -172,13 +176,13 @@ private extension SKServerAPIImplementaton {
     }
     params["date"] = installedDate
     params["timestamp"] = "\(Int(Date().timeIntervalSince1970 * 1000000))"
-    params["client_id"] = "prodinf"
+    params["client_id"] = SKServiceRegistry.userDefaultsService.string(forKey: .clientId)
     params["idfa"] = ASIdentifierManager.shared().advertisingIdentifier.uuidString
     
     return params
   }
   
-  func prepateDeviceData() -> [String: Any] {
+  func prepareDeviceData() -> [String: Any] {
     var params: [String: Any] = [:]
     if let preferredLanguage = Locale.preferredLanguages.first {
       params["locale"] = preferredLanguage
@@ -198,14 +202,14 @@ private extension SKServerAPIImplementaton {
     return params
   }
   
-  func prepateTestData(name: String, group: String) -> [String: Any]? {
+  func prepareTestData(name: String, group: String) -> [String: Any]? {
     var params: [String: Any] = [:]
     params["name"] = name
     params["group"] = group
     return params
   }
   
-  func prepateSourceData(source: SKSource, features: [String: Any]) -> [String: Any]? {
+  func prepareSourceData(source: SKSource, features: [String: Any]) -> [String: Any]? {
     var params: [String: Any] = [:]
     params["broker"] = source.name
     params["features"] = features
@@ -213,7 +217,7 @@ private extension SKServerAPIImplementaton {
     return params
   }
   
-  func prepatePurchaseData() -> [String: Any]? {
+  func preparePurchaseData() -> [String: Any]? {
     guard let paywall = SKServiceRegistry.userDefaultsService.string(forKey: .paywall),
        let price = SKServiceRegistry.userDefaultsService.float(forKey: .price),
        let currency = SKServiceRegistry.userDefaultsService.string(forKey: .currency),

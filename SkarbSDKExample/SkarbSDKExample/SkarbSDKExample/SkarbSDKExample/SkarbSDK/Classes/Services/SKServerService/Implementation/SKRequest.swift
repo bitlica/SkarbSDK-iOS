@@ -9,23 +9,10 @@
 import Foundation
 
 enum SKRequestType: String {
-  case install
-  case test
-  case source
-  case purchase
-  
-  var storingName: String {
-    switch self {
-      case .install:
-        return "sk_request_type_install"
-      case .test:
-        return "sk_request_type_test"
-      case .source:
-        return "sk_request_type_source"
-      case .purchase:
-        return "sk_request_type_purchase"
-    }
-  }
+  case install = "sk_request_type_install"
+  case test = "sk_request_type_test"
+  case source = "sk_request_type_source"
+  case purchase = "sk_request_type_purchase"
 }
 
 //This is a class, to use reference semantic, to enable remainingRetryCount updates

@@ -19,7 +19,7 @@ class SKServerAPIImplementaton: SKServerAPI {
   
   func sendInstall(completion: @escaping (SKResponseError?) -> Void) {
     let requestType = SKRequestType.install
-    guard !SKServiceRegistry.userDefaultsService.bool(forKey: .skRequestType(requestType.storingName)) else {
+    guard !SKServiceRegistry.userDefaultsService.bool(forKey: .skRequestType(requestType.rawValue)) else {
       SKSyncLog.logInfo("Send install called, but SDK have already sent install event successful before")
       completion(nil)
       return
@@ -40,15 +40,27 @@ class SKServerAPIImplementaton: SKServerAPI {
     syncAllData(initRequestType: .source, completion: completion)
   }
   
-  func sendPurchase(paywall: String, price: Float, currency: String, completion: @escaping (SKResponseError?) -> Void) {
-    SKServiceRegistry.userDefaultsService.setValue(paywall, forKey: .paywall)
-    SKServiceRegistry.userDefaultsService.setValue(price, forKey: .price)
-    SKServiceRegistry.userDefaultsService.setValue(currency, forKey: .currency)
+  func sendPurchase(productId: String,
+                    paywall: String?,
+                    price: Float?,
+                    currency: String?,
+                    completion: ((SKResponseError?) -> Void)?) {
+    SKServiceRegistry.userDefaultsService.setValue(productId, forKey: .productId)
+    if let paywall = paywall {
+      SKServiceRegistry.userDefaultsService.setValue(paywall, forKey: .paywall)
+    }
+    if let price = price {
+      SKServiceRegistry.userDefaultsService.setValue(price, forKey: .price)
+    }
+    if let currency = currency {
+      SKServiceRegistry.userDefaultsService.setValue(currency, forKey: .currency)
+    }
     syncAllData(initRequestType: .purchase, completion: completion)
   }
   
-  func syncAllData(initRequestType: SKRequestType, completion: @escaping (SKResponseError?) -> Void) {
+  func syncAllData(initRequestType: SKRequestType, completion: ((SKResponseError?) -> Void)?) {
     var params: [String: Any] = [:]
+    params["client"] = prepareClientData()
     params["application"] = prepareApplicationData()
     params["device"] = prepareDeviceData()
     if let testJSON = SKServiceRegistry.userDefaultsService.json(forKey: .test) {
@@ -79,12 +91,12 @@ class SKServerAPIImplementaton: SKServerAPI {
                                 SKSyncLog.logInfo("SKResponse is \(result) for requestType = \(initRequestType)")
                                 switch result {
                                   case .success(_):
-                                    SKServiceRegistry.userDefaultsService.setValue(nil, forKey: .requestTypeToSync)
-                                    SKServiceRegistry.userDefaultsService.setValue(true, forKey: .skRequestType(initRequestType.storingName))
-                                    completion(nil)
+                                    SKServiceRegistry.userDefaultsService.removeValue(forKey: .requestTypeToSync)
+                                    SKServiceRegistry.userDefaultsService.setValue(true, forKey: .skRequestType(initRequestType.rawValue))
+                                    completion?(nil)
                                   case .failure(let error):
                                     SKServiceRegistry.userDefaultsService.setValue(initRequestType.rawValue, forKey: .requestTypeToSync)
-                                    completion(error)
+                                    completion?(error)
                                 }
     })
     executeRequest(skRequest)
@@ -158,15 +170,22 @@ private extension SKServerAPIImplementaton {
     return SKServerAPIImplementaton.serverName + urlAction
   }
   
+  func prepareClientData() ->  [String: Any] {
+    var params: [String: Any] = [:]
+    params["timestamp"] = "\(Int(Date().timeIntervalSince1970 * 1000000))"
+    params["client_id"] = SKServiceRegistry.userDefaultsService.string(forKey: .clientId)
+    if let env = SKServiceRegistry.userDefaultsService.string(forKey: .env) {
+      params["env"] = env
+    }
+    params["env"] = "dev"
+    return params
+  }
+  
   func prepareApplicationData() -> [String: Any] {
     var params: [String: Any] = [:]
     params["bundle_id"] = Bundle.main.bundleIdentifier
     params["bundle_ver"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-    var deviceId = UIDevice.current.identifierForVendor?.uuidString
-    #if DEBUG
-    deviceId = "dev-" + (deviceId ?? "")
-    #endif
-    params["device_id"] = deviceId
+    params["device_id"] = UIDevice.current.identifierForVendor?.uuidString
     let installedDate: String
     if let installedDateISO8601 = SKServiceRegistry.userDefaultsService.string(forKey: .installedDateISO8601) {
       installedDate = installedDateISO8601
@@ -175,8 +194,6 @@ private extension SKServerAPIImplementaton {
       SKServiceRegistry.userDefaultsService.setValue(installedDate, forKey: .installedDateISO8601)
     }
     params["date"] = installedDate
-    params["timestamp"] = "\(Int(Date().timeIntervalSince1970 * 1000000))"
-    params["client_id"] = SKServiceRegistry.userDefaultsService.string(forKey: .clientId)
     params["idfa"] = ASIdentifierManager.shared().advertisingIdentifier.uuidString
     
     return params
@@ -218,17 +235,16 @@ private extension SKServerAPIImplementaton {
   }
   
   func preparePurchaseData() -> [String: Any]? {
-    guard let paywall = SKServiceRegistry.userDefaultsService.string(forKey: .paywall),
-       let price = SKServiceRegistry.userDefaultsService.float(forKey: .price),
-       let currency = SKServiceRegistry.userDefaultsService.string(forKey: .currency),
-       let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
+    guard let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
       let recieptData = try? Data(contentsOf: appStoreReceiptURL) else {
       return nil
     }
+    
     var params: [String: Any] = [:]
-    params["paywall"] = paywall
-    params["price"] = price
-    params["currency"] = currency
+    params["product_id"] = SKServiceRegistry.userDefaultsService.string(forKey: .productId)
+    params["paywall"] = SKServiceRegistry.userDefaultsService.string(forKey: .paywall)
+    params["price"] = SKServiceRegistry.userDefaultsService.float(forKey: .price)
+    params["currency"] = SKServiceRegistry.userDefaultsService.string(forKey: .currency)
     params["receipt"] = recieptData.base64EncodedString()
     
     return params

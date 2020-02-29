@@ -9,8 +9,6 @@
 import Foundation
 import UIKit
 
-
-
 class SKSyncServiceImplementation: SKSyncService {
   
   private let actionSerialQueue = DispatchQueue(label: "com.skarbSDK.sync.action", qos: .userInitiated)
@@ -49,26 +47,32 @@ class SKSyncServiceImplementation: SKSyncService {
     
     SKSyncLog.logInfo("SKSyncService syncAllCommands called")
     
-    guard !isSyncNow,
-      let requestTypeToSync = SKServiceRegistry.userDefaultsService.string(forKey: .requestTypeToSync),
-      let requestType = SKRequestType(rawValue: requestTypeToSync) else {
+    guard !isSyncNow else {
         return
     }
-    
-    SKSyncLog.logInfo("SKSyncService syncAllCommands started sync requestTypeToSync = \(requestTypeToSync)")
-    
-    self.stateSerialQueue.sync {
-      self.cachedIsSyncNow = true
-    }
-    SKServiceRegistry.serverAPI.syncAllData(initRequestType: requestType, completion: { [weak self] error in
-      self?.stateSerialQueue.sync {
-        self?.cachedIsSyncNow = false
+    if let fetchAllProductsAndSyncValue = SKServiceRegistry.userDefaultsService.string(forKey: .fetchAllProductsAndSync) {
+      self.stateSerialQueue.sync {
+        self.cachedIsSyncNow = true
       }
+      SKSyncLog.logInfo("SKSyncService syncAllCommands started sync requestType = \(fetchAllProductsAndSyncValue)")
+      SKServiceRegistry.storeKitService.requestProductInfoAndSendPurchase(productId: fetchAllProductsAndSyncValue)
+    } else if let requestTypeToSync = SKServiceRegistry.userDefaultsService.string(forKey: .requestTypeToSync),
+      let requestType = SKRequestType(rawValue: requestTypeToSync) {
+      self.stateSerialQueue.sync {
+        self.cachedIsSyncNow = true
+      }
+      SKSyncLog.logInfo("SKSyncService syncAllCommands started sync requestType = \(requestType)")
       
-      if error != nil {
-        SKServiceRegistry.userDefaultsService.setValue(requestTypeToSync, forKey: .requestTypeToSync)
-      }
-    })
+      SKServiceRegistry.serverAPI.syncAllData(initRequestType: requestType, completion: { [weak self] error in
+        self?.stateSerialQueue.sync {
+          self?.cachedIsSyncNow = false
+        }
+        
+        if error != nil {
+          SKServiceRegistry.userDefaultsService.setValue(requestTypeToSync, forKey: .requestTypeToSync)
+        }
+      })
+    }
   }
 }
 

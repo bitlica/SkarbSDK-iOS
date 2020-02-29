@@ -49,14 +49,7 @@ struct NSLogBasedImplementation: LogDelegate {
 ///to take autoclosures and avoid string building costs when no logging is needed
 public class SKSyncLog {
 
-  static private let allowStatus: Bool = false
-  static private let allowPersistence: Bool = false
   static private let allowNetwork: Bool = true
-  static private let allowSync: Bool = false
-  static private let allowUI: Bool = false
-  static private let allowPerformance: Bool = false
-  static private let allowAnalytics: Bool = false
-
 
   public static var logDelegate: LogDelegate = NSLogBasedImplementation()
 

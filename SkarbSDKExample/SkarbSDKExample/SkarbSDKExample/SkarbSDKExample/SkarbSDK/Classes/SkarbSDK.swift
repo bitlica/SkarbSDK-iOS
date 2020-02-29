@@ -9,9 +9,10 @@
 import Foundation
 
 class SkarbSDK {
-  static func initialize(clientId: String) {
-    SKServiceRegistry.initialize()
+  static func initialize(clientId: String, isObservable: Bool, isDebug: Bool) {
+    SKServiceRegistry.initialize(isObservable: isObservable)
     SKServiceRegistry.userDefaultsService.setValue(clientId, forKey: .clientId)
+    SKServiceRegistry.userDefaultsService.setValue(isDebug, forKey: .env)
     SKServiceRegistry.serverAPI.sendInstall(completion: { _ in })
   }
   
@@ -23,7 +24,15 @@ class SkarbSDK {
     SKServiceRegistry.serverAPI.sendSource(source: source, features: features, completion: completion)
   }
   
-  static func sendPurchase(paywall: String, price: Float, currency: String, completion: @escaping (SKResponseError?) -> Void) {
-    SKServiceRegistry.serverAPI.sendPurchase(paywall: paywall, price: price, currency: currency, completion: completion)
+  static func sendPurchase(productId: String,
+                           paywall: String? = nil,
+                           price: Float? = nil,
+                           currency: String? = nil,
+                           completion: ((SKResponseError?) -> Void)? = nil) {
+    SKServiceRegistry.serverAPI.sendPurchase(productId: productId,
+                                             paywall: paywall,
+                                             price: price,
+                                             currency: currency,
+                                             completion: completion)
   }
 }

@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum SKSource {
+public enum SKSource {
   case facebook
   case searchads
   case appsflyer

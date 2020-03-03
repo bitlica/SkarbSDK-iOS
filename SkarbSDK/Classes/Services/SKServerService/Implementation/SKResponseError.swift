@@ -15,7 +15,7 @@ enum SKResponseErrorCode {
 }
 
 
-struct SKResponseError: Error {
+public struct SKResponseError: Error {
   let errorCode: SKResponseErrorCode
   let message: String
 

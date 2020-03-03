@@ -3,12 +3,12 @@
 //  SkarbSDKExample
 //
 //  Created by Artem Hitrik on 1/27/20.
-//  Copyright © 2020 Prodinfire. All rights reserved.
+//  Copyright © 2020 Bitlica Inc. All rights reserved.
 //
 
 import Foundation
 
-class SkarbSDK {
+public class SkarbSDK {
   public static func initialize(clientId: String, isObservable: Bool, isDebug: Bool) {
     SKServiceRegistry.initialize(isObservable: isObservable)
     SKServiceRegistry.userDefaultsService.setValue(clientId, forKey: .clientId)

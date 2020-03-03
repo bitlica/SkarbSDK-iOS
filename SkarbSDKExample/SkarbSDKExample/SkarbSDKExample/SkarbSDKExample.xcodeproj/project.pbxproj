@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 51;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -88,7 +88,6 @@
 				5DF303FD11171F762CC3F8D0 /* Pods-SkarbSDKExample.debug.xcconfig */,
 				E28BEF55D1AAAAC247DEE6DA /* Pods-SkarbSDKExample.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};

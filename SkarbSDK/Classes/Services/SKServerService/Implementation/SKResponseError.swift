@@ -3,12 +3,12 @@
 //  SkarbSDKExample
 //
 //  Created by Artem Hitrik on 1/19/20.
-//  Copyright © 2020 Prodinfire. All rights reserved.
+//  Copyright © 2020 Bitlica Inc. All rights reserved.
 //
 
 import Foundation
 
-enum ResponseErrorCode {
+enum SKResponseErrorCode {
   case noInternet
   case serverError
   case other
@@ -16,7 +16,7 @@ enum ResponseErrorCode {
 
 
 struct SKResponseError: Error {
-  let errorCode: ResponseErrorCode
+  let errorCode: SKResponseErrorCode
   let message: String
 
   static let genericRetryMessage = "An error occurred connecting to the server. Please try again in a minute."

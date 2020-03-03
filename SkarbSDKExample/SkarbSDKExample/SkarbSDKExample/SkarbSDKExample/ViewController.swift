@@ -3,10 +3,11 @@
 //  SkarbSDKExample
 //
 //  Created by Artem Hitrik on 1/21/20.
-//  Copyright © 2020 Prodinfire. All rights reserved.
+//  Copyright © 2020 Bitlica Inc. All rights reserved.
 //
 
 import UIKit
+import SkarbSDK
 
 class ViewController: UIViewController {
 
@@ -15,6 +16,8 @@ class ViewController: UIViewController {
     // Do any additional setup after loading the view.
     
     view.backgroundColor = .red
+    
+    SkarbS
   }
 
 

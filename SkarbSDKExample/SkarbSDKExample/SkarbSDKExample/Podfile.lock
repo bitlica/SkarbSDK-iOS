@@ -1,0 +1,16 @@
+PODS:
+  - SkarbSDK (0.1.5)
+
+DEPENDENCIES:
+  - SkarbSDK
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - SkarbSDK
+
+SPEC CHECKSUMS:
+  SkarbSDK: af7c5f5ce677f29fe8af6102c99299ed341e4fc4
+
+PODFILE CHECKSUM: 346e3d83de032e28e565ced4d4190f58fa74659a
+
+COCOAPODS: 1.8.4

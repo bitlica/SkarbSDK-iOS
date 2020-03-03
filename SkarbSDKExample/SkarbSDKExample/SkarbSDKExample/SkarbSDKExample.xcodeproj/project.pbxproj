@@ -13,6 +13,7 @@
 		4F735BE623D7279400A8A537 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE423D7279400A8A537 /* Main.storyboard */; };
 		4F735BE823D7279500A8A537 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE723D7279500A8A537 /* Assets.xcassets */; };
 		4F735BEB23D7279500A8A537 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE923D7279500A8A537 /* LaunchScreen.storyboard */; };
+		97F5B54E4D9C915F1F0408A7 /* Pods_SkarbSDKExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5313EE38F51E3FA1305834B1 /* Pods_SkarbSDKExample.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +25,9 @@
 		4F735BE723D7279500A8A537 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4F735BEA23D7279500A8A537 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4F735BEC23D7279500A8A537 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		5313EE38F51E3FA1305834B1 /* Pods_SkarbSDKExample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SkarbSDKExample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		5DF303FD11171F762CC3F8D0 /* Pods-SkarbSDKExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SkarbSDKExample.debug.xcconfig"; path = "Target Support Files/Pods-SkarbSDKExample/Pods-SkarbSDKExample.debug.xcconfig"; sourceTree = "<group>"; };
+		E28BEF55D1AAAAC247DEE6DA /* Pods-SkarbSDKExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SkarbSDKExample.release.xcconfig"; path = "Target Support Files/Pods-SkarbSDKExample/Pods-SkarbSDKExample.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				97F5B54E4D9C915F1F0408A7 /* Pods_SkarbSDKExample.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,6 +47,8 @@
 			children = (
 				4F735BDD23D7279400A8A537 /* SkarbSDKExample */,
 				4F735BDC23D7279400A8A537 /* Products */,
+				FC45110F7E7B54E25BDAC0F9 /* Pods */,
+				6018733A755B6D07782FA9FA /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -67,6 +74,24 @@
 			path = SkarbSDKExample;
 			sourceTree = "<group>";
 		};
+		6018733A755B6D07782FA9FA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				5313EE38F51E3FA1305834B1 /* Pods_SkarbSDKExample.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		FC45110F7E7B54E25BDAC0F9 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				5DF303FD11171F762CC3F8D0 /* Pods-SkarbSDKExample.debug.xcconfig */,
+				E28BEF55D1AAAAC247DEE6DA /* Pods-SkarbSDKExample.release.xcconfig */,
+			);
+			name = Pods;
+			path = Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -74,9 +99,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4F735BEF23D7279500A8A537 /* Build configuration list for PBXNativeTarget "SkarbSDKExample" */;
 			buildPhases = (
+				0C033FE18FE8E56C210DFB59 /* [CP] Check Pods Manifest.lock */,
 				4F735BD723D7279400A8A537 /* Sources */,
 				4F735BD823D7279400A8A537 /* Frameworks */,
 				4F735BD923D7279400A8A537 /* Resources */,
+				59601D2FBDC846DB9F47EC04 /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -132,6 +159,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		0C033FE18FE8E56C210DFB59 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SkarbSDKExample-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		59601D2FBDC846DB9F47EC04 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SkarbSDKExample/Pods-SkarbSDKExample-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-SkarbSDKExample/Pods-SkarbSDKExample-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-SkarbSDKExample/Pods-SkarbSDKExample-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		4F735BD723D7279400A8A537 /* Sources */ = {
@@ -282,6 +351,7 @@
 		};
 		4F735BF023D7279500A8A537 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5DF303FD11171F762CC3F8D0 /* Pods-SkarbSDKExample.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
@@ -300,6 +370,7 @@
 		};
 		4F735BF123D7279500A8A537 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = E28BEF55D1AAAAC247DEE6DA /* Pods-SkarbSDKExample.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;

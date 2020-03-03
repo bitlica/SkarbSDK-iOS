@@ -9,26 +9,26 @@
 import Foundation
 
 class SkarbSDK {
-  static func initialize(clientId: String, isObservable: Bool, isDebug: Bool) {
+  public static func initialize(clientId: String, isObservable: Bool, isDebug: Bool) {
     SKServiceRegistry.initialize(isObservable: isObservable)
     SKServiceRegistry.userDefaultsService.setValue(clientId, forKey: .clientId)
     SKServiceRegistry.userDefaultsService.setValue(isDebug, forKey: .env)
     SKServiceRegistry.serverAPI.sendInstall(completion: { _ in })
   }
   
-  static func sendTest(name: String,
+  public static func sendTest(name: String,
                        group: String,
                        completion: @escaping (SKResponseError?) -> Void) {
     SKServiceRegistry.serverAPI.sendTest(name: name, group: group, completion: completion)
   }
   
-  static func sendSource(source: SKSource,
+  public static func sendSource(source: SKSource,
                          features: [String: Any],
                          completion: @escaping (SKResponseError?) -> Void) {
     SKServiceRegistry.serverAPI.sendSource(source: source, features: features, completion: completion)
   }
   
-  static func sendPurchase(productId: String,
+  public static func sendPurchase(productId: String,
                            price: Float? = nil,
                            currency: String? = nil,
                            completion: ((SKResponseError?) -> Void)? = nil) {

@@ -69,7 +69,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
             
             guard let self = self,
                 self.isObservable,
-                SKServiceRegistry.userDefaultsService.bool(forKey: .purchaseSentBySwizzling) else {
+                !SKServiceRegistry.userDefaultsService.bool(forKey: .purchaseSentBySwizzling) else {
                 return
               }
               SKServiceRegistry.userDefaultsService.setValue(true, forKey: .purchaseSentBySwizzling)

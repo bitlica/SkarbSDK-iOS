@@ -12,6 +12,7 @@ enum SKSource {
   case facebook
   case searchads
   case appsflyer
+  case custom(String)
   
   var name: String {
     switch self {
@@ -21,6 +22,8 @@ enum SKSource {
         return "searchads"
       case .appsflyer:
         return "appsflyer"
+      case .custom(let value):
+        return value
     }
   }
 }

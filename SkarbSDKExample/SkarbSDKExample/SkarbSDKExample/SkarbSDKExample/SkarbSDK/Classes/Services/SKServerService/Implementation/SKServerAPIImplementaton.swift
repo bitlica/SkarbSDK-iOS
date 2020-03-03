@@ -41,14 +41,10 @@ class SKServerAPIImplementaton: SKServerAPI {
   }
   
   func sendPurchase(productId: String,
-                    paywall: String?,
                     price: Float?,
                     currency: String?,
                     completion: ((SKResponseError?) -> Void)?) {
     SKServiceRegistry.userDefaultsService.setValue(productId, forKey: .productId)
-    if let paywall = paywall {
-      SKServiceRegistry.userDefaultsService.setValue(paywall, forKey: .paywall)
-    }
     if let price = price {
       SKServiceRegistry.userDefaultsService.setValue(price, forKey: .price)
     }
@@ -177,7 +173,6 @@ private extension SKServerAPIImplementaton {
     if let env = SKServiceRegistry.userDefaultsService.string(forKey: .env) {
       params["env"] = env
     }
-    params["env"] = "dev"
     return params
   }
   
@@ -239,10 +234,11 @@ private extension SKServerAPIImplementaton {
       let recieptData = try? Data(contentsOf: appStoreReceiptURL) else {
       return nil
     }
-    
+    if recieptData.isEmpty {
+      SKSyncLog.logInfo("PreparePurchaseData() called. But recieptData is empty")
+    }
     var params: [String: Any] = [:]
     params["product_id"] = SKServiceRegistry.userDefaultsService.string(forKey: .productId)
-    params["paywall"] = SKServiceRegistry.userDefaultsService.string(forKey: .paywall)
     params["price"] = SKServiceRegistry.userDefaultsService.float(forKey: .price)
     params["currency"] = SKServiceRegistry.userDefaultsService.string(forKey: .currency)
     params["receipt"] = recieptData.base64EncodedString()

@@ -13,7 +13,6 @@ class SKUserDefaultsService {
     case source
     case test
     case productId
-    case paywall
     case price
     case currency
     case requestTypeToSync
@@ -32,8 +31,6 @@ class SKUserDefaultsService {
           return "sk_test_key"
         case .productId:
           return "sk_product_id"
-        case .paywall:
-          return "sk_paywall_key"
         case .price:
           return "sk_price_key"
         case .currency:

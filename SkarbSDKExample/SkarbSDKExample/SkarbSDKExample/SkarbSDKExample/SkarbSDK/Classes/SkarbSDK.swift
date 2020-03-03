@@ -16,21 +16,23 @@ class SkarbSDK {
     SKServiceRegistry.serverAPI.sendInstall(completion: { _ in })
   }
   
-  static func sendTest(name: String, group: String, completion: @escaping (SKResponseError?) -> Void) {
+  static func sendTest(name: String,
+                       group: String,
+                       completion: @escaping (SKResponseError?) -> Void) {
     SKServiceRegistry.serverAPI.sendTest(name: name, group: group, completion: completion)
   }
   
-  static func sendSource(source: SKSource, features: JSONObject, completion: @escaping (SKResponseError?) -> Void) {
+  static func sendSource(source: SKSource,
+                         features: [String: Any],
+                         completion: @escaping (SKResponseError?) -> Void) {
     SKServiceRegistry.serverAPI.sendSource(source: source, features: features, completion: completion)
   }
   
   static func sendPurchase(productId: String,
-                           paywall: String? = nil,
                            price: Float? = nil,
                            currency: String? = nil,
                            completion: ((SKResponseError?) -> Void)? = nil) {
     SKServiceRegistry.serverAPI.sendPurchase(productId: productId,
-                                             paywall: paywall,
                                              price: price,
                                              currency: currency,
                                              completion: completion)

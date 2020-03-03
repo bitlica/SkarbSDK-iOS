@@ -13,21 +13,6 @@
 		4F735BE623D7279400A8A537 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE423D7279400A8A537 /* Main.storyboard */; };
 		4F735BE823D7279500A8A537 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE723D7279500A8A537 /* Assets.xcassets */; };
 		4F735BEB23D7279500A8A537 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE923D7279500A8A537 /* LaunchScreen.storyboard */; };
-		4F735C0623D727AB00A8A537 /* SKTypeAliases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735BFB23D727AB00A8A537 /* SKTypeAliases.swift */; };
-		4F735C0723D727AB00A8A537 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735BFC23D727AB00A8A537 /* Utils.swift */; };
-		4F735C0823D727AB00A8A537 /* SKSyncLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735BFD23D727AB00A8A537 /* SKSyncLog.swift */; };
-		4F735C0923D727AB00A8A537 /* FormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735BFF23D727AB00A8A537 /* FormatterExtension.swift */; };
-		4F735C0A23D727AB00A8A537 /* SKSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C0123D727AB00A8A537 /* SKSource.swift */; };
-		4F735C1223D727F600A8A537 /* SKServerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C0D23D727F600A8A537 /* SKServerAPI.swift */; };
-		4F735C1323D727F600A8A537 /* SKServerAPIImplementaton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C0F23D727F600A8A537 /* SKServerAPIImplementaton.swift */; };
-		4F735C1423D727F600A8A537 /* SKResponseError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C1023D727F600A8A537 /* SKResponseError.swift */; };
-		4F735C1523D727F600A8A537 /* SKRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C1123D727F600A8A537 /* SKRequest.swift */; };
-		4F735C1723D7286500A8A537 /* SKServiceRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C1623D7286500A8A537 /* SKServiceRegistry.swift */; };
-		4F735C1923D73D1100A8A537 /* LocaleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C1823D73D1100A8A537 /* LocaleExtension.swift */; };
-		4F735C1C23D8445400A8A537 /* UserDefaultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C1B23D8445400A8A537 /* UserDefaultsService.swift */; };
-		4F735C1F23D9FBB100A8A537 /* SKSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C1E23D9FBB100A8A537 /* SKSyncService.swift */; };
-		4F735C2123D9FBC800A8A537 /* SKSyncServiceImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C2023D9FBC800A8A537 /* SKSyncServiceImplementation.swift */; };
-		4F735C4B23DEF3E600A8A537 /* SkarbSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735C4A23DEF3E600A8A537 /* SkarbSDK.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,21 +24,6 @@
 		4F735BE723D7279500A8A537 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4F735BEA23D7279500A8A537 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4F735BEC23D7279500A8A537 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		4F735BFB23D727AB00A8A537 /* SKTypeAliases.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKTypeAliases.swift; sourceTree = "<group>"; };
-		4F735BFC23D727AB00A8A537 /* Utils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
-		4F735BFD23D727AB00A8A537 /* SKSyncLog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKSyncLog.swift; sourceTree = "<group>"; };
-		4F735BFF23D727AB00A8A537 /* FormatterExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormatterExtension.swift; sourceTree = "<group>"; };
-		4F735C0123D727AB00A8A537 /* SKSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKSource.swift; sourceTree = "<group>"; };
-		4F735C0D23D727F600A8A537 /* SKServerAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKServerAPI.swift; sourceTree = "<group>"; };
-		4F735C0F23D727F600A8A537 /* SKServerAPIImplementaton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKServerAPIImplementaton.swift; sourceTree = "<group>"; };
-		4F735C1023D727F600A8A537 /* SKResponseError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKResponseError.swift; sourceTree = "<group>"; };
-		4F735C1123D727F600A8A537 /* SKRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKRequest.swift; sourceTree = "<group>"; };
-		4F735C1623D7286500A8A537 /* SKServiceRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKServiceRegistry.swift; sourceTree = "<group>"; };
-		4F735C1823D73D1100A8A537 /* LocaleExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocaleExtension.swift; sourceTree = "<group>"; };
-		4F735C1B23D8445400A8A537 /* UserDefaultsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultsService.swift; sourceTree = "<group>"; };
-		4F735C1E23D9FBB100A8A537 /* SKSyncService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKSyncService.swift; sourceTree = "<group>"; };
-		4F735C2023D9FBC800A8A537 /* SKSyncServiceImplementation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKSyncServiceImplementation.swift; sourceTree = "<group>"; };
-		4F735C4A23DEF3E600A8A537 /* SkarbSDK.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkarbSDK.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,107 +59,12 @@
 				4F735BDE23D7279400A8A537 /* AppDelegate.swift */,
 				4F735BE023D7279400A8A537 /* SceneDelegate.swift */,
 				4F735BE223D7279400A8A537 /* ViewController.swift */,
-				4F735BF223D727AB00A8A537 /* SkarbSDK */,
 				4F735BE423D7279400A8A537 /* Main.storyboard */,
 				4F735BE723D7279500A8A537 /* Assets.xcassets */,
 				4F735BE923D7279500A8A537 /* LaunchScreen.storyboard */,
 				4F735BEC23D7279500A8A537 /* Info.plist */,
 			);
 			path = SkarbSDKExample;
-			sourceTree = "<group>";
-		};
-		4F735BF223D727AB00A8A537 /* SkarbSDK */ = {
-			isa = PBXGroup;
-			children = (
-				4F735BF323D727AB00A8A537 /* Classes */,
-			);
-			path = SkarbSDK;
-			sourceTree = "<group>";
-		};
-		4F735BF323D727AB00A8A537 /* Classes */ = {
-			isa = PBXGroup;
-			children = (
-				4F735C4A23DEF3E600A8A537 /* SkarbSDK.swift */,
-				4F735C0B23D727F600A8A537 /* Services */,
-				4F735BFA23D727AB00A8A537 /* Util */,
-				4F735BFE23D727AB00A8A537 /* Extensions */,
-				4F735C0023D727AB00A8A537 /* Model */,
-			);
-			path = Classes;
-			sourceTree = "<group>";
-		};
-		4F735BFA23D727AB00A8A537 /* Util */ = {
-			isa = PBXGroup;
-			children = (
-				4F735BFB23D727AB00A8A537 /* SKTypeAliases.swift */,
-				4F735BFC23D727AB00A8A537 /* Utils.swift */,
-				4F735BFD23D727AB00A8A537 /* SKSyncLog.swift */,
-			);
-			path = Util;
-			sourceTree = "<group>";
-		};
-		4F735BFE23D727AB00A8A537 /* Extensions */ = {
-			isa = PBXGroup;
-			children = (
-				4F735BFF23D727AB00A8A537 /* FormatterExtension.swift */,
-				4F735C1823D73D1100A8A537 /* LocaleExtension.swift */,
-			);
-			path = Extensions;
-			sourceTree = "<group>";
-		};
-		4F735C0023D727AB00A8A537 /* Model */ = {
-			isa = PBXGroup;
-			children = (
-				4F735C0123D727AB00A8A537 /* SKSource.swift */,
-			);
-			path = Model;
-			sourceTree = "<group>";
-		};
-		4F735C0B23D727F600A8A537 /* Services */ = {
-			isa = PBXGroup;
-			children = (
-				4F735C1623D7286500A8A537 /* SKServiceRegistry.swift */,
-				4F735C0C23D727F600A8A537 /* SKServerService */,
-				4F735C1A23D8444800A8A537 /* SKUserDefaultsService */,
-				4F735C1D23D8A82800A8A537 /* SKSyncService */,
-			);
-			path = Services;
-			sourceTree = "<group>";
-		};
-		4F735C0C23D727F600A8A537 /* SKServerService */ = {
-			isa = PBXGroup;
-			children = (
-				4F735C0D23D727F600A8A537 /* SKServerAPI.swift */,
-				4F735C0E23D727F600A8A537 /* Implementation */,
-			);
-			path = SKServerService;
-			sourceTree = "<group>";
-		};
-		4F735C0E23D727F600A8A537 /* Implementation */ = {
-			isa = PBXGroup;
-			children = (
-				4F735C0F23D727F600A8A537 /* SKServerAPIImplementaton.swift */,
-				4F735C1023D727F600A8A537 /* SKResponseError.swift */,
-				4F735C1123D727F600A8A537 /* SKRequest.swift */,
-			);
-			path = Implementation;
-			sourceTree = "<group>";
-		};
-		4F735C1A23D8444800A8A537 /* SKUserDefaultsService */ = {
-			isa = PBXGroup;
-			children = (
-				4F735C1B23D8445400A8A537 /* UserDefaultsService.swift */,
-			);
-			path = SKUserDefaultsService;
-			sourceTree = "<group>";
-		};
-		4F735C1D23D8A82800A8A537 /* SKSyncService */ = {
-			isa = PBXGroup;
-			children = (
-				4F735C1E23D9FBB100A8A537 /* SKSyncService.swift */,
-				4F735C2023D9FBC800A8A537 /* SKSyncServiceImplementation.swift */,
-			);
-			path = SKSyncService;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -263,23 +138,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4F735C0623D727AB00A8A537 /* SKTypeAliases.swift in Sources */,
-				4F735C1423D727F600A8A537 /* SKResponseError.swift in Sources */,
-				4F735C0723D727AB00A8A537 /* Utils.swift in Sources */,
 				4F735BE323D7279400A8A537 /* ViewController.swift in Sources */,
-				4F735C1223D727F600A8A537 /* SKServerAPI.swift in Sources */,
-				4F735C0A23D727AB00A8A537 /* SKSource.swift in Sources */,
-				4F735C1323D727F600A8A537 /* SKServerAPIImplementaton.swift in Sources */,
-				4F735C1923D73D1100A8A537 /* LocaleExtension.swift in Sources */,
-				4F735C0923D727AB00A8A537 /* FormatterExtension.swift in Sources */,
-				4F735C2123D9FBC800A8A537 /* SKSyncServiceImplementation.swift in Sources */,
 				4F735BDF23D7279400A8A537 /* AppDelegate.swift in Sources */,
-				4F735C1F23D9FBB100A8A537 /* SKSyncService.swift in Sources */,
-				4F735C1523D727F600A8A537 /* SKRequest.swift in Sources */,
-				4F735C1723D7286500A8A537 /* SKServiceRegistry.swift in Sources */,
-				4F735C4B23DEF3E600A8A537 /* SkarbSDK.swift in Sources */,
-				4F735C1C23D8445400A8A537 /* UserDefaultsService.swift in Sources */,
-				4F735C0823D727AB00A8A537 /* SKSyncLog.swift in Sources */,
 				4F735BE123D7279400A8A537 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

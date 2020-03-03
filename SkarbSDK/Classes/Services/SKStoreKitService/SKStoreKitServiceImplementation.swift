@@ -126,7 +126,7 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
   
   func request(_ request: SKRequest, didFailWithError error: Error) {
     
-    SyncLog.logError("SKRequestDelegate got called with didFailWithError: \(error)")
+    SKSyncLog.logError("SKRequestDelegate got called with didFailWithError: \(error)")
     
     productInfoCompletion?([])
   }

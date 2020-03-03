@@ -70,7 +70,7 @@ class SKUserDefaultsService {
     self.userDefaults.set(value, forKey: key.keyName)
   }
   
-  func setValue(_ value: JSONObject, forKey key: SKKey) {
+  func setValue(_ value: [String: Any], forKey key: SKKey) {
     self.userDefaults.setValue(value, forKey: key.keyName)
   }
   
@@ -90,8 +90,8 @@ class SKUserDefaultsService {
     return self.userDefaults.integer(forKey: key.keyName)
   }
   
-  func json(forKey key: SKKey) -> JSONObject? {
-    return self.userDefaults.object(forKey: key.keyName) as? JSONObject
+  func json(forKey key: SKKey) -> [String: Any]? {
+    return self.userDefaults.object(forKey: key.keyName) as? [String: Any]
   }
   
   func string(forKey key: SKKey) -> String? {

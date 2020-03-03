@@ -22,7 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 #### Notes:
 ```clientId``` You could get it in your account dashboard.
 
-```isObservable``` Automatically sends all events about purchases that are in your app. If you want to send a purchase event manually you should set this param to false and call SkarbSDK.sendPurchase() method.
+```isObservable``` Automatically sends all events about purchases that are in your app. If you want to send a purchase event manually you should set this param to ```false``` and see ```Send purchase event``` section.
 
 ```isDebug``` Use this flag for testing events, etc. (not supported yet)
 
@@ -67,9 +67,9 @@ SkarbSDK.sendPurchase(productId: String,
 ```swift
 import SkarSDK
 
-SkarbSDK.sendSource(source: SKSource,
-                    features: [String: Any],
-                    completion: @escaping (SKResponseError?) -> Void)													 
+SkarbSDK.sendTest(name: String,
+                  group: String,
+                  completion: @escaping (SKResponseError?) -> Void)
 ```
 #### Notes:
 ```name``` Name of A/B test

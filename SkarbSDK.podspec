@@ -15,6 +15,6 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/bitlica/SkarbSDK", :tag => "#{s.version}" }
   s.source_files  = "SkarbSDK/Classes/**/*"
   s.static_framework = true
-  s.frameworks = 'Foundation'
+  s.frameworks = 'Foundation', 'StoreKit'
 
 end

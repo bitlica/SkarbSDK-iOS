@@ -10,7 +10,7 @@ import Foundation
 
 class SKUserDefaultsService {
   enum SKKey {
-    case source
+    case broker
     case test
     case productId
     case price
@@ -25,8 +25,8 @@ class SKUserDefaultsService {
     
     var keyName: String {
       switch self {
-        case .source:
-          return "sk_source_key"
+        case .broker:
+          return "sk_broker_key"
         case .test:
           return "sk_test_key"
         case .productId:

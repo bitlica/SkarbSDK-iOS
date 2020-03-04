@@ -11,7 +11,7 @@ import Foundation
 enum SKRequestType: String {
   case install = "sk_request_type_install"
   case test = "sk_request_type_test"
-  case source = "sk_request_type_source"
+  case broker = "sk_request_type_broker"
   case purchase = "sk_request_type_purchase"
 }
 

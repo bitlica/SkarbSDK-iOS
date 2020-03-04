@@ -32,12 +32,12 @@ class SKServerAPIImplementaton: SKServerAPI {
     syncAllData(initRequestType: .test, completion: completion)
   }
   
-  func sendSource(source: SKBroker, features: [String: Any], completion: @escaping (SKResponseError?) -> Void) {
+  func sendBroker(broker: SKBroker, features: [String: Any], completion: @escaping (SKResponseError?) -> Void) {
     var params: [String: Any] = [:]
-    params["broker"] = source.name
+    params["broker"] = broker.name
     params["features"] = features
-    SKServiceRegistry.userDefaultsService.setValue(params, forKey: .source)
-    syncAllData(initRequestType: .source, completion: completion)
+    SKServiceRegistry.userDefaultsService.setValue(params, forKey: .broker)
+    syncAllData(initRequestType: .broker, completion: completion)
   }
   
   func sendPurchase(productId: String,
@@ -62,8 +62,8 @@ class SKServerAPIImplementaton: SKServerAPI {
     if let testJSON = SKServiceRegistry.userDefaultsService.json(forKey: .test) {
       params["test"] = testJSON
     }
-    if let sourceJSON = SKServiceRegistry.userDefaultsService.json(forKey: .source) {
-      params["source"] = sourceJSON
+    if let brokerJSON = SKServiceRegistry.userDefaultsService.json(forKey: .broker) {
+      params["source"] = brokerJSON
     }
     params["purchase"] = preparePurchaseData()
     
@@ -218,14 +218,6 @@ private extension SKServerAPIImplementaton {
     var params: [String: Any] = [:]
     params["name"] = name
     params["group"] = group
-    return params
-  }
-  
-  func prepareSourceData(source: SKBroker, features: [String: Any]) -> [String: Any]? {
-    var params: [String: Any] = [:]
-    params["broker"] = source.name
-    params["features"] = features
-    
     return params
   }
   

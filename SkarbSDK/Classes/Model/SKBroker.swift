@@ -1,5 +1,5 @@
 //
-//  SKSource.swift
+//  SKBroker.swift
 //  SkarbSDKExample
 //
 //  Created by Artem Hitrik on 1/19/20.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-public enum SKSource {
+public enum SKBroker {
   case facebook
   case searchads
   case appsflyer

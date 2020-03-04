@@ -22,7 +22,7 @@ public class SkarbSDK {
     SKServiceRegistry.serverAPI.sendTest(name: name, group: group, completion: completion)
   }
   
-  public static func sendSource(source: SKSource,
+  public static func sendSource(source: SKBroker,
                          features: [String: Any],
                          completion: @escaping (SKResponseError?) -> Void) {
     SKServiceRegistry.serverAPI.sendSource(source: source, features: features, completion: completion)

@@ -32,7 +32,7 @@ class SKServerAPIImplementaton: SKServerAPI {
     syncAllData(initRequestType: .test, completion: completion)
   }
   
-  func sendSource(source: SKSource, features: [String: Any], completion: @escaping (SKResponseError?) -> Void) {
+  func sendSource(source: SKBroker, features: [String: Any], completion: @escaping (SKResponseError?) -> Void) {
     var params: [String: Any] = [:]
     params["broker"] = source.name
     params["features"] = features
@@ -221,7 +221,7 @@ private extension SKServerAPIImplementaton {
     return params
   }
   
-  func prepareSourceData(source: SKSource, features: [String: Any]) -> [String: Any]? {
+  func prepareSourceData(source: SKBroker, features: [String: Any]) -> [String: Any]? {
     var params: [String: Any] = [:]
     params["broker"] = source.name
     params["features"] = features

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SkarbSDK
 
 class ViewController: UIViewController {
 
@@ -15,6 +16,12 @@ class ViewController: UIViewController {
     // Do any additional setup after loading the view.
     
     view.backgroundColor = .red
+    
+    var isDebug = false
+    #if DEBUG
+      isDebug = true
+    #endif
+    SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID", isObservable: true, isDebug: isDebug)
   }
 
 

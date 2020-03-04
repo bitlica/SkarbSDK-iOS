@@ -38,12 +38,12 @@ Using for loging the attribution.
 ```swift
 import SkarbSDK
 
-SkarbSDK.sendSource(source: SKSource,
+SkarbSDK.sendSource(broker: SKBroker,
                     features: [String: Any],
                     completion: @escaping (SKResponseError?)
 ```
 #### Params:
-```source``` indicates what service you use for attribution. There are three predefined sources: ```facebook```, ```searchads```, ```appsflyer```. Also might be used any value - ```SKSource.custom(String)```.
+```broker``` indicates what service you use for attribution. There are three predefined brokers: ```facebook```, ```searchads```, ```appsflyer```. Also might be used any value - ```SKBroker.custom(String)```.
 
 ```features```. See features paragraphe, supported features has a string type, not supported are ignored silently. 
 
@@ -74,7 +74,7 @@ In delegate mothod:
 import SkarbSDK
 
 func onConversionDataSuccess(_ conversionInfo: [AnyHashable : Any]) {
-    SkarbSDK.sendSource(source: .appsflyer, features: conversionInfo, completion: { _ in })
+    SkarbSDK.sendSource(broker: .appsflyer, features: conversionInfo, completion: { _ in })
 }
 ```
 

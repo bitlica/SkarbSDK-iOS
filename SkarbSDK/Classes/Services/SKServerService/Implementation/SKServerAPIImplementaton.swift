@@ -32,7 +32,7 @@ class SKServerAPIImplementaton: SKServerAPI {
     syncAllData(initRequestType: .test, completion: completion)
   }
   
-  func sendBroker(broker: SKBroker, features: [String: Any], completion: @escaping (SKResponseError?) -> Void) {
+  func sendSource(broker: SKBroker, features: [String: Any], completion: @escaping (SKResponseError?) -> Void) {
     var params: [String: Any] = [:]
     params["broker"] = broker.name
     params["features"] = features

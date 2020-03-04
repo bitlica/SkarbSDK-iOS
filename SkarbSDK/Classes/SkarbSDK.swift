@@ -22,10 +22,10 @@ public class SkarbSDK {
     SKServiceRegistry.serverAPI.sendTest(name: name, group: group, completion: completion)
   }
   
-  public static func sendBroker(broker: SKBroker,
+  public static func sendSource(broker: SKBroker,
                                 features: [String: Any],
                                 completion: @escaping (SKResponseError?) -> Void) {
-    SKServiceRegistry.serverAPI.sendBroker(broker: broker, features: features, completion: completion)
+    SKServiceRegistry.serverAPI.sendSource(broker: broker, features: features, completion: completion)
   }
   
   public static func sendPurchase(productId: String,

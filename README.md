@@ -8,7 +8,7 @@ SkarbSDK can be installed with CocoaPods. Simply add pod 'SkarbSDK' to your Podf
 ### Initialization 
 
 ```swift
-import SkarSDK
+import SkarbSDK
 
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -26,12 +26,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 ```isDebug``` Use this flag for testing events, etc. (not supported yet)
 
-### Log features 
+### Send features 
 
 Using for loging the attribution.
 
 ```swift
-import SkarSDK
+import SkarbSDK
 
 SkarbSDK.sendSource(source: SKSource,
                     features: [String: Any],
@@ -48,7 +48,7 @@ SkarbSDK.sendSource(source: SKSource,
 You have to use this call if ```isObservable``` during initialization is ```false```
 
 ```swift
-import SkarSDK
+import SkarbSDK
 
 SkarbSDK.sendPurchase(productId: String,
                       price: Float? = nil,
@@ -65,7 +65,7 @@ SkarbSDK.sendPurchase(productId: String,
 ### A/B testing
 
 ```swift
-import SkarSDK
+import SkarbSDK
 
 SkarbSDK.sendTest(name: String,
                   group: String,

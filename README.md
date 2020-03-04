@@ -4,7 +4,7 @@ It automatically reports:
 1. install event - during SDK initialization phase. 
 2. subscription event - this event could be reported manually as well by `sendPurchase()`, though it's not recommended way. 
 
-In addition, you could enrich these events with features obtained from the traffic sources with the help of `sendSource()` method.
+In addition, you could enrich these events with features obtained from the traffic source by explicit call of `sendSource()` method. And if you're interesting in split testing inside an app take a look on `sendTest()` method.
 
 ## Installation
 SkarbSDK can be installed with CocoaPods. Simply add pod 'SkarbSDK' to your Podfile.

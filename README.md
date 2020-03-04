@@ -24,7 +24,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 ```
-#### Notes:
+#### Params:
 ```clientId``` You could get it in your account dashboard.
 
 ```isObservable``` Automatically sends all events about purchases that are in your app. If you want to send a purchase event manually you should set this param to ```false``` and see ```Send purchase event``` section.
@@ -42,7 +42,7 @@ SkarbSDK.sendSource(source: SKSource,
                     features: [String: Any],
                     completion: @escaping (SKResponseError?)
 ```
-#### Notes:
+#### Params:
 ```source``` indicates what service you use for attribution. There are three predefined sources: ```facebook```, ```searchads```, ```appsflyer```. Also might be used any value - ```SKSource.custom(String)```.
 
 ```features```. See features paragraphe, supported features has a string type, not supported are ignored silently. 
@@ -60,12 +60,24 @@ SkarbSDK.sendPurchase(productId: String,
                       currency: String? = nil,
                       completion: ((SKResponseError?) -> Void)? = nil)													 
 ```
-#### Notes:
+#### Params:
 ```productId``` It’s a SKProduct.productIdentifier of purchased product
 
 ```price``` It’s a SKProduct.price
 
 ```currency``` It’s SKProduct.priceLocale.currencyCode
+
+#### Example for Appsflyer:
+In delegate mothod:
+
+```swift
+import SkarbSDK
+
+func onConversionDataSuccess(_ conversionInfo: [AnyHashable : Any]) {
+    SkarbSDK.sendSource(source: .appsflyer, features: conversionInfo, completion: { _ in })
+}
+```
+
 
 ### A/B testing
 
@@ -76,7 +88,7 @@ SkarbSDK.sendTest(name: String,
                   group: String,
                   completion: @escaping (SKResponseError?) -> Void)
 ```
-#### Notes:
+#### Params:
 ```name``` Name of A/B test
 
 ```group``` Group name of A/B test. For example: control group, B, etc.

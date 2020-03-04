@@ -3,6 +3,7 @@ SkarbSDK is a framework that makes you happier.
 It automatically reports: 
 1. install event - during SDK initialization phase. 
 2. subscription event - this event could be reported manually as well, but it's not recommended way. 
+
 In addition, you could enrich these events with features obtained from the traffic sources. with the help of `sendSource()` method, it should be called before a purchase is made.
 
 ## Installation

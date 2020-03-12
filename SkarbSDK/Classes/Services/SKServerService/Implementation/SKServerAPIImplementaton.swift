@@ -180,7 +180,7 @@ private extension SKServerAPIImplementaton {
     var params: [String: Any] = [:]
     params["bundle_id"] = Bundle.main.bundleIdentifier
     params["bundle_ver"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-    params["device_id"] = UIDevice.current.identifierForVendor?.uuidString
+    params["device_id"] = SKServiceRegistry.userDefaultsService.string(forKey: .deviceId)
     let installedDate: String
     if let installedDateISO8601 = SKServiceRegistry.userDefaultsService.string(forKey: .installedDateISO8601) {
       installedDate = installedDateISO8601

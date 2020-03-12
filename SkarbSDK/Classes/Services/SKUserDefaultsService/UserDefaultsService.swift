@@ -22,6 +22,7 @@ class SKUserDefaultsService {
     case skRequestType(String)
     case clientId
     case env
+    case deviceId
     
     var keyName: String {
       switch self {
@@ -49,6 +50,8 @@ class SKUserDefaultsService {
           return "sk_client_id"
         case .env:
           return "sk_environment"
+        case .deviceId:
+          return "sk_device_id"
       }
     }
   }

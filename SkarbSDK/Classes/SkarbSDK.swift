@@ -7,11 +7,16 @@
 //
 
 import Foundation
+import UIKit
 
 public class SkarbSDK {
-  public static func initialize(clientId: String, isObservable: Bool, isDebug: Bool) {
+  public static func initialize(clientId: String,
+                                isObservable: Bool,
+                                deviceId: String? = nil,
+                                isDebug: Bool) {
     SKServiceRegistry.initialize(isObservable: isObservable)
     SKServiceRegistry.userDefaultsService.setValue(clientId, forKey: .clientId)
+    SKServiceRegistry.userDefaultsService.setValue(deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString, forKey: .deviceId)
     SKServiceRegistry.userDefaultsService.setValue(isDebug, forKey: .env)
     SKServiceRegistry.serverAPI.sendInstall(completion: { _ in })
   }
@@ -36,5 +41,9 @@ public class SkarbSDK {
                                              price: price,
                                              currency: currency,
                                              completion: completion)
+  }
+  
+  public static func getDeviceId() -> String {
+    return SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) ?? UUID().uuidString
   }
 }

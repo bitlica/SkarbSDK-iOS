@@ -1,5 +1,5 @@
 PODS:
-  - SkarbSDK (0.1.10)
+  - SkarbSDK (0.1.11)
 
 DEPENDENCIES:
   - SkarbSDK
@@ -9,7 +9,7 @@ SPEC REPOS:
     - SkarbSDK
 
 SPEC CHECKSUMS:
-  SkarbSDK: ddfae451df6f353f7066c6eca3441401e613a84e
+  SkarbSDK: 84bfb87c33185e4080d87ce84c2de3a872d6effe
 
 PODFILE CHECKSUM: 346e3d83de032e28e565ced4d4190f58fa74659a
 

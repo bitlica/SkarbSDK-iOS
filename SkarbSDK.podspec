@@ -10,9 +10,9 @@ Pod::Spec.new do |s|
   s.description  = 'Description'
   s.homepage     = 'https://github.com/bitlica/SkarbSDK'
   s.license      = 'MIT'
-  s.author       = { "Art" => "support@bitlica.com" }
-  s.platform     = :ios, '11.0'
-  s.ios.deployment_target = '11.0'
+  s.author       = { "Bitlica Inc" => "support@bitlica.com" }
+  s.platform     = :ios, '10.0'
+  s.ios.deployment_target = '10.0'
   s.source       = { :git => "https://github.com/bitlica/SkarbSDK.git", :tag => "#{s.version}" }
   s.source_files  = 'SkarbSDK/Classes/**/*'
 end

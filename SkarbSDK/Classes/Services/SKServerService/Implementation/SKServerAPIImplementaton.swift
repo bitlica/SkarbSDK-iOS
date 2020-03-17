@@ -112,19 +112,19 @@ private extension SKServerAPIImplementaton {
       }
       
       if let error = self.validateResponseError(response: response, data: data, error: error) {
-        skRequest.parsingHandler(.failure(error))
+        skRequest.completionHandler(.failure(error))
       } else {
         guard let data = data else {
           return
         }
         do {
           if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
-            skRequest.parsingHandler(.success(json))
+            skRequest.completionHandler(.success(json))
           } else {
-            skRequest.parsingHandler(.failure(SKResponseError(serverStatusCode: 0, message: nil)))
+            skRequest.completionHandler(.failure(SKResponseError(serverStatusCode: 0, message: nil)))
           }
         } catch let error as NSError {
-          skRequest.parsingHandler(.failure(SKResponseError(serverStatusCode: 0, message: error.localizedDescription)))
+          skRequest.completionHandler(.failure(SKResponseError(serverStatusCode: 0, message: error.localizedDescription)))
         }
       }
     })

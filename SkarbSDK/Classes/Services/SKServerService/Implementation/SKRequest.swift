@@ -21,24 +21,16 @@ public class SKRequest {
   let request: URLRequest
   let requestType: SKRequestType
   let params: [String: Any]
-  let parsingHandler: (Result<[String: Any], SKResponseError>) -> Void
-
-  private(set) var remainingRetryCount: Int
+  let completionHandler: (Result<[String: Any], SKResponseError>) -> Void
 
   init(request: URLRequest,
        requestType: SKRequestType,
        params: [String: Any],
-       retryCount: Int = SKServerAPIImplementaton.maxNumberOfRequestRetries,
        parsingHandler: @escaping (Result<[String: Any], SKResponseError>) -> Void) {
 
     self.request = request
     self.requestType = requestType
     self.params = params
-    self.remainingRetryCount = retryCount
-    self.parsingHandler = parsingHandler
-  }
-
-  public func decrementRemainingRetryCount() {
-    remainingRetryCount -= 1
+    self.completionHandler = parsingHandler
   }
 }

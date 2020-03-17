@@ -2,7 +2,7 @@
 //  SKStoreKitServiceImplementation.swift
 //  ios
 //
-//  Created by Artem Hitrik on 2/20/20.
+//  Created by Bitlica Inc. on 2/20/20.
 //  Copyright © 2020 Ihnat Kandrashou. All rights reserved.
 //
 
@@ -64,7 +64,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       switch transaction.transactionState {
         case .purchased:
           SKPaymentQueue.default().finishTransaction(transaction)
-          SKSyncLog.logError("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
+          SKLogger.logError("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
           DispatchQueue.main.async { [weak self] in
             
             guard let self = self,
@@ -87,10 +87,10 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
           }
         case .failed:
           SKPaymentQueue.default().finishTransaction(transaction)
-          SKSyncLog.logError("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
+          SKLogger.logError("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
         case .restored:
           SKPaymentQueue.default().finishTransaction(transaction)
-          SKSyncLog.logInfo("updatedTransactions was called. Transaction was restored. Date = \(String(describing: transaction.transactionDate))")
+          SKLogger.logInfo("updatedTransactions was called. Transaction was restored. Date = \(String(describing: transaction.transactionDate))")
         default:
           break
       }
@@ -99,12 +99,12 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
   
   /// Sent when all transactions from the user's purchase history have successfully been added back to the queue.
   public func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
-    SKSyncLog.logInfo("paymentQueueRestoreCompletedTransactionsFinished was called")
+    SKLogger.logInfo("paymentQueueRestoreCompletedTransactionsFinished was called")
   }
   
   /// Sent when an error is encountered while adding transactions from the user's purchase history back to the queue.
   public func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
-    SKSyncLog.logError(String(format: "paymentQueueRestoreCompletedTransactionsFailedWithError was called with error %@", error.localizedDescription))
+    SKLogger.logError(String(format: "paymentQueueRestoreCompletedTransactionsFailedWithError was called with error %@", error.localizedDescription))
   }
 }
 
@@ -119,14 +119,14 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
         }
       }
     }
-    SKSyncLog.logInfo("SKRequestDelegate fetched products successful")
+    SKLogger.logInfo("SKRequestDelegate fetched products successful")
     
     productInfoCompletion?(response.products)
   }
   
   func request(_ request: SKRequest, didFailWithError error: Error) {
     
-    SKSyncLog.logError("SKRequestDelegate got called with didFailWithError: \(error)")
+    SKLogger.logError("SKRequestDelegate got called with didFailWithError: \(error)")
     
     productInfoCompletion?([])
   }

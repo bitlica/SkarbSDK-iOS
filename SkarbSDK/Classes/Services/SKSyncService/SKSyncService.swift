@@ -2,7 +2,7 @@
 //  SKSyncService.swift
 //  SkarbSDKExample
 //
-//  Created by Artem Hitrik on 1/23/20.
+//  Created by Bitlica Inc. on 1/23/20.
 //  Copyright © 2020 Bitlica Inc. All rights reserved.
 //
 

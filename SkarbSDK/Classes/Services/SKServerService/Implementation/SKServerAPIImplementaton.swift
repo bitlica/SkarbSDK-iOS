@@ -2,7 +2,7 @@
 //  ServerAPIImplementation.swift
 //  SkarbSDKExample
 //
-//  Created by Artem Hitrik on 1/19/20.
+//  Created by Bitlica Inc. on 1/19/20.
 //  Copyright © 2020 Bitlica Inc. All rights reserved.
 //
 
@@ -20,7 +20,7 @@ class SKServerAPIImplementaton: SKServerAPI {
   func sendInstall(completion: @escaping (SKResponseError?) -> Void) {
     let requestType = SKRequestType.install
     guard !SKServiceRegistry.userDefaultsService.bool(forKey: .skRequestType(requestType.rawValue)) else {
-      SKSyncLog.logInfo("Send install called, but SDK have already sent install event successful before")
+      SKLogger.logInfo("Send install called, but SDK have already sent install event successful before")
       completion(nil)
       return
     }
@@ -77,14 +77,14 @@ class SKServerAPIImplementaton: SKServerAPI {
       let data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
       request.httpBody = data
     } catch {
-      SKSyncLog.logError("executeRequest: can't json serialization to Data")
+      SKLogger.logError("executeRequest: can't json serialization to Data")
     }
     
     let skRequest = SKRequest(request: request,
                               requestType: initRequestType,
                               params: params,
                               parsingHandler: { result in
-                                SKSyncLog.logInfo("SKResponse is \(result) for requestType = \(initRequestType)")
+                                SKLogger.logInfo("SKResponse is \(result) for requestType = \(initRequestType)")
                                 switch result {
                                   case .success(_):
                                     SKServiceRegistry.userDefaultsService.removeValue(forKey: .requestTypeToSync)
@@ -101,11 +101,11 @@ class SKServerAPIImplementaton: SKServerAPI {
 
 private extension SKServerAPIImplementaton {
   func executeRequest(_ skRequest: SKRequest) {
-    SKSyncLog.logDebugNetwork("Executing request: \(String(describing: skRequest.request.url?.absoluteString)) with params: \(skRequest.params)")
+    SKLogger.logDebugNetwork("Executing request: \(String(describing: skRequest.request.url?.absoluteString)) with params: \(skRequest.params)")
     
     let task = URLSession.shared.dataTask(with: skRequest.request, completionHandler: { [weak self] (data, response, error) in
       
-      SKSyncLog.logDebugNetwork("Finished request: \(String(describing: skRequest.request.url?.absoluteString))")
+      SKLogger.logDebugNetwork("Finished request: \(String(describing: skRequest.request.url?.absoluteString))")
       
       guard let self = self else {
         return
@@ -227,7 +227,7 @@ private extension SKServerAPIImplementaton {
       return nil
     }
     if recieptData.isEmpty {
-      SKSyncLog.logInfo("PreparePurchaseData() called. But recieptData is empty")
+      SKLogger.logInfo("PreparePurchaseData() called. But recieptData is empty")
     }
     var params: [String: Any] = [:]
     params["product_id"] = SKServiceRegistry.userDefaultsService.string(forKey: .productId)

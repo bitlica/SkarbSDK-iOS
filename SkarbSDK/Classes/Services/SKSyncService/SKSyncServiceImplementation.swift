@@ -2,7 +2,7 @@
 //  SKSyncServiceImplementation.swift
 //  SkarbSDKExample
 //
-//  Created by Artem Hitrik on 1/23/20.
+//  Created by Bitlica Inc. on 1/23/20.
 //  Copyright © 2020 Bitlica Inc. All rights reserved.
 //
 
@@ -45,7 +45,7 @@ class SKSyncServiceImplementation: SKSyncService {
   func syncAllCommands() {
     dispatchPrecondition(condition: .notOnQueue(DispatchQueue.main))
     
-    SKSyncLog.logInfo("SKSyncService syncAllCommands called")
+    SKLogger.logInfo("SKSyncService syncAllCommands called")
     
     guard !isSyncNow else {
         return
@@ -54,14 +54,14 @@ class SKSyncServiceImplementation: SKSyncService {
       self.stateSerialQueue.sync {
         self.cachedIsSyncNow = true
       }
-      SKSyncLog.logInfo("SKSyncService syncAllCommands started sync requestType = \(fetchAllProductsAndSyncValue)")
+      SKLogger.logInfo("SKSyncService syncAllCommands started sync requestType = \(fetchAllProductsAndSyncValue)")
       SKServiceRegistry.storeKitService.requestProductInfoAndSendPurchase(productId: fetchAllProductsAndSyncValue)
     } else if let requestTypeToSync = SKServiceRegistry.userDefaultsService.string(forKey: .requestTypeToSync),
       let requestType = SKRequestType(rawValue: requestTypeToSync) {
       self.stateSerialQueue.sync {
         self.cachedIsSyncNow = true
       }
-      SKSyncLog.logInfo("SKSyncService syncAllCommands started sync requestType = \(requestType)")
+      SKLogger.logInfo("SKSyncService syncAllCommands started sync requestType = \(requestType)")
       
       SKServiceRegistry.serverAPI.syncAllData(initRequestType: requestType, completion: { [weak self] error in
         self?.stateSerialQueue.sync {
@@ -78,13 +78,13 @@ class SKSyncServiceImplementation: SKSyncService {
 
 private extension SKSyncServiceImplementation {
   @objc func willResignActiveNotification() {
-    SKSyncLog.logInfo("SKSyncService is stoppted because app willResignActiveNotification")
+    SKLogger.logInfo("SKSyncService is stoppted because app willResignActiveNotification")
     timer?.invalidate()
     timer = nil
   }
   
   @objc func willEnterForegroundNotification() {
-    SKSyncLog.logInfo("SKSyncService is resumed because app willResignActiveNotification")
+    SKLogger.logInfo("SKSyncService is resumed because app willResignActiveNotification")
     timer?.invalidate()
     timer = nil
     timer = Timer.scheduledTimer(withTimeInterval: 20, repeats: true, block: { [weak self] _ in

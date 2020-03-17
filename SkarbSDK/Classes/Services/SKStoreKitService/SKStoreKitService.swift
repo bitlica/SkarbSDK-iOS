@@ -2,7 +2,7 @@
 //  SKStoreKitService.swift
 //  ios
 //
-//  Created by Artem Hitrik on 2/20/20.
+//  Created by Bitlica Inc. on 2/20/20.
 //  Copyright © 2020 Ihnat Kandrashou. All rights reserved.
 //
 

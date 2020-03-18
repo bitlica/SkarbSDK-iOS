@@ -84,7 +84,7 @@ class SKServerAPIImplementaton: SKServerAPI {
                               requestType: initRequestType,
                               params: params,
                               parsingHandler: { result in
-                                SKLogger.logInfo("SKResponse is \(result) for requestType = \(initRequestType)")
+                                SKLogger.logNetwork("SKResponse is \(result) for requestType = \(initRequestType)")
                                 switch result {
                                   case .success(_):
                                     SKServiceRegistry.userDefaultsService.removeValue(forKey: .requestTypeToSync)
@@ -101,11 +101,11 @@ class SKServerAPIImplementaton: SKServerAPI {
 
 private extension SKServerAPIImplementaton {
   func executeRequest(_ skRequest: SKRequest) {
-    SKLogger.logDebugNetwork("Executing request: \(String(describing: skRequest.request.url?.absoluteString)) with params: \(skRequest.params)")
+    SKLogger.logNetwork("Executing request: \(String(describing: skRequest.request.url?.absoluteString)) with params: \(skRequest.params)")
     
     let task = URLSession.shared.dataTask(with: skRequest.request, completionHandler: { [weak self] (data, response, error) in
       
-      SKLogger.logDebugNetwork("Finished request: \(String(describing: skRequest.request.url?.absoluteString))")
+      SKLogger.logNetwork("Finished request: \(String(describing: skRequest.request.url?.absoluteString))")
       
       guard let self = self else {
         return

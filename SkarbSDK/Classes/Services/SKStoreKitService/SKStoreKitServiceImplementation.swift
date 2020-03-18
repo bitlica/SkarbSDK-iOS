@@ -64,7 +64,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       switch transaction.transactionState {
         case .purchased:
           SKPaymentQueue.default().finishTransaction(transaction)
-          SKLogger.logError("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
+          SKLogger.logInfo("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
           DispatchQueue.main.async { [weak self] in
             
             guard let self = self,
@@ -87,7 +87,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
           }
         case .failed:
           SKPaymentQueue.default().finishTransaction(transaction)
-          SKLogger.logError("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
+          SKLogger.logInfo("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
         case .restored:
           SKPaymentQueue.default().finishTransaction(transaction)
           SKLogger.logInfo("updatedTransactions was called. Transaction was restored. Date = \(String(describing: transaction.transactionDate))")

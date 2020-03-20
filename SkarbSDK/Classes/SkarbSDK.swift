@@ -28,7 +28,7 @@ public class SkarbSDK {
   }
   
   public static func sendSource(broker: SKBroker,
-                                features: [String: Any],
+                                features: [AnyHashable: Any],
                                 completion: @escaping (SKResponseError?) -> Void) {
     SKServiceRegistry.serverAPI.sendSource(broker: broker, features: features, completion: completion)
   }

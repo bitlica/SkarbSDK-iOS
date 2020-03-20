@@ -1,5 +1,5 @@
 //
-//  SKRequest.swift
+//  SKURLRequest.swift
 //  SkarbSDKExample
 //
 //  Created by Bitlica Inc. on 1/19/20.
@@ -16,7 +16,7 @@ enum SKRequestType: String {
 }
 
 //This is a class, to use reference semantic, to enable remainingRetryCount updates
-public class SKRequest {
+public class SKURLRequest {
 
   let request: URLRequest
   let requestType: SKRequestType

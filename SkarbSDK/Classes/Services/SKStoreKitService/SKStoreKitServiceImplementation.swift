@@ -68,23 +68,23 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
           DispatchQueue.main.async { [weak self] in
             
             guard let self = self,
-                self.isObservable,
-                !SKServiceRegistry.userDefaultsService.bool(forKey: .purchaseSentBySwizzling) else {
+              self.isObservable,
+              !SKServiceRegistry.userDefaultsService.bool(forKey: .purchaseSentBySwizzling) else {
                 return
-              }
-              SKServiceRegistry.userDefaultsService.setValue(true, forKey: .purchaseSentBySwizzling)
-              
-              let purchasedProductId = transaction.payment.productIdentifier
-              SkarbSDK.sendPurchase(productId: purchasedProductId)
+            }
+            SKServiceRegistry.userDefaultsService.setValue(true, forKey: .purchaseSentBySwizzling)
+            
+            let purchasedProductId = transaction.payment.productIdentifier
+            SkarbSDK.sendPurchase(productId: purchasedProductId)
             if let allProducts = self.allProducts,
-                let product = allProducts.filter({ $0.productIdentifier == purchasedProductId }).first {
-                SkarbSDK.sendPurchase(productId: purchasedProductId,
-                                      price: product.price.floatValue,
-                                      currency: product.priceLocale.currencyCode)
-              } else {
+              let product = allProducts.filter({ $0.productIdentifier == purchasedProductId }).first {
+              SkarbSDK.sendPurchase(productId: purchasedProductId,
+                                    price: product.price.floatValue,
+                                    currency: product.priceLocale.currencyCode)
+            } else {
               self.requestProductInfoAndSendPurchase(productId: purchasedProductId)
             }
-          }
+        }
         case .failed:
           SKPaymentQueue.default().finishTransaction(transaction)
           SKLogger.logInfo("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")

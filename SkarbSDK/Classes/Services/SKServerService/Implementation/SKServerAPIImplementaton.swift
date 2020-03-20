@@ -32,7 +32,7 @@ class SKServerAPIImplementaton: SKServerAPI {
     syncAllData(initRequestType: .test, completion: completion)
   }
   
-  func sendSource(broker: SKBroker, features: [String: Any], completion: @escaping (SKResponseError?) -> Void) {
+  func sendSource(broker: SKBroker, features: [AnyHashable: Any], completion: @escaping (SKResponseError?) -> Void) {
     var params: [String: Any] = [:]
     params["broker"] = broker.name
     params["features"] = features
@@ -65,7 +65,9 @@ class SKServerAPIImplementaton: SKServerAPI {
     if let brokerJSON = SKServiceRegistry.userDefaultsService.json(forKey: .broker) {
       params["source"] = brokerJSON
     }
-    params["purchase"] = preparePurchaseData()
+    if let purchaseJSON = preparePurchaseData() {
+      params["purchase"] = purchaseJSON
+    }
     
     let urlString = prepareBaseURLString(urlAction: "/appgate")
     guard let url = URL(string: urlString) else { return }
@@ -80,7 +82,7 @@ class SKServerAPIImplementaton: SKServerAPI {
       SKLogger.logError("executeRequest: can't json serialization to Data")
     }
     
-    let skRequest = SKRequest(request: request,
+    let skRequest = SKURLRequest(request: request,
                               requestType: initRequestType,
                               params: params,
                               parsingHandler: { result in
@@ -100,7 +102,7 @@ class SKServerAPIImplementaton: SKServerAPI {
 }
 
 private extension SKServerAPIImplementaton {
-  func executeRequest(_ skRequest: SKRequest) {
+  func executeRequest(_ skRequest: SKURLRequest) {
     SKLogger.logNetwork("Executing request: \(String(describing: skRequest.request.url?.absoluteString)) with params: \(skRequest.params)")
     
     let task = URLSession.shared.dataTask(with: skRequest.request, completionHandler: { [weak self] (data, response, error) in
@@ -228,6 +230,7 @@ private extension SKServerAPIImplementaton {
     }
     if recieptData.isEmpty {
       SKLogger.logInfo("PreparePurchaseData() called. But recieptData is empty")
+      return nil
     }
     var params: [String: Any] = [:]
     params["product_id"] = SKServiceRegistry.userDefaultsService.string(forKey: .productId)

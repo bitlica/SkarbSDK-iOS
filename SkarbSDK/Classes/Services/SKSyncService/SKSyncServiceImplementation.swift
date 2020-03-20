@@ -55,7 +55,9 @@ class SKSyncServiceImplementation: SKSyncService {
         self.cachedIsSyncNow = true
       }
       SKLogger.logInfo("SKSyncService syncAllCommands started sync requestType = \(fetchAllProductsAndSyncValue)")
-      SKServiceRegistry.storeKitService.requestProductInfoAndSendPurchase(productId: fetchAllProductsAndSyncValue)
+      DispatchQueue.main.async {
+        SKServiceRegistry.storeKitService.requestProductInfoAndSendPurchase(productId: fetchAllProductsAndSyncValue)
+      }
     } else if let requestTypeToSync = SKServiceRegistry.userDefaultsService.string(forKey: .requestTypeToSync),
       let requestType = SKRequestType(rawValue: requestTypeToSync) {
       self.stateSerialQueue.sync {

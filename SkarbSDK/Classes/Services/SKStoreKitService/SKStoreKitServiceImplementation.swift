@@ -47,7 +47,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
                               price: product.price.floatValue,
                               currency: product.priceLocale.currencyCode)
       } else {
-        SKServiceRegistry.userDefaultsService.setValue(productId, forKey: .fetchAllProductsAndSync)
+        SKServiceRegistry.userDefaultsService.setString(productId, forKey: .fetchAllProductsAndSync)
       }
     }
   }
@@ -72,7 +72,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
               !SKServiceRegistry.userDefaultsService.bool(forKey: .purchaseSentBySwizzling) else {
                 return
             }
-            SKServiceRegistry.userDefaultsService.setValue(true, forKey: .purchaseSentBySwizzling)
+            SKServiceRegistry.userDefaultsService.setBool(true, forKey: .purchaseSentBySwizzling)
             
             let purchasedProductId = transaction.payment.productIdentifier
             SkarbSDK.sendPurchase(productId: purchasedProductId)

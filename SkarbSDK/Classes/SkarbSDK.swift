@@ -15,9 +15,9 @@ public class SkarbSDK {
                                 deviceId: String? = nil,
                                 isDebug: Bool) {
     SKServiceRegistry.initialize(isObservable: isObservable)
-    SKServiceRegistry.userDefaultsService.setValue(clientId, forKey: .clientId)
-    SKServiceRegistry.userDefaultsService.setValue(deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString, forKey: .deviceId)
-    SKServiceRegistry.userDefaultsService.setValue(isDebug, forKey: .env)
+    SKServiceRegistry.userDefaultsService.setString(clientId, forKey: .clientId)
+    SKServiceRegistry.userDefaultsService.setString(deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString, forKey: .deviceId)
+    SKServiceRegistry.userDefaultsService.setBool(isDebug, forKey: .env)
     SKServiceRegistry.serverAPI.sendInstall(completion: { _ in })
   }
   

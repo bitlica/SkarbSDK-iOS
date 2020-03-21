@@ -65,23 +65,27 @@ class SKUserDefaultsService {
     self.userDefaults.set(nil, forKey: key.keyName)
   }
   
-  func setValue(_ value: Bool, forKey key: SKKey) {
+  func setBool(_ value: Bool, forKey key: SKKey) {
     self.userDefaults.set(value, forKey: key.keyName)
   }
   
-  func setValue(_ value: Int, forKey key: SKKey) {
+  func setInt(_ value: Int, forKey key: SKKey) {
     self.userDefaults.set(value, forKey: key.keyName)
   }
   
-  func setValue(_ value: [String: Any], forKey key: SKKey) {
+  func setJSON(_ value: [String: Any], forKey key: SKKey) {
     self.userDefaults.setValue(value, forKey: key.keyName)
   }
   
-  func setValue(_ value: String, forKey key: SKKey) {
+  func setString(_ value: String, forKey key: SKKey) {
     self.userDefaults.set(value, forKey: key.keyName)
   }
   
-  func setValue(_ value: Float, forKey key: SKKey) {
+  func setFloat(_ value: Float, forKey key: SKKey) {
+    self.userDefaults.set(value, forKey: key.keyName)
+  }
+  
+  func setData(_ value: Data, forKey key: SKKey) {
     self.userDefaults.set(value, forKey: key.keyName)
   }
   
@@ -103,5 +107,9 @@ class SKUserDefaultsService {
   
   func float(forKey key: SKKey) -> Float? {
     return self.userDefaults.object(forKey: key.keyName) as? Float
+  }
+  
+  func data(forKey key: SKKey) -> Data? {
+    return self.userDefaults.object(forKey: key.keyName) as? Data
   }
 }

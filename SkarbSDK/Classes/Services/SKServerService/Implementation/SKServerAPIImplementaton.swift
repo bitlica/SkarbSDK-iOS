@@ -28,7 +28,7 @@ class SKServerAPIImplementaton: SKServerAPI {
   }
   
   func sendTest(name: String, group: String, completion: @escaping (SKResponseError?) -> Void) {
-    SKServiceRegistry.userDefaultsService.setValue(["name": name, "group": group], forKey: .test)
+    SKServiceRegistry.userDefaultsService.setJSON(["name": name, "group": group], forKey: .test)
     syncAllData(initRequestType: .test, completion: completion)
   }
   
@@ -36,7 +36,12 @@ class SKServerAPIImplementaton: SKServerAPI {
     var params: [String: Any] = [:]
     params["broker"] = broker.name
     params["features"] = features
-    SKServiceRegistry.userDefaultsService.setValue(params, forKey: .broker)
+    do {
+      let data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
+      SKServiceRegistry.userDefaultsService.setData(data, forKey: .broker)
+    } catch {
+      SKLogger.logError("SKServerAPIImplementaton.sendSource: can't json serialization to Data")
+    }
     syncAllData(initRequestType: .broker, completion: completion)
   }
   
@@ -44,12 +49,12 @@ class SKServerAPIImplementaton: SKServerAPI {
                     price: Float?,
                     currency: String?,
                     completion: ((SKResponseError?) -> Void)?) {
-    SKServiceRegistry.userDefaultsService.setValue(productId, forKey: .productId)
+    SKServiceRegistry.userDefaultsService.setString(productId, forKey: .productId)
     if let price = price {
-      SKServiceRegistry.userDefaultsService.setValue(price, forKey: .price)
+      SKServiceRegistry.userDefaultsService.setFloat(price, forKey: .price)
     }
     if let currency = currency {
-      SKServiceRegistry.userDefaultsService.setValue(currency, forKey: .currency)
+      SKServiceRegistry.userDefaultsService.setString(currency, forKey: .currency)
     }
     syncAllData(initRequestType: .purchase, completion: completion)
   }
@@ -62,8 +67,13 @@ class SKServerAPIImplementaton: SKServerAPI {
     if let testJSON = SKServiceRegistry.userDefaultsService.json(forKey: .test) {
       params["test"] = testJSON
     }
-    if let brokerJSON = SKServiceRegistry.userDefaultsService.json(forKey: .broker) {
-      params["source"] = brokerJSON
+    if let brokerData = SKServiceRegistry.userDefaultsService.data(forKey: .broker) {
+      do {
+        let brokerJSON = try JSONSerialization.jsonObject(with: brokerData, options: [])
+        params["source"] = brokerJSON
+      } catch {
+        SKLogger.logError("SKServerAPIImplementaton.syncAllData: can't json serialization to Data for source")
+      }
     }
     if let purchaseJSON = preparePurchaseData() {
       params["purchase"] = purchaseJSON
@@ -90,10 +100,10 @@ class SKServerAPIImplementaton: SKServerAPI {
                                 switch result {
                                   case .success(_):
                                     SKServiceRegistry.userDefaultsService.removeValue(forKey: .requestTypeToSync)
-                                    SKServiceRegistry.userDefaultsService.setValue(true, forKey: .skRequestType(initRequestType.rawValue))
+                                    SKServiceRegistry.userDefaultsService.setBool(true, forKey: .skRequestType(initRequestType.rawValue))
                                     completion?(nil)
                                   case .failure(let error):
-                                    SKServiceRegistry.userDefaultsService.setValue(initRequestType.rawValue, forKey: .requestTypeToSync)
+                                    SKServiceRegistry.userDefaultsService.setString(initRequestType.rawValue, forKey: .requestTypeToSync)
                                     completion?(error)
                                 }
     })
@@ -188,7 +198,7 @@ private extension SKServerAPIImplementaton {
       installedDate = installedDateISO8601
     } else {
       installedDate = Formatter.iso8601.string(from: Date())
-      SKServiceRegistry.userDefaultsService.setValue(installedDate, forKey: .installedDateISO8601)
+      SKServiceRegistry.userDefaultsService.setString(installedDate, forKey: .installedDateISO8601)
     }
     params["date"] = installedDate
     params["idfa"] = ASIdentifierManager.shared().advertisingIdentifier.uuidString

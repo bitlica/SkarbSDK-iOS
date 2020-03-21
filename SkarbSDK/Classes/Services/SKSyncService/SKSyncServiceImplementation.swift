@@ -71,7 +71,7 @@ class SKSyncServiceImplementation: SKSyncService {
         }
         
         if error != nil {
-          SKServiceRegistry.userDefaultsService.setValue(requestTypeToSync, forKey: .requestTypeToSync)
+          SKServiceRegistry.userDefaultsService.setString(requestTypeToSync, forKey: .requestTypeToSync)
         }
       })
     }

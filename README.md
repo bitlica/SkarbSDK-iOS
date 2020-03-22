@@ -10,7 +10,7 @@ In addition, you could enrich these events with features obtained from the traff
 SkarbSDK can be installed with CocoaPods. Simply add pod 'SkarbSDK' to your Podfile.
 
 ## Updating
-Simply use command pod update in terminal with Podfile folder.
+Simply use command ```pod update``` in terminal with Podfile folder.
 
 ## Usage
 ### Initialization 

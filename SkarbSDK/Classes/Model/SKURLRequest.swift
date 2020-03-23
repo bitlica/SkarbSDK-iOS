@@ -21,12 +21,12 @@ public class SKURLRequest {
   let request: URLRequest
   let requestType: SKRequestType
   let params: [String: Any]
-  let completionHandler: (Result<[String: Any], SKResponseError>) -> Void
+  let completionHandler: (Swift.Result<[String: Any], SKResponseError>) -> Void
 
   init(request: URLRequest,
        requestType: SKRequestType,
        params: [String: Any],
-       parsingHandler: @escaping (Result<[String: Any], SKResponseError>) -> Void) {
+       parsingHandler: @escaping (Swift.Result<[String: Any], SKResponseError>) -> Void) {
 
     self.request = request
     self.requestType = requestType

@@ -8,34 +8,26 @@
 
 import Foundation
 
-enum SKResponseErrorCode {
-  case noInternet
-  case serverError
-  case other
-}
-
-
 public struct SKResponseError: Error {
-  let errorCode: SKResponseErrorCode
+  let errorCode: Int
   let message: String
 
-  static let genericRetryMessage = "An error occurred connecting to the server. Please try again in a minute."
+  public static let noResponseCode = 9999
+  static let genericRetryMessage = "General response error"
 
-  init() {
-    errorCode = .other
-    message = SKResponseError.genericRetryMessage
+  init(errorCode: Int, message: String = SKResponseError.genericRetryMessage) {
+    self.errorCode = errorCode
+    self.message = message
   }
 
   init(serverStatusCode: Int, message: String?) {
+    errorCode = serverStatusCode
     switch serverStatusCode {
-      case -1009:
-        errorCode = .noInternet
-        self.message = "Please check your internet connection."
-      case 400..<600:
-        errorCode = .serverError
+      case -1009, -1003, -1001:
+        self.message = "No internet connection, unable to upload events"
+      case 400..<501:
         self.message = message ?? SKResponseError.genericRetryMessage
       default:
-        errorCode = .other
         self.message = message ?? SKResponseError.genericRetryMessage
     }
   }

@@ -144,11 +144,13 @@ private extension SKServerAPIImplementaton {
   }
   
   func validateResponseError(response: URLResponse?, data: Data?, error: Error?) -> SKResponseError? {
+    
+    if let error = error {
+      return SKResponseError(serverStatusCode: error._code, message: error.localizedDescription)
+    }
+    
     guard let response = response as? HTTPURLResponse else {
-      if let error = error {
-        return SKResponseError(serverStatusCode: error._code, message: error.localizedDescription)
-      }
-      return nil
+      return SKResponseError(errorCode: SKResponseError.noResponseCode, message: "Response empty, error empty for NSURLConnection")
     }
     
     switch response.statusCode {
@@ -171,7 +173,7 @@ private extension SKServerAPIImplementaton {
         break
     }
     
-    return nil
+    return SKResponseError(serverStatusCode: response.statusCode, message: "Validating response general error")
   }
   
   func prepareBaseURLString(urlAction: String) -> String {
@@ -234,6 +236,11 @@ private extension SKServerAPIImplementaton {
   }
   
   func preparePurchaseData() -> [String: Any]? {
+    
+    guard let productId = SKServiceRegistry.userDefaultsService.string(forKey: .productId) else {
+      return nil
+    }
+    
     guard let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
       let recieptData = try? Data(contentsOf: appStoreReceiptURL) else {
       return nil
@@ -243,7 +250,7 @@ private extension SKServerAPIImplementaton {
       return nil
     }
     var params: [String: Any] = [:]
-    params["product_id"] = SKServiceRegistry.userDefaultsService.string(forKey: .productId)
+    params["product_id"] = productId
     params["price"] = SKServiceRegistry.userDefaultsService.float(forKey: .price)
     params["currency"] = SKServiceRegistry.userDefaultsService.string(forKey: .currency)
     params["receipt"] = recieptData.base64EncodedString()

@@ -12,12 +12,23 @@ import UIKit
 public class SkarbSDK {
   public static func initialize(clientId: String,
                                 isObservable: Bool,
-                                deviceId: String? = nil,
-                                isDebug: Bool) {
+                                deviceId: String? = nil) {
     SKServiceRegistry.initialize(isObservable: isObservable)
-    SKServiceRegistry.userDefaultsService.setString(clientId, forKey: .clientId)
-    SKServiceRegistry.userDefaultsService.setString(deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString, forKey: .deviceId)
-    SKServiceRegistry.userDefaultsService.setBool(isDebug, forKey: .env)
+    
+    let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+    let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
+    var dataCount: Int = 0
+      if let appStoreReceiptURL = appStoreReceiptURL,
+         let recieptData = try? Data(contentsOf: appStoreReceiptURL) {
+        dataCount = recieptData.count
+    }
+    
+    let initData = SKInitData(clientId: clientId,
+                              deviceId: deviceId,
+                              installDate: Formatter.iso8601.string(from: Date()),
+                              receiptUrl: appStoreReceiptURL?.absoluteString ?? "",
+                              receiptLen: dataCount)
+    SKServiceRegistry.userDefaultsService.setData(initData.getData(), forKey: .initData)
     SKServiceRegistry.serverAPI.sendInstall(completion: { _ in })
   }
   
@@ -44,6 +55,13 @@ public class SkarbSDK {
   }
   
   public static func getDeviceId() -> String {
-    return SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) ?? UUID().uuidString
+    let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self)
+    if let deviceId = initData?.deviceId {
+      return deviceId
+    }
+    
+    SKLogger.logWarn("SkarbSDK getDeviceId: called and deviceId is nill. Use UUID().uuidString")
+    
+    return UUID().uuidString
   }
 }

@@ -10,48 +10,40 @@ import Foundation
 
 class SKUserDefaultsService {
   enum SKKey {
+    case initData
     case broker
     case test
-    case productId
-    case price
-    case currency
+    case purchaseData
+    
+    case appgateComands
+    
     case requestTypeToSync
     case fetchAllProductsAndSync
     case purchaseSentBySwizzling
-    case installedDateISO8601
     case skRequestType(String)
-    case clientId
-    case env
-    case deviceId
     
     var keyName: String {
       switch self {
+        case .initData:
+          return "sk_init_data"
         case .broker:
           return "sk_broker_key"
         case .test:
           return "sk_test_key"
-        case .productId:
-          return "sk_product_id"
-        case .price:
-          return "sk_price_key"
-        case .currency:
-          return "sk_currency_key"
+        case .purchaseData:
+          return "sk_purchase_data"
+        
+        case .appgateComands:
+          return "sk_appgate_commands"
+        
         case .requestTypeToSync:
           return "sk_request_to_sync"
         case .fetchAllProductsAndSync:
           return "sk_fetch_all_products_and_sync"
         case .purchaseSentBySwizzling:
           return "sk_purchase_sent_by_swizzling"
-        case .installedDateISO8601:
-          return "sk_installed_date_ISO8601"
         case .skRequestType(let name):
           return name
-        case .clientId:
-          return "sk_client_id"
-        case .env:
-          return "sk_environment"
-        case .deviceId:
-          return "sk_device_id"
       }
     }
   }
@@ -85,7 +77,7 @@ class SKUserDefaultsService {
     self.userDefaults.set(value, forKey: key.keyName)
   }
   
-  func setData(_ value: Data, forKey key: SKKey) {
+  func setData(_ value: Data?, forKey key: SKKey) {
     self.userDefaults.set(value, forKey: key.keyName)
   }
   
@@ -111,5 +103,17 @@ class SKUserDefaultsService {
   
   func data(forKey key: SKKey) -> Data? {
     return self.userDefaults.object(forKey: key.keyName) as? Data
+  }
+  
+  func codable<T: Decodable>(forKey key: SKKey, objectType: T.Type) -> T? {
+    
+    let decoder = JSONDecoder()
+    
+    guard let data = self.userDefaults.object(forKey: key.keyName) as? Data,
+          let object = try? decoder.decode(T.self, from: data) else {
+      return nil
+    }
+    
+    return object
   }
 }

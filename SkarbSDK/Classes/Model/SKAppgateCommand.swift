@@ -18,7 +18,7 @@ struct SKAppgateCommand: Codable {
   var retryCount: Int
   
   var description: String {
-    return "timestamp=\(timestamp), commandType=\(commandType), status=\(status)"
+    return "timestamp=\(timestamp), commandType=\(commandType), status=\(status), retryCount=\(retryCount), data = \(String(data: data, encoding: .utf8))"
   }
   
   mutating func incrementRetryCount() {
@@ -81,7 +81,7 @@ struct SKAppgateCommand: Codable {
     params["timestamp"] = "\(Int(Date().timeIntervalSince1970 * 1000000))"
     let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self)
     params["client_id"] = initData?.clientId
-    params["agent"] = "SkarbSDK 0.3.0"
+    params["agent"] = "SkarbSDK 0.2.4"
     return params
   }
   

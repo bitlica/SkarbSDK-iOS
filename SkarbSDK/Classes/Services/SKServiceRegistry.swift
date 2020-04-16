@@ -14,6 +14,7 @@ class SKServiceRegistry {
   static let syncService: SKSyncService = SKSyncServiceImplementation()
   static var storeKitService: SKStoreKitService!
   static let commandStore: SKCommandStore = SKCommandStore()
+  static let migrationService: SKMigrationService = SKMigrationService()
   
   static func initialize(isObservable: Bool) {
     _ = syncService

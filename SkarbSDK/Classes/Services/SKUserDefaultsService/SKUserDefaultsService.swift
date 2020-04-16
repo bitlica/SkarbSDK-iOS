@@ -10,33 +10,16 @@ import Foundation
 
 class SKUserDefaultsService {
   enum SKKey {
-    
-    // Old keys. Not used after 0.2.2 version
-    case installSent
-    case testSent
-    case brokerSent
-    case purchaseSent
-    case installedDateISO8601
-    // Version 0.3.0 and higher
     case initData
     case brokerData
     case testData
     case purchaseData
     case appgateComands
     case fetchAllProductsAndSync
+    case migrationVersion(Int)
     
     var keyName: String {
       switch self {
-        case .installSent:
-          return "sk_request_type_install"
-        case .testSent:
-          return "sk_request_type_test"
-        case .brokerSent:
-          return "sk_request_type_broker"
-        case .purchaseSent:
-          return "sk_request_type_purchase"
-        case .installedDateISO8601:
-          return "sk_installed_date_ISO8601"
         case .initData:
           return "sk_init_data_key"
         case .brokerData:
@@ -49,6 +32,8 @@ class SKUserDefaultsService {
           return "sk_appgate_commands"
         case .fetchAllProductsAndSync:
           return "sk_fetch_all_products_and_sync"
+        case .migrationVersion(let version):
+          return "sk_migration_version_\(version)"
       }
     }
   }

@@ -10,8 +10,8 @@ import Foundation
 
 struct SKPurchaseData: SKCodableStruct {
   let productId: String
-  let price: Float?
-  let currency: String?
+  let price: Float
+  let currency: String
   
   func getData() -> Data? {
     let encoder = JSONEncoder()

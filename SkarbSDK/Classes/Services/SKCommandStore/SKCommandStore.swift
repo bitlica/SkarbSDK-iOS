@@ -37,7 +37,8 @@ class SKCommandStore {
   func saveAppgateCommand(_ command: SKAppgateCommand) {
     exclusionSerialQueue.sync {
       guard localAppgateCommands.first(where: { $0 == command }) == nil else {
-        SKLogger.logInfo("saveAppgateCommand called: but this command is already exist")
+        SKLogger.logInfo("saveAppgateCommand: called but this command is already exist. UpdateCommand: called with command = \(command.description)")
+        updateCommand(command)
         return
       }
       localAppgateCommands.append(command)
@@ -48,7 +49,7 @@ class SKCommandStore {
     exclusionSerialQueue.sync {
       guard let currentCommand = localAppgateCommands.filter({ $0 == command }).first,
         let index = localAppgateCommands.firstIndex(where: { $0 == currentCommand }) else {
-        SKLogger.logInfo("updateCommand called: but there is no such command \(command.description)")
+        SKLogger.logInfo("updateCommand called: but there is no such command = \(command.description)")
         return
       }
       localAppgateCommands[index] = command

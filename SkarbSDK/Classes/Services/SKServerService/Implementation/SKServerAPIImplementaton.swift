@@ -40,7 +40,7 @@ class SKServerAPIImplementaton: SKServerAPI {
 
 private extension SKServerAPIImplementaton {
   func executeRequest(_ skRequest: SKURLRequest) {
-    SKLogger.logNetwork("Executing request: \(String(describing: skRequest.request.url?.absoluteString)) with params: \(String(data: skRequest.command.data, encoding: .utf8))")
+    SKLogger.logNetwork("Executing request: \(String(describing: skRequest.request.url?.absoluteString)) with params: \(String(describing: String(data: skRequest.command.data, encoding: .utf8)))")
     
     let task = URLSession.shared.dataTask(with: skRequest.request, completionHandler: { [weak self] (data, response, error) in
       

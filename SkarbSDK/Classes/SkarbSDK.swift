@@ -15,9 +15,11 @@ public class SkarbSDK {
                                 deviceId: String? = nil) {
     SKServiceRegistry.initialize(isObservable: isObservable)
     
+    SKServiceRegistry.migrationService.doMigrationIfNeeded()
+    
     if SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) == nil {
       let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
-      let installDate = SKServiceRegistry.userDefaultsService.string(forKey: .installedDateISO8601) ?? Formatter.iso8601.string(from: Date())
+      let installDate = Formatter.iso8601.string(from: Date())
       let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
       var dataCount: Int = 0
       if let appStoreReceiptURL = appStoreReceiptURL,
@@ -31,10 +33,6 @@ public class SkarbSDK {
                                 receiptUrl: appStoreReceiptURL?.absoluteString ?? "",
                                 receiptLen: dataCount)
       SKServiceRegistry.userDefaultsService.setValue(initData.getData(), forKey: .initData)
-    }
-    
-    guard !SKServiceRegistry.userDefaultsService.bool(forKey: .installSent) else {
-      return
     }
     
     guard !SKServiceRegistry.commandStore.hasInstallCommand else {
@@ -53,10 +51,6 @@ public class SkarbSDK {
     let testData = SKTestData(name: name, group: group)
     SKServiceRegistry.userDefaultsService.setValue(testData.getData(), forKey: .testData)
     
-    guard !SKServiceRegistry.userDefaultsService.bool(forKey: .testSent) else {
-      return
-    }
-    
     let testCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
                                        commandType: .test,
                                        status: .pending,
@@ -69,10 +63,6 @@ public class SkarbSDK {
                                 features: [AnyHashable: Any]) {
     let broberData = SKBrokerData(broker: broker.name, features: features)
     SKServiceRegistry.userDefaultsService.setValue(broberData.getData(), forKey: .brokerData)
-    
-    guard !SKServiceRegistry.userDefaultsService.bool(forKey: .brokerSent) else {
-      return
-    }
     
     let sourceCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
                                          commandType: .source,
@@ -90,16 +80,12 @@ public class SkarbSDK {
                                       currency: currency)
     SKServiceRegistry.userDefaultsService.setValue(purchaseData.getData(), forKey: .purchaseData)
     
-    guard !SKServiceRegistry.userDefaultsService.bool(forKey: .purchaseSent) else {
-      return
-    }
-    
-    let sourceCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
-                                         commandType: .source,
+    let purchaseCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
+                                         commandType: .purchase,
                                          status: .pending,
                                          data: SKAppgateCommand.prepareData(),
                                          retryCount: 0)
-    SKServiceRegistry.commandStore.saveAppgateCommand(sourceCommand)
+    SKServiceRegistry.commandStore.saveAppgateCommand(purchaseCommand)
   }
   
   public static func getDeviceId() -> String {

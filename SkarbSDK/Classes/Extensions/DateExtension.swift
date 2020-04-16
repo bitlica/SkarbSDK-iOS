@@ -9,5 +9,7 @@
 import Foundation
 
 extension Date {
-  static let nowTimestampInt: Int = Int(Date().timeIntervalSince1970 * 1000000)
+  var nowTimestampInt: Int {
+    return Int(self.timeIntervalSince1970 * 1000000)
+  }
 }

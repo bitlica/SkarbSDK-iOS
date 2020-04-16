@@ -10,12 +10,5 @@ import Foundation
 import UIKit
 
 protocol SKServerAPI {
-  func sendInstall(completion: @escaping (SKResponseError?) -> Void)
-  func sendTest(name: String, group: String, completion: @escaping (SKResponseError?) -> Void)
-  func sendSource(broker: SKBroker, features: [AnyHashable: Any], completion: @escaping (SKResponseError?) -> Void)
-  func sendPurchase(productId: String,
-                    price: Float?,
-                    currency: String?,
-                    completion: ((SKResponseError?) -> Void)?)
-  func syncAllData(initRequestType: SKRequestType, completion: ((SKResponseError?) -> Void)?)
+  func syncCommand(_ command: SKAppgateCommand, completion: ((SKResponseError?) -> Void)?)
 }

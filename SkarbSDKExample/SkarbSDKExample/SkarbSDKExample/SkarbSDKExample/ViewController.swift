@@ -17,9 +17,9 @@ class ViewController: UIViewController {
     
     view.backgroundColor = .red
 
-    SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID", isObservable: true)    
-  }
-  
-  
+    SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID", isObservable: true)
+    let features: [String: Any] = ["source": "artem", "campaign": "artemCampaign"]
+    SkarbSDK.sendSource(broker: .appsflyer, features: features)
+  } 
 }
 

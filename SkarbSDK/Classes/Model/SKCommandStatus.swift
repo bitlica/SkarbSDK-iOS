@@ -9,9 +9,10 @@
 import Foundation
 
 enum SKCommandStatus {
-  case pending
-  case done
-  case canceled
+  case pending // just added to store
+  case done // when command was finished successful
+  case canceled // might be canceled if we have the same command type in pending status
+  case inProgress // if command is processing on the server side
 }
 
 extension SKCommandStatus: Codable {
@@ -34,6 +35,8 @@ extension SKCommandStatus: Codable {
         self = .done
       case 2:
         self = .canceled
+      case 3:
+        self = .inProgress
       default:
         throw CodingError.unknownValue
     }
@@ -48,6 +51,8 @@ extension SKCommandStatus: Codable {
         try container.encode(1, forKey: .rawValue)
       case .canceled:
         try container.encode(2, forKey: .rawValue)
+      case .inProgress:
+        try container.encode(3, forKey: .rawValue)
     }
   }
 }

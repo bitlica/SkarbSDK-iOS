@@ -9,10 +9,6 @@
 import Foundation
 import StoreKit
 
-enum SKStoreKitSyncType: String {
-  case fetchProducts = "sk_sync_service_type_fetchProducts"
-}
-
 class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   
   private let isObservable: Bool
@@ -43,11 +39,14 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     requestProductInfo(productId: productId) { products in
       if let product = products.filter({ $0.productIdentifier == productId }).first {
         SKServiceRegistry.userDefaultsService.removeValue(forKey: .fetchAllProductsAndSync)
+        guard !SKServiceRegistry.commandStore.hasPurhcaseCommand else {
+          return
+        }
         SkarbSDK.sendPurchase(productId: productId,
                               price: product.price.floatValue,
-                              currency: product.priceLocale.currencyCode)
+                              currency: product.priceLocale.currencyCode ?? "")
       } else {
-        SKServiceRegistry.userDefaultsService.setString(productId, forKey: .fetchAllProductsAndSync)
+        SKServiceRegistry.userDefaultsService.setValue(productId, forKey: .fetchAllProductsAndSync)
       }
     }
   }
@@ -63,34 +62,29 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       
       switch transaction.transactionState {
         case .purchased:
-          SKPaymentQueue.default().finishTransaction(transaction)
           SKLogger.logInfo("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
           DispatchQueue.main.async { [weak self] in
             
             guard let self = self,
               self.isObservable,
-              !SKServiceRegistry.userDefaultsService.bool(forKey: .purchaseSentBySwizzling) else {
+              !SKServiceRegistry.commandStore.hasPurhcaseCommand else {
                 return
             }
-            SKServiceRegistry.userDefaultsService.setBool(true, forKey: .purchaseSentBySwizzling)
             
             let purchasedProductId = transaction.payment.productIdentifier
-            SkarbSDK.sendPurchase(productId: purchasedProductId)
             if let allProducts = self.allProducts,
               let product = allProducts.filter({ $0.productIdentifier == purchasedProductId }).first {
               SkarbSDK.sendPurchase(productId: purchasedProductId,
                                     price: product.price.floatValue,
-                                    currency: product.priceLocale.currencyCode)
+                                    currency: product.priceLocale.currencyCode ?? "")
             } else {
               self.requestProductInfoAndSendPurchase(productId: purchasedProductId)
             }
         }
         case .failed:
-          SKPaymentQueue.default().finishTransaction(transaction)
-          SKLogger.logInfo("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
+          SKLogger.logInfo("updatedTransactions: called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
         case .restored:
-          SKPaymentQueue.default().finishTransaction(transaction)
-          SKLogger.logInfo("updatedTransactions was called. Transaction was restored. Date = \(String(describing: transaction.transactionDate))")
+          SKLogger.logInfo("updatedTransactions: called. Transaction was restored. Date = \(String(describing: transaction.transactionDate))")
         default:
           break
       }

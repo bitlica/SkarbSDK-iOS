@@ -8,29 +8,19 @@
 
 import Foundation
 
-enum SKRequestType: String {
-  case install = "sk_request_type_install"
-  case test = "sk_request_type_test"
-  case broker = "sk_request_type_broker"
-  case purchase = "sk_request_type_purchase"
-}
-
 //This is a class, to use reference semantic, to enable remainingRetryCount updates
 public class SKURLRequest {
 
   let request: URLRequest
-  let requestType: SKRequestType
-  let params: [String: Any]
+  let command: SKAppgateCommand
   let completionHandler: (Swift.Result<[String: Any], SKResponseError>) -> Void
 
   init(request: URLRequest,
-       requestType: SKRequestType,
-       params: [String: Any],
+       command: SKAppgateCommand,
        parsingHandler: @escaping (Swift.Result<[String: Any], SKResponseError>) -> Void) {
 
     self.request = request
-    self.requestType = requestType
-    self.params = params
+    self.command = command
     self.completionHandler = parsingHandler
   }
 }

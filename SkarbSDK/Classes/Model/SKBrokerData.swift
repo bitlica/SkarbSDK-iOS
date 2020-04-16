@@ -25,14 +25,14 @@ struct SKBrokerData: SKCodableStruct {
   func getJSON() -> [String: Any] {
     let brokerJSON: Any
     do {
-      brokerJSON = try JSONSerialization.jsonObject(with: featuresData, options: [])
+      brokerJSON = try JSONSerialization.jsonObject(with: featuresData, options: .fragmentsAllowed)
     } catch {
       brokerJSON = [:]
       SKLogger.logError("SKServerAPIImplementaton.syncAllData: can't json serialization to Data for source")
     }
     
     return ["broker": broker,
-            "group": brokerJSON]
+            "features": brokerJSON]
   }
   
   func getData() -> Data? {

@@ -26,7 +26,7 @@ class SKServerAPIImplementaton: SKServerAPI {
     let skRequest = SKURLRequest(request: request,
                                  command: command,
                                  parsingHandler: { result in
-                                  SKLogger.logNetwork("SKResponse is \(result) for requestType = \(command.commandType)")
+                                  SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
                                   switch result {
                                     case .success(_):
                                       completion?(nil)

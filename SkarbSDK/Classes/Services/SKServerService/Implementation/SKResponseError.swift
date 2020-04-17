@@ -9,6 +9,13 @@
 import Foundation
 
 public struct SKResponseError: Error {
+  
+  var isInternetCode: Bool {
+    return errorCode == -1009 ||
+      errorCode == -1003 ||
+      errorCode == -1001
+  }
+  
   let errorCode: Int
   let message: String
 

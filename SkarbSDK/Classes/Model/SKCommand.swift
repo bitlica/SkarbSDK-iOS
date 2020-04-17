@@ -12,10 +12,10 @@ import AdSupport
 
 struct SKCommand: Codable {
   let timestamp: Int
-  var commandType: SKCommandType
-  var status: SKCommandStatus
+  private(set) var commandType: SKCommandType
+  private(set) var status: SKCommandStatus
   let data: Data
-  var retryCount: Int
+  private(set) var retryCount: Int
   
   var description: String {
     return "timestamp=\(timestamp), commandType=\(commandType), status=\(status), retryCount=\(retryCount), data = \(String(describing: String(data: data, encoding: .utf8)))"
@@ -30,6 +30,9 @@ struct SKCommand: Codable {
   }
   
   func getRetryDelay() -> TimeInterval {
+    
+    return 5
+    
     switch retryCount {
       case 0:
         return 0
@@ -70,7 +73,7 @@ struct SKCommand: Codable {
     do {
       data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
     } catch {
-      SKLogger.logError("SKAppgateCommand prepareAppgateData: can't json serialization to Data")
+      SKLogger.logError("SKCommand prepareAppgateData: can't json serialization to Data")
     }
     
     return data
@@ -86,7 +89,7 @@ struct SKCommand: Codable {
     do {
       data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
     } catch {
-      SKLogger.logError("SKAppgateCommand prepareAppgateData: can't json serialization to Data")
+      SKLogger.logError("SKCommand prepareApplogData: can't json serialization to Data")
     }
     
     return data
@@ -104,7 +107,7 @@ struct SKCommand: Codable {
   private static func prepareApplicationData() -> [String: Any] {
     
     guard let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) else {
-      SKLogger.logError("SKServerAPIImplementaton prepareApplicationData: called and initData is nil")
+      SKLogger.logError("SKCommand prepareApplicationData: called and initData is nil")
       return [:]
     }
     
@@ -150,22 +153,21 @@ struct SKCommand: Codable {
   private static func preparePurchaseData() -> [String: Any]? {
     
     guard let purchaseData = SKServiceRegistry.userDefaultsService.codable(forKey: .purchaseData, objectType: SKPurchaseData.self) else {
-      SKLogger.logError("SKServerAPIImplementaton preparePurchaseData: called and purchaseData is nil")
       return nil
     }
     
     guard let appStoreReceiptURL = Bundle.main.appStoreReceiptURL else {
-      SKLogger.logInfo("SKAppgateCommand preparePurchaseData: called but appStoreReceiptURL == nil")
+      SKLogger.logError("SKCommand preparePurchaseData: called but appStoreReceiptURL == nil")
       return nil
     }
     
     guard let recieptData = try? Data(contentsOf: appStoreReceiptURL) else {
-      SKLogger.logInfo("SKAppgateCommand preparePurchaseData: called but recieptData == nil")
+      SKLogger.logError("SKCommand preparePurchaseData: called but recieptData == nil")
       return nil
     }
     
     if recieptData.isEmpty {
-      SKLogger.logInfo("SKAppgateCommand preparePurchaseData: called but recieptData is empty")
+      SKLogger.logError("SKCommand preparePurchaseData: called but recieptData is empty")
       return nil
     }
     var params: [String: Any] = [:]

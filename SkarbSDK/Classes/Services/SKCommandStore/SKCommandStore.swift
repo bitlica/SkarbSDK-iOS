@@ -35,25 +35,14 @@ class SKCommandStore {
   }
   
   func saveCommand(_ command: SKCommand) {
+    SKLogger.logInfo("saveCommand: commandType = \(command.commandType), status = \(command.status)")
     exclusionSerialQueue.sync {
-      guard localAppgateCommands.first(where: { $0 == command }) == nil else {
-        SKLogger.logInfo("saveAppgateCommand: called but this command is already exist. UpdateCommand: called with command = \(command.description)")
-        updateCommand(command)
-        return
+      if let existingCommand = localAppgateCommands.first(where: { $0 == command }),
+         let index = localAppgateCommands.firstIndex(where: { $0 == existingCommand }) {
+        localAppgateCommands[index] = command
+      } else {
+        localAppgateCommands.append(command)
       }
-      localAppgateCommands.append(command)
-    }
-    saveState()
-  }
-  
-  func updateCommand(_ command: SKCommand) {
-    exclusionSerialQueue.sync {
-      guard let currentCommand = localAppgateCommands.filter({ $0 == command }).first,
-        let index = localAppgateCommands.firstIndex(where: { $0 == currentCommand }) else {
-        SKLogger.logInfo("updateCommand called: but there is no such command = \(command.description)")
-        return
-      }
-      localAppgateCommands[index] = command
     }
     saveState()
   }
@@ -72,6 +61,21 @@ class SKCommandStore {
       result = localAppgateCommands.filter({ $0.status == .pending })
     }
     return result
+  }
+  
+  /// when user termonate app or go to background some commands might be inProgress
+  /// and there is no guarantee that command will be handled by the app
+  func markAllInProgressAsPendingAndSave() {
+    var result: [SKCommand] = []
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.filter({ $0.status == .inProgress })
+    }
+    
+    for command in result {
+      var inProgress = command
+      inProgress.changeStatus(to: .pending)
+      saveCommand(command)
+    }
   }
 }
 

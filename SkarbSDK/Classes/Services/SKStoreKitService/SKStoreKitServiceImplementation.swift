@@ -38,9 +38,9 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   func requestProductInfoAndSendPurchase(command: SKCommand) {
     var editedCommand = command
     guard let productId = String(data: command.data, encoding: .utf8) else {
-      SKLogger.logError("SKSyncServiceImplementation syncAllCommands: celled with fetchProducts but command.data is not String. Command.data == \(String(describing: String(data: command.data, encoding: .utf8)))")
+      SKLogger.logError("SKSyncServiceImplementation requestProductInfoAndSendPurchase: called with fetchProducts but command.data is not String. Command.data == \(String(describing: String(data: command.data, encoding: .utf8)))")
       editedCommand.changeStatus(to: .canceled)
-      SKServiceRegistry.commandStore.updateCommand(command)
+      SKServiceRegistry.commandStore.saveCommand(command)
       return
     }
     
@@ -55,7 +55,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
       } else {
         editedCommand.incrementRetryCount()
         editedCommand.changeStatus(to: .pending)
-        SKServiceRegistry.commandStore.updateCommand(command)
+        SKServiceRegistry.commandStore.saveCommand(command)
       }
     }
   }
@@ -71,7 +71,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       
       switch transaction.transactionState {
         case .purchased:
-          SKLogger.logInfo("updatedTransactions was called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
+          SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
           DispatchQueue.main.async { [weak self] in
             
             guard let self = self,
@@ -116,7 +116,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
   
   /// Sent when an error is encountered while adding transactions from the user's purchase history back to the queue.
   public func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
-    SKLogger.logError(String(format: "paymentQueueRestoreCompletedTransactionsFailedWithError was called with error %@", error.localizedDescription))
+    SKLogger.logInfo(String(format: "paymentQueueRestoreCompletedTransactionsFailedWithError was called with error %@", error.localizedDescription))
   }
 }
 
@@ -138,7 +138,7 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
   
   func request(_ request: SKRequest, didFailWithError error: Error) {
     
-    SKLogger.logError("SKRequestDelegate got called with didFailWithError: \(error)")
+    SKLogger.logInfo("SKRequestDelegate got called with didFailWithError: \(error)")
     
     productInfoCompletion?([])
   }

@@ -11,26 +11,38 @@ import Foundation
 public class SKLogger {
       
   public static func logError(_ message: String) {
+    let command = SKCommand(timestamp: Date().nowTimestampInt,
+                            commandType: .logging,
+                            status: .pending,
+                            data: SKCommand.prepareApplogData(message: message),
+                            retryCount: 0)
+    SKServiceRegistry.commandStore.saveCommand(command)
     if isDebug {
-      print("[ERROR] \(message)")
+      print("\(Date()) [ERROR] \(message)")
     }
   }
   
   public static func logWarn(_ message: String) {
+    let command = SKCommand(timestamp: Date().nowTimestampInt,
+                            commandType: .logging,
+                            status: .pending,
+                            data: SKCommand.prepareApplogData(message: message),
+                            retryCount: 0)
+    SKServiceRegistry.commandStore.saveCommand(command)
     if isDebug {
-      print("[WARN] \(message)")
+      print("\(Date()) [WARN] \(message)")
     }
   }
   
   public static func logInfo(_ message: String) {
     if isDebug {
-      print("[INFO] \(message)")
+      print("\(Date()) [INFO] \(message)")
     }
   }
   
   public static func logNetwork(_ message: String) {
     if isDebug {
-      print("[NETWORK] \(message)")
+      print("\(Date()) [NETWORK] \(message)")
     }
   }
 }

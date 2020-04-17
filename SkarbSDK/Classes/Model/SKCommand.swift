@@ -30,9 +30,6 @@ struct SKCommand: Codable {
   }
   
   func getRetryDelay() -> TimeInterval {
-    
-    return 5
-    
     switch retryCount {
       case 0:
         return 0

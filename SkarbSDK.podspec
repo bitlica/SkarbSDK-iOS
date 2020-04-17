@@ -4,8 +4,8 @@
 
 Pod::Spec.new do |s|
   s.name         = 'SkarbSDK'
-  s.version      = '0.2.3'
-  s.swift_version = '5.0'
+  s.version      = '0.2.4'
+  s.swift_version = '4.2'
   s.summary      = 'Summary'
   s.description  = 'Description'
   s.homepage     = 'https://github.com/bitlica/SkarbSDK'

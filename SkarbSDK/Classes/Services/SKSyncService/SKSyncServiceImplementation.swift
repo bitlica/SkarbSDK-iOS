@@ -30,28 +30,29 @@ class SKSyncServiceImplementation: SKSyncService {
   func syncAllCommands() {
     dispatchPrecondition(condition: .notOnQueue(DispatchQueue.main))
     
-    if let fetchAllProductsAndSyncValue = SKServiceRegistry.userDefaultsService.string(forKey: .fetchAllProductsAndSync) {
-      SKLogger.logInfo("SKSyncService syncAllCommands: called started getting all SKProduct")
-      DispatchQueue.main.async {
-        SKServiceRegistry.storeKitService.requestProductInfoAndSendPurchase(productId: fetchAllProductsAndSyncValue)
-      }
-    }
-    
     let pendingCommands = SKServiceRegistry.commandStore.getPendingCommands()
     for pendingCommand in pendingCommands {
       DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + pendingCommand.getRetryDelay(), execute: {
         var command = pendingCommand
         command.changeStatus(to: .inProgress)
         SKServiceRegistry.commandStore.updateCommand(command)
-        SKServiceRegistry.serverAPI.syncCommand(command, completion: { error in
-          if let error = error {
-            command.changeStatus(to: .pending)
-            SKLogger.logError("Sync command finished with error = \(error.message)")
-          } else {
-            command.changeStatus(to: .done)
+        switch command.commandType {
+          case .install, .source, .test, .purchase, .logging:
+            SKServiceRegistry.serverAPI.syncCommand(command, completion: { error in
+              if let error = error {
+                command.incrementRetryCount()
+                command.changeStatus(to: .pending)
+                SKLogger.logError("Sync command finished with error = \(error.message)")
+              } else {
+                command.changeStatus(to: .done)
+              }
+              SKServiceRegistry.commandStore.updateCommand(command)
+            })
+          case .fetchProducts:
+            DispatchQueue.main.async {
+              SKServiceRegistry.storeKitService.requestProductInfoAndSendPurchase(command: command)
           }
-          SKServiceRegistry.commandStore.updateCommand(command)
-        })
+        }
       })
     }
   }

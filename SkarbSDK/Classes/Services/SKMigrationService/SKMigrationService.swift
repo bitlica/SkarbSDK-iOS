@@ -34,12 +34,12 @@ struct SKMigrationService {
       }
       
       if UserDefaults.standard.bool(forKey: "sk_request_type_install") {
-        let installCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
+        let installCommand = SKCommand(timestamp: Date().nowTimestampInt,
                                               commandType: .install,
                                               status: .done,
-                                              data: SKAppgateCommand.prepareData(),
+                                              data: SKCommand.prepareAppgateData(),
                                               retryCount: 0)
-        SKServiceRegistry.commandStore.saveAppgateCommand(installCommand)
+        SKServiceRegistry.commandStore.saveCommand(installCommand)
       }
       
       // test
@@ -50,12 +50,12 @@ struct SKMigrationService {
         SKServiceRegistry.userDefaultsService.setValue(testData.getData(), forKey: .testData)
         
         if UserDefaults.standard.bool(forKey: "sk_request_type_test") {
-          let testCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
+          let testCommand = SKCommand(timestamp: Date().nowTimestampInt,
                                              commandType: .test,
                                              status: .done,
-                                             data: SKAppgateCommand.prepareData(),
+                                             data: SKCommand.prepareAppgateData(),
                                              retryCount: 0)
-          SKServiceRegistry.commandStore.saveAppgateCommand(testCommand)
+          SKServiceRegistry.commandStore.saveCommand(testCommand)
         }
       }
       
@@ -69,12 +69,12 @@ struct SKMigrationService {
         SKServiceRegistry.userDefaultsService.setValue(brokerData.getData(), forKey: .brokerData)
         
         if UserDefaults.standard.bool(forKey: "sk_request_type_broker") {
-          let sourceCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
+          let sourceCommand = SKCommand(timestamp: Date().nowTimestampInt,
                                                commandType: .source,
                                                status: .done,
-                                               data: SKAppgateCommand.prepareData(),
+                                               data: SKCommand.prepareAppgateData(),
                                                retryCount: 0)
-          SKServiceRegistry.commandStore.saveAppgateCommand(sourceCommand)
+          SKServiceRegistry.commandStore.saveCommand(sourceCommand)
         }
       }
       
@@ -87,12 +87,12 @@ struct SKMigrationService {
         SKServiceRegistry.userDefaultsService.setValue(purchaseData.getData(), forKey: .purchaseData)
         
         if UserDefaults.standard.bool(forKey: "sk_request_type_purchase") {
-          let purchaseCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
+          let purchaseCommand = SKCommand(timestamp: Date().nowTimestampInt,
                                                  commandType: .purchase,
                                                  status: .done,
-                                                 data: SKAppgateCommand.prepareData(),
+                                                 data: SKCommand.prepareAppgateData(),
                                                  retryCount: 0)
-          SKServiceRegistry.commandStore.saveAppgateCommand(purchaseCommand)
+          SKServiceRegistry.commandStore.saveCommand(purchaseCommand)
         }
       }
       

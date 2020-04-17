@@ -10,15 +10,15 @@ import Foundation
 import UIKit
 import AdSupport
 
-struct SKAppgateCommand: Codable {
+struct SKCommand: Codable {
   let timestamp: Int
-  var commandType: SKCommandAppgateType
+  var commandType: SKCommandType
   var status: SKCommandStatus
   let data: Data
   var retryCount: Int
   
   var description: String {
-    return "timestamp=\(timestamp), commandType=\(commandType), status=\(status), retryCount=\(retryCount), data = \(String(data: data, encoding: .utf8))"
+    return "timestamp=\(timestamp), commandType=\(commandType), status=\(status), retryCount=\(retryCount), data = \(String(describing: String(data: data, encoding: .utf8)))"
   }
   
   mutating func incrementRetryCount() {
@@ -52,7 +52,7 @@ struct SKAppgateCommand: Codable {
     }
   }
   
-  static func prepareData() -> Data {
+  static func prepareAppgateData() -> Data {
     var params: [String: Any] = [:]
     params["client"] = prepareClientData()
     params["application"] = prepareApplicationData()
@@ -70,7 +70,23 @@ struct SKAppgateCommand: Codable {
     do {
       data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
     } catch {
-      SKLogger.logError("SKAppgateCommand prepareInstallData: can't json serialization to Data")
+      SKLogger.logError("SKAppgateCommand prepareAppgateData: can't json serialization to Data")
+    }
+    
+    return data
+  }
+  
+  static func prepareApplogData(message: String) -> Data {
+    var params: [String: Any] = [:]
+    params["client"] = prepareClientData()
+    params["application"] = prepareApplicationData()
+    params["message"] = message
+    
+    var data: Data = Data()
+    do {
+      data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
+    } catch {
+      SKLogger.logError("SKAppgateCommand prepareAppgateData: can't json serialization to Data")
     }
     
     return data
@@ -163,7 +179,7 @@ struct SKAppgateCommand: Codable {
 }
 
 
-extension SKAppgateCommand: Equatable {
+extension SKCommand: Equatable {
   public static func == (lhs: Self, rhs: Self) -> Bool {
     return lhs.timestamp == rhs.timestamp &&
            lhs.commandType == rhs.commandType

@@ -8,14 +8,28 @@
 
 import Foundation
 
-enum SKCommandAppgateType: Int {
+enum SKCommandType: Int {
   case install
   case source
   case test
   case purchase
+  case fetchProducts
+  case logging
+  
+  // applicable only for server commands
+  var endpoint: String {
+    switch self {
+      case .install, .source, .test, .purchase:
+        return"/appgate"
+      case .fetchProducts:
+        return ""
+      case .logging:
+        return"/applog"
+    }
+  }
 }
 
-extension SKCommandAppgateType: Codable {
+extension SKCommandType: Codable {
   
   enum Key: CodingKey {
     case rawValue
@@ -37,6 +51,10 @@ extension SKCommandAppgateType: Codable {
         self = .test
       case 3:
         self = .purchase
+      case 4:
+        self = .fetchProducts
+      case 5:
+        self = .logging
       default:
         throw CodingError.unknownValue
     }
@@ -53,6 +71,10 @@ extension SKCommandAppgateType: Codable {
         try container.encode(2, forKey: .rawValue)
       case .purchase:
         try container.encode(3, forKey: .rawValue)
+      case .fetchProducts:
+        try container.encode(4, forKey: .rawValue)
+      case .logging:
+        try container.encode(5, forKey: .rawValue)
     }
   }
 }

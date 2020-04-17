@@ -38,12 +38,12 @@ public class SkarbSDK {
     guard !SKServiceRegistry.commandStore.hasInstallCommand else {
       return
     }
-    let installCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
-                                          commandType: .install,
-                                          status: .pending,
-                                          data: SKAppgateCommand.prepareData(),
-                                          retryCount: 0)
-    SKServiceRegistry.commandStore.saveAppgateCommand(installCommand)
+    let installCommand = SKCommand(timestamp: Date().nowTimestampInt,
+                                   commandType: .install,
+                                   status: .pending,
+                                   data: SKCommand.prepareAppgateData(),
+                                   retryCount: 0)
+    SKServiceRegistry.commandStore.saveCommand(installCommand)
   }
   
   public static func sendTest(name: String,
@@ -51,12 +51,12 @@ public class SkarbSDK {
     let testData = SKTestData(name: name, group: group)
     SKServiceRegistry.userDefaultsService.setValue(testData.getData(), forKey: .testData)
     
-    let testCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
-                                       commandType: .test,
-                                       status: .pending,
-                                       data: SKAppgateCommand.prepareData(),
-                                       retryCount: 0)
-    SKServiceRegistry.commandStore.saveAppgateCommand(testCommand)
+    let testCommand = SKCommand(timestamp: Date().nowTimestampInt,
+                                commandType: .test,
+                                status: .pending,
+                                data: SKCommand.prepareAppgateData(),
+                                retryCount: 0)
+    SKServiceRegistry.commandStore.saveCommand(testCommand)
   }
   
   public static func sendSource(broker: SKBroker,
@@ -64,12 +64,12 @@ public class SkarbSDK {
     let broberData = SKBrokerData(broker: broker.name, features: features)
     SKServiceRegistry.userDefaultsService.setValue(broberData.getData(), forKey: .brokerData)
     
-    let sourceCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
-                                         commandType: .source,
-                                         status: .pending,
-                                         data: SKAppgateCommand.prepareData(),
-                                         retryCount: 0)
-    SKServiceRegistry.commandStore.saveAppgateCommand(sourceCommand)
+    let sourceCommand = SKCommand(timestamp: Date().nowTimestampInt,
+                                  commandType: .source,
+                                  status: .pending,
+                                  data: SKCommand.prepareAppgateData(),
+                                  retryCount: 0)
+    SKServiceRegistry.commandStore.saveCommand(sourceCommand)
   }
   
   public static func sendPurchase(productId: String,
@@ -80,12 +80,12 @@ public class SkarbSDK {
                                       currency: currency)
     SKServiceRegistry.userDefaultsService.setValue(purchaseData.getData(), forKey: .purchaseData)
     
-    let purchaseCommand = SKAppgateCommand(timestamp: Date().nowTimestampInt,
-                                         commandType: .purchase,
-                                         status: .pending,
-                                         data: SKAppgateCommand.prepareData(),
-                                         retryCount: 0)
-    SKServiceRegistry.commandStore.saveAppgateCommand(purchaseCommand)
+    let purchaseCommand = SKCommand(timestamp: Date().nowTimestampInt,
+                                    commandType: .purchase,
+                                    status: .pending,
+                                    data: SKCommand.prepareAppgateData(),
+                                    retryCount: 0)
+    SKServiceRegistry.commandStore.saveCommand(purchaseCommand)
   }
   
   public static func getDeviceId() -> String {

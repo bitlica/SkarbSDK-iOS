@@ -13,9 +13,9 @@ class SKServerAPIImplementaton: SKServerAPI {
   
   private static let serverName = "https://track3.skarb.club"
   
-  func syncCommand(_ command: SKAppgateCommand, completion: ((SKResponseError?) -> Void)?) {
+  func syncCommand(_ command: SKCommand, completion: ((SKResponseError?) -> Void)?) {
     
-    let urlString = prepareBaseURLString(urlAction: "/appgate")
+    let urlString = prepareBaseURLString(command: command)
     guard let url = URL(string: urlString) else { return }
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
@@ -103,7 +103,7 @@ private extension SKServerAPIImplementaton {
     return SKResponseError(serverStatusCode: response.statusCode, message: "Validating response general error")
   }
   
-  func prepareBaseURLString(urlAction: String) -> String {
-    return SKServerAPIImplementaton.serverName + urlAction
+  func prepareBaseURLString(command: SKCommand) -> String {
+    return SKServerAPIImplementaton.serverName + command.commandType.endpoint
   }
 }

@@ -12,11 +12,11 @@ import Foundation
 public class SKURLRequest {
 
   let request: URLRequest
-  let command: SKAppgateCommand
+  let command: SKCommand
   let completionHandler: (Swift.Result<[String: Any], SKResponseError>) -> Void
 
   init(request: URLRequest,
-       command: SKAppgateCommand,
+       command: SKCommand,
        parsingHandler: @escaping (Swift.Result<[String: Any], SKResponseError>) -> Void) {
 
     self.request = request

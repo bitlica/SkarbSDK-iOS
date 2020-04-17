@@ -10,5 +10,5 @@ import Foundation
 import StoreKit
 
 protocol SKStoreKitService {
-  func requestProductInfoAndSendPurchase(productId: String)
+  func requestProductInfoAndSendPurchase(command: SKCommand)
 }

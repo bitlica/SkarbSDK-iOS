@@ -12,10 +12,10 @@ class SKCommandStore {
   
   private let exclusionSerialQueue = DispatchQueue(label: "com.bitlica.skcommandStore.exclusion")
   
-  private var localAppgateCommands: [SKAppgateCommand]
+  private var localAppgateCommands: [SKCommand]
   
   init() {
-    localAppgateCommands = SKServiceRegistry.userDefaultsService.codableArray(forKey: .appgateComands, objectType: SKAppgateCommand.self)
+    localAppgateCommands = SKServiceRegistry.userDefaultsService.codableArray(forKey: .appgateComands, objectType: SKCommand.self)
   }
   
   var hasInstallCommand: Bool {
@@ -34,7 +34,7 @@ class SKCommandStore {
     return result
   }
   
-  func saveAppgateCommand(_ command: SKAppgateCommand) {
+  func saveCommand(_ command: SKCommand) {
     exclusionSerialQueue.sync {
       guard localAppgateCommands.first(where: { $0 == command }) == nil else {
         SKLogger.logInfo("saveAppgateCommand: called but this command is already exist. UpdateCommand: called with command = \(command.description)")
@@ -43,9 +43,10 @@ class SKCommandStore {
       }
       localAppgateCommands.append(command)
     }
+    saveState()
   }
   
-  func updateCommand(_ command: SKAppgateCommand) {
+  func updateCommand(_ command: SKCommand) {
     exclusionSerialQueue.sync {
       guard let currentCommand = localAppgateCommands.filter({ $0 == command }).first,
         let index = localAppgateCommands.firstIndex(where: { $0 == currentCommand }) else {
@@ -54,17 +55,19 @@ class SKCommandStore {
       }
       localAppgateCommands[index] = command
     }
+    saveState()
   }
   
   func saveState() {
+    SKLogger.logInfo("SKCommandStore saveState: called")
     exclusionSerialQueue.sync {
       let data = localAppgateCommands.map { try? JSONEncoder().encode($0) }
       SKServiceRegistry.userDefaultsService.setValue(data, forKey: .appgateComands)
     }
   }
   
-  func getPendingCommands() -> [SKAppgateCommand] {
-    var result: [SKAppgateCommand] = []
+  func getPendingCommands() -> [SKCommand] {
+    var result: [SKCommand] = []
     exclusionSerialQueue.sync {
       result = localAppgateCommands.filter({ $0.status == .pending })
     }
@@ -74,8 +77,8 @@ class SKCommandStore {
 
 
 private extension SKCommandStore {
-  func getAllAppgateCommands() -> [SKAppgateCommand] {
-    var localAppgateCommands: [SKAppgateCommand] = []
+  func getAllAppgateCommands() -> [SKCommand] {
+    var localAppgateCommands: [SKCommand] = []
     exclusionSerialQueue.sync {
       localAppgateCommands = self.localAppgateCommands
     }

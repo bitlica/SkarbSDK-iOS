@@ -35,10 +35,17 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     self.paymentQueue.add(self)
   }
   
-  func requestProductInfoAndSendPurchase(productId: String) {
+  func requestProductInfoAndSendPurchase(command: SKCommand) {
+    var editedCommand = command
+    guard let productId = String(data: command.data, encoding: .utf8) else {
+      SKLogger.logError("SKSyncServiceImplementation syncAllCommands: celled with fetchProducts but command.data is not String. Command.data == \(String(describing: String(data: command.data, encoding: .utf8)))")
+      editedCommand.changeStatus(to: .canceled)
+      SKServiceRegistry.commandStore.updateCommand(command)
+      return
+    }
+    
     requestProductInfo(productId: productId) { products in
       if let product = products.filter({ $0.productIdentifier == productId }).first {
-        SKServiceRegistry.userDefaultsService.removeValue(forKey: .fetchAllProductsAndSync)
         guard !SKServiceRegistry.commandStore.hasPurhcaseCommand else {
           return
         }
@@ -46,7 +53,9 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
                               price: product.price.floatValue,
                               currency: product.priceLocale.currencyCode ?? "")
       } else {
-        SKServiceRegistry.userDefaultsService.setValue(productId, forKey: .fetchAllProductsAndSync)
+        editedCommand.incrementRetryCount()
+        editedCommand.changeStatus(to: .pending)
+        SKServiceRegistry.commandStore.updateCommand(command)
       }
     }
   }
@@ -78,7 +87,16 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
                                     price: product.price.floatValue,
                                     currency: product.priceLocale.currencyCode ?? "")
             } else {
-              self.requestProductInfoAndSendPurchase(productId: purchasedProductId)
+              guard let productData = purchasedProductId.data(using: .utf8) else {
+                SKLogger.logError("paymentQueue updatedTransactions: called. Need to fetch products but purchasedProductId.data(using: .utf8) == nil")
+                return
+              }
+              let fetchCommand = SKCommand(timestamp: Date().nowTimestampInt,
+                                           commandType: .fetchProducts,
+                                           status: .pending,
+                                           data: productData,
+                                           retryCount: 0)
+              SKServiceRegistry.commandStore.saveCommand(fetchCommand)
             }
         }
         case .failed:

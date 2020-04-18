@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-      SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID", isObservable: true, isDebug: isDebug)
+      SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID", isObservable: true)
     }
 }
 ```
@@ -31,8 +31,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 ```clientId``` You could get it in your account dashboard.
 
 ```isObservable``` Automatically sends all events about purchases that are in your app. If you want to send a purchase event manually you should set this param to ```false``` and see ```Send purchase event``` section.
-
-```isDebug``` Use this flag for testing events, etc. (not supported yet)
 
 ### Send features 
 
@@ -42,8 +40,7 @@ Using for loging the attribution.
 import SkarbSDK
 
 SkarbSDK.sendSource(broker: SKBroker,
-                    features: [String: Any],
-                    completion: @escaping (SKResponseError?)
+                    features: [String: Any])
 ```
 #### Params:
 ```broker``` indicates what service you use for attribution. There are three predefined brokers: ```facebook```, ```searchads```, ```appsflyer```. Also might be used any value - ```SKBroker.custom(String)```.
@@ -59,9 +56,8 @@ You have to use this call if ```isObservable``` during initialization is ```fals
 import SkarbSDK
 
 SkarbSDK.sendPurchase(productId: String,
-                      price: Float? = nil,
-                      currency: String? = nil,
-                      completion: ((SKResponseError?) -> Void)? = nil)													 
+                      price: Float,
+                      currency: String)													 
 ```
 #### Params:
 ```productId``` It’s a SKProduct.productIdentifier of purchased product
@@ -77,7 +73,7 @@ In delegate mothod:
 import SkarbSDK
 
 func onConversionDataSuccess(_ conversionInfo: [AnyHashable : Any]) {
-    SkarbSDK.sendSource(broker: .appsflyer, features: conversionInfo, completion: { _ in })
+    SkarbSDK.sendSource(broker: .appsflyer, features: conversionInfo)
 }
 ```
 
@@ -88,8 +84,7 @@ func onConversionDataSuccess(_ conversionInfo: [AnyHashable : Any]) {
 import SkarbSDK
 
 SkarbSDK.sendTest(name: String,
-                  group: String,
-                  completion: @escaping (SKResponseError?) -> Void)
+                  group: String)
 ```
 #### Params:
 ```name``` Name of A/B test

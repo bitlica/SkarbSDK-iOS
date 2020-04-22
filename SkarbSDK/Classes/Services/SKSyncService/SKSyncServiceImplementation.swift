@@ -22,10 +22,20 @@ class SKSyncServiceImplementation: SKSyncService {
     }
     return localIsRunning
   }
+  private var cachedIsFirstSync: Bool
+  private var isFirstSync: Bool {
+    var localIsFirstSync = false
+    stateSerialQueue.sync {
+      localIsFirstSync = cachedIsFirstSync
+    }
+    return localIsFirstSync
+  }
+  
   private var timer: Timer?
   
   init() {
     cachedIsRunning = false
+    cachedIsFirstSync = true
     timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: { [weak self] _ in
       self?.actionSerialQueue.async {
         self?.syncAllCommands()
@@ -47,7 +57,14 @@ class SKSyncServiceImplementation: SKSyncService {
       var command = pendingCommand
       command.changeStatus(to: .inProgress)
       SKServiceRegistry.commandStore.saveCommand(command)
-      DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + pendingCommand.getRetryDelay(), execute: {
+      var delay: TimeInterval = command.getRetryDelay()
+      if isFirstSync {
+        delay = 0
+        stateSerialQueue.sync {
+          cachedIsFirstSync = false
+        }
+      }
+      DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + delay, execute: {
         SKLogger.logInfo("Command start executing: commandType = \(command.commandType), commandStatus = \(command.status), retryCount = \(command.retryCount)")
         switch command.commandType {
           case .install, .source, .test, .purchase, .logging:

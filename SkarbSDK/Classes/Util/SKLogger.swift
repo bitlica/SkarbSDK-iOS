@@ -18,7 +18,7 @@ public class SKLogger {
                             retryCount: 0)
     SKServiceRegistry.commandStore.saveCommand(command)
     if isDebug {
-      print("\(Date()) [ERROR] \(message)")
+      print("\(Formatter.milliSec.string(from: Date())) [ERROR] \(message)")
     }
   }
   
@@ -30,19 +30,19 @@ public class SKLogger {
                             retryCount: 0)
     SKServiceRegistry.commandStore.saveCommand(command)
     if isDebug {
-      print("\(Date()) [WARN] \(message)")
+      print("\(Formatter.milliSec.string(from: Date())) [WARN] \(message)")
     }
   }
   
   public static func logInfo(_ message: String) {
     if isDebug {
-      print("\(Date()) [INFO] \(message)")
+      print("\(Formatter.milliSec.string(from: Date())) [INFO] \(message)")
     }
   }
   
   public static func logNetwork(_ message: String) {
     if isDebug {
-      print("\(Date()) [NETWORK] \(message)")
+      print("\(Formatter.milliSec.string(from: Date())) [NETWORK] \(message)")
     }
   }
 }

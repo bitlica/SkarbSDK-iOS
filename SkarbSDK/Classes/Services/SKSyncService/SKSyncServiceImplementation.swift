@@ -70,15 +70,34 @@ class SKSyncServiceImplementation: SKSyncService {
           case .install, .source, .test, .purchase, .logging:
             SKServiceRegistry.serverAPI.syncCommand(command, completion: { error in
               if let error = error {
+                var features: [AnyHashable: Any] = [:]
+                features[SKLoggerFeatureType.requestType] = command.commandType
+                features[SKLoggerFeatureType.retryCount] = command.retryCount
+                features[SKLoggerFeatureType.responseHeaders] = error.headerFields
+                features[SKLoggerFeatureType.responseBody] = error.body
+                features[SKLoggerFeatureType.responseStatus] = error.errorCode
+                let firstPurchaseFail = command.commandType == .purchase && command.retryCount == 0
+                if firstPurchaseFail {
+                  features[SKLoggerFeatureType.purchase] = "false"
+                }
+                  
                 command.incrementRetryCount()
                 command.changeStatus(to: .pending)
+                
                 if error.isInternetCode {
                   SKLogger.logInfo("Sync command finished with code = \(error.errorCode), message = \(error.message)")
                 } else {
                   //send error to server
-                  SKLogger.logError("Sync command finished with code = \(error.errorCode), message = \(error.message)")
+                  SKLogger.logError("Sync command finished with code = \(error.errorCode), message = \(error.message)", features: features)
                 }
               } else {
+                if command.commandType == .purchase && command.retryCount != 0 {
+                  var features: [AnyHashable: Any] = [:]
+                  features[SKLoggerFeatureType.requestType] = command.commandType
+                  features[SKLoggerFeatureType.retryCount] = command.retryCount
+                  features[SKLoggerFeatureType.purchase] = "true"
+                  SKLogger.logError("Sync purchase command was finished after retry", features: features)
+                }
                 command.changeStatus(to: .done)
               }
               SKServiceRegistry.commandStore.saveCommand(command)

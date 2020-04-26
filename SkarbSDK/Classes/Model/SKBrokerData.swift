@@ -18,7 +18,8 @@ struct SKBrokerData: SKCodableStruct {
       featuresData = try JSONSerialization.data(withJSONObject: features, options: .fragmentsAllowed)
     } catch {
       featuresData = Data()
-      SKLogger.logError("SKBrokerData: can't json serialization to Data")
+      SKLogger.logError("SKBrokerData: can't json serialization to Data",
+                        features: [SKLoggerFeatureType.internalError: SKLoggerFeatureType.internalError])
     }
   }
   
@@ -28,7 +29,8 @@ struct SKBrokerData: SKCodableStruct {
       brokerJSON = try JSONSerialization.jsonObject(with: featuresData, options: .fragmentsAllowed)
     } catch {
       brokerJSON = [:]
-      SKLogger.logError("SKBrokerData: can't json serialization to Data for source")
+      SKLogger.logError("SKBrokerData: can't json serialization to Data for source",
+                        features: [SKLoggerFeatureType.internalError: SKLoggerFeatureType.internalError])
     }
     
     return ["broker": broker,

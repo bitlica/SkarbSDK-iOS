@@ -94,7 +94,8 @@ public class SkarbSDK {
       return deviceId
     }
     
-    SKLogger.logWarn("SkarbSDK getDeviceId: called and deviceId is nill. Use UUID().uuidString")
+    SKLogger.logWarn("SkarbSDK getDeviceId: called and deviceId is nill. Use UUID().uuidString",
+                     features: [SKLoggerFeatureType.internalError: SKLoggerFeatureType.internalError])
     
     return UUID().uuidString
   }

@@ -60,10 +60,16 @@ private extension SKServerAPIImplementaton {
           if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
             skRequest.completionHandler(.success(json))
           } else {
-            skRequest.completionHandler(.failure(SKResponseError(serverStatusCode: 0, message: nil)))
+            skRequest.completionHandler(.failure(SKResponseError(serverStatusCode: 0,
+                                                                 message: nil,
+                                                                 headerFields: nil,
+                                                                 body: nil)))
           }
         } catch let error as NSError {
-          skRequest.completionHandler(.failure(SKResponseError(serverStatusCode: 0, message: error.localizedDescription)))
+          skRequest.completionHandler(.failure(SKResponseError(serverStatusCode: 0,
+                                                               message: error.localizedDescription,
+                                                               headerFields: nil,
+                                                               body: nil)))
         }
       }
     })
@@ -72,12 +78,21 @@ private extension SKServerAPIImplementaton {
   
   func validateResponseError(response: URLResponse?, data: Data?, error: Error?) -> SKResponseError? {
     
+    let jsonBody = try? JSONSerialization.jsonObject(with: data ?? Data(), options: []) as? [String: Any]
+    
     if let error = error {
-      return SKResponseError(serverStatusCode: error._code, message: error.localizedDescription)
+      let response = response as? HTTPURLResponse
+      return SKResponseError(serverStatusCode: error._code,
+                             message: error.localizedDescription,
+                             headerFields: response?.allHeaderFields,
+                             body: jsonBody ?? nil)
     }
     
     guard let response = response as? HTTPURLResponse else {
-      return SKResponseError(errorCode: SKResponseError.noResponseCode, message: "Response empty, error empty for NSURLConnection")
+      return SKResponseError(errorCode: SKResponseError.noResponseCode,
+                             message: "Response empty, error empty for NSURLConnection",
+                             headerFields: nil,
+                             body: jsonBody ?? nil)
     }
     
     switch response.statusCode {
@@ -85,22 +100,34 @@ private extension SKServerAPIImplementaton {
         return nil
       case 500, 400:
         guard let data = data else {
-          return SKResponseError(serverStatusCode: response.statusCode, message: nil)
+          return SKResponseError(serverStatusCode: response.statusCode,
+                                 message: nil,
+                                 headerFields: response.allHeaderFields,
+                                 body: jsonBody ?? nil)
         }
         
         do {
           if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
             let errorMessage = json["error"] as? String {
-            return SKResponseError(serverStatusCode: response.statusCode, message: errorMessage)
+            return SKResponseError(serverStatusCode: response.statusCode,
+                                   message: errorMessage,
+                                   headerFields: response.allHeaderFields,
+                                   body: json)
           }
         } catch let error as NSError {
-          return SKResponseError(serverStatusCode: error.code, message: error.localizedDescription)
+          return SKResponseError(serverStatusCode: error.code,
+                                 message: error.localizedDescription,
+                                 headerFields: response.allHeaderFields,
+                                 body: jsonBody ?? nil)
       }
       default:
         break
     }
     
-    return SKResponseError(serverStatusCode: response.statusCode, message: "Validating response general error")
+    return SKResponseError(serverStatusCode: response.statusCode,
+                           message: "Validating response general error",
+                           headerFields: response.allHeaderFields,
+                           body: jsonBody ?? nil)
   }
   
   func prepareBaseURLString(command: SKCommand) -> String {

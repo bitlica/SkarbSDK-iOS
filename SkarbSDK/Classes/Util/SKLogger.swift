@@ -8,13 +8,23 @@
 
 import Foundation
 
-public class SKLogger {
+enum SKLoggerFeatureType: String {
+  case requestType
+  case retryCount
+  case responseHeaders
+  case responseBody
+  case responseStatus
+  case purchase
+  case internalError
+}
+
+class SKLogger {
       
-  public static func logError(_ message: String) {
+  static func logError(_ message: String, features: [AnyHashable: Any]?) {
     let command = SKCommand(timestamp: Date().nowTimestampInt,
                             commandType: .logging,
                             status: .pending,
-                            data: SKCommand.prepareApplogData(message: message),
+                            data: SKCommand.prepareApplogData(message: message, features: features),
                             retryCount: 0)
     SKServiceRegistry.commandStore.saveCommand(command)
     if isDebug {
@@ -22,11 +32,11 @@ public class SKLogger {
     }
   }
   
-  public static func logWarn(_ message: String) {
+  static func logWarn(_ message: String, features: [AnyHashable: Any]?) {
     let command = SKCommand(timestamp: Date().nowTimestampInt,
                             commandType: .logging,
                             status: .pending,
-                            data: SKCommand.prepareApplogData(message: message),
+                            data: SKCommand.prepareApplogData(message: message, features: features),
                             retryCount: 0)
     SKServiceRegistry.commandStore.saveCommand(command)
     if isDebug {
@@ -34,13 +44,13 @@ public class SKLogger {
     }
   }
   
-  public static func logInfo(_ message: String) {
+  static func logInfo(_ message: String) {
     if isDebug {
       print("\(Formatter.milliSec.string(from: Date())) [INFO] \(message)")
     }
   }
   
-  public static func logNetwork(_ message: String) {
+  static func logNetwork(_ message: String) {
     if isDebug {
       print("\(Formatter.milliSec.string(from: Date())) [NETWORK] \(message)")
     }

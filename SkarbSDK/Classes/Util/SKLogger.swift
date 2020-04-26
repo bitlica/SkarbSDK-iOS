@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum SKLoggerFeatureType: String {
+enum SKLoggerFeatureType {
   case requestType
   case retryCount
   case responseHeaders
@@ -16,11 +16,30 @@ enum SKLoggerFeatureType: String {
   case responseStatus
   case purchase
   case internalError
+  
+  var name: String {
+    switch self {
+      case .requestType:
+        return "requestType"
+      case .retryCount:
+        return "retryCount"
+      case .responseHeaders:
+        return "responseHeaders"
+      case .responseBody:
+        return "responseBody"
+      case .responseStatus:
+        return "responseStatus"
+      case .purchase:
+        return "purchase"
+      case .internalError:
+        return "internalError"
+    }
+  }
 }
 
 class SKLogger {
-      
-  static func logError(_ message: String, features: [AnyHashable: Any]?) {
+  
+  static func logError(_ message: String, features: [String: Any]?) {
     let command = SKCommand(timestamp: Date().nowTimestampInt,
                             commandType: .logging,
                             status: .pending,
@@ -32,7 +51,7 @@ class SKLogger {
     }
   }
   
-  static func logWarn(_ message: String, features: [AnyHashable: Any]?) {
+  static func logWarn(_ message: String, features: [String: Any]?) {
     let command = SKCommand(timestamp: Date().nowTimestampInt,
                             commandType: .logging,
                             status: .pending,

@@ -71,13 +71,13 @@ struct SKCommand: Codable {
       data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
     } catch {
       SKLogger.logError("SKCommand prepareAppgateData: can't json serialization to Data",
-                        features: [SKLoggerFeatureType.internalError: SKLoggerFeatureType.internalError])
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
     }
     
     return data
   }
   
-  static func prepareApplogData(message: String, features: [AnyHashable: Any]?) -> Data {
+  static func prepareApplogData(message: String, features: [String: Any]?) -> Data {
     var params: [String: Any] = [:]
     params["client"] = prepareClientData()
     params["application"] = prepareApplicationData()
@@ -86,10 +86,10 @@ struct SKCommand: Codable {
     
     var data: Data = Data()
     do {
-      data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
+      data = try JSONSerialization.data(withJSONObject: params, options: [])
     } catch {
       SKLogger.logError("SKCommand prepareApplogData: can't json serialization to Data",
-                        features: [SKLoggerFeatureType.internalError: SKLoggerFeatureType.internalError])
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
     }
     
     return data
@@ -108,7 +108,7 @@ struct SKCommand: Codable {
     
     guard let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) else {
       SKLogger.logError("SKCommand prepareApplicationData: called and initData is nil",
-                        features: [SKLoggerFeatureType.internalError: SKLoggerFeatureType.internalError])
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
       return [:]
     }
     
@@ -159,19 +159,19 @@ struct SKCommand: Codable {
     
     guard let appStoreReceiptURL = Bundle.main.appStoreReceiptURL else {
       SKLogger.logError("SKCommand preparePurchaseData: called but appStoreReceiptURL == nil",
-                        features: [SKLoggerFeatureType.internalError: SKLoggerFeatureType.internalError])
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
       return nil
     }
     
     guard let recieptData = try? Data(contentsOf: appStoreReceiptURL) else {
       SKLogger.logError("SKCommand preparePurchaseData: called but recieptData == nil",
-                        features: [SKLoggerFeatureType.internalError: SKLoggerFeatureType.internalError])
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
       return nil
     }
     
     if recieptData.isEmpty {
       SKLogger.logError("SKCommand preparePurchaseData: called but recieptData is empty",
-                        features: [SKLoggerFeatureType.internalError: SKLoggerFeatureType.internalError])
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
       return nil
     }
     var params: [String: Any] = [:]

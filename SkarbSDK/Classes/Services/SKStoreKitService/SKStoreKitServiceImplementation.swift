@@ -38,7 +38,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   func requestProductInfoAndSendPurchase(command: SKCommand) {
     var editedCommand = command
     guard let productId = String(data: command.data, encoding: .utf8) else {
-      SKLogger.logError("SKSyncServiceImplementation requestProductInfoAndSendPurchase: called with fetchProducts but command.data is not String. Command.data == \(String(describing: String(data: command.data, encoding: .utf8)))", features: [SKLoggerFeatureType.internalError: SKLoggerFeatureType.internalError])
+      SKLogger.logError("SKSyncServiceImplementation requestProductInfoAndSendPurchase: called with fetchProducts but command.data is not String. Command.data == \(String(describing: String(data: command.data, encoding: .utf8)))", features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
       editedCommand.changeStatus(to: .canceled)
       SKServiceRegistry.commandStore.saveCommand(command)
       return
@@ -89,7 +89,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
             } else {
               guard let productData = purchasedProductId.data(using: .utf8) else {
                 SKLogger.logError("paymentQueue updatedTransactions: called. Need to fetch products but purchasedProductId.data(using: .utf8) == nil",
-                                  features: [SKLoggerFeatureType.internalError: SKLoggerFeatureType.internalError])
+                                  features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
                 return
               }
               let fetchCommand = SKCommand(timestamp: Date().nowTimestampInt,

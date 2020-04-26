@@ -84,7 +84,7 @@ class SKSyncServiceImplementation: SKSyncService {
                 command.incrementRetryCount()
                 command.changeStatus(to: .pending)
                 
-                if error.isInternetCode {
+                if error.isInternetCode && !firstPurchaseFail {
                   SKLogger.logInfo("Sync command finished with code = \(error.errorCode), message = \(error.message)")
                 } else {
                   //send error to server

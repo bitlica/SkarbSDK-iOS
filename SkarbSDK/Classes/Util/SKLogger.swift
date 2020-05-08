@@ -16,6 +16,7 @@ enum SKLoggerFeatureType {
   case responseStatus
   case purchase
   case internalError
+  case internalValue
   
   var name: String {
     switch self {
@@ -33,6 +34,8 @@ enum SKLoggerFeatureType {
         return "purchase"
       case .internalError:
         return "internalError"
+      case .internalValue:
+        return "internalValue"
     }
   }
 }

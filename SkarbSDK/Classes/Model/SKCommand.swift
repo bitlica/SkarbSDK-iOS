@@ -67,11 +67,18 @@ struct SKCommand: Codable {
       params["purchase"] = purchaseJSON
     }
     var data: Data = Data()
+    guard JSONSerialization.isValidJSONObject(params) else {
+      SKLogger.logError("SKCommand prepareAppgateData: json isValidJSONObject",
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.internalValue.name: params.description])
+      return data
+    }
     do {
       data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
     } catch {
       SKLogger.logError("SKCommand prepareAppgateData: can't json serialization to Data",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.internalValue.name: params.description])
     }
     
     return data
@@ -85,11 +92,18 @@ struct SKCommand: Codable {
     params["context"] = features
     
     var data: Data = Data()
+    guard JSONSerialization.isValidJSONObject(params) else {
+      SKLogger.logError("SKCommand prepareApplogData: json isValidJSONObject",
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.internalValue.name: params.description])
+      return data
+    }
     do {
       data = try JSONSerialization.data(withJSONObject: params, options: [])
     } catch {
       SKLogger.logError("SKCommand prepareApplogData: can't json serialization to Data",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.internalValue.name: params.description])
     }
     
     return data

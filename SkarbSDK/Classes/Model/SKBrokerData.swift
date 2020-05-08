@@ -14,12 +14,20 @@ struct SKBrokerData: SKCodableStruct {
   
   init(broker: String, features: [AnyHashable: Any]) {
     self.broker = broker
+    guard JSONSerialization.isValidJSONObject(features) else {
+      SKLogger.logError("SKBrokerData init: json isValidJSONObject",
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.internalValue.name: features.description])
+      featuresData = Data()
+      return
+    }
     do {
       featuresData = try JSONSerialization.data(withJSONObject: features, options: .fragmentsAllowed)
     } catch {
       featuresData = Data()
       SKLogger.logError("SKBrokerData: can't json serialization to Data",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.internalValue.name: features.description])
     }
   }
   

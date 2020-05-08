@@ -65,13 +65,13 @@ class SKSyncServiceImplementation: SKSyncService {
         }
       }
       DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + delay, execute: {
-        SKLogger.logInfo("Command start executing: commandType = \(command.commandType), commandStatus = \(command.status), retryCount = \(command.retryCount)")
+        SKLogger.logInfo("Command start executing: \(command.description)")
         switch command.commandType {
           case .install, .source, .test, .purchase, .logging:
             SKServiceRegistry.serverAPI.syncCommand(command, completion: { error in
               if let error = error {
                 var features: [String: Any] = [:]
-                features[SKLoggerFeatureType.requestType.name] = command.commandType
+                features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
                 features[SKLoggerFeatureType.retryCount.name] = command.retryCount
                 features[SKLoggerFeatureType.responseHeaders.name] = error.headerFields
                 features[SKLoggerFeatureType.responseBody.name] = error.body
@@ -85,18 +85,18 @@ class SKSyncServiceImplementation: SKSyncService {
                 command.changeStatus(to: .pending)
                 
                 if error.isInternetCode && !firstPurchaseFail {
-                  SKLogger.logInfo("Sync command finished with code = \(error.errorCode), message = \(error.message)")
+                  SKLogger.logInfo("Sync command finished \(command.commandType) with code = \(error.errorCode), message = \(error.message)")
                 } else {
                   //send error to server
-                  SKLogger.logError("Sync command finished with code = \(error.errorCode), message = \(error.message)", features: features)
+                  SKLogger.logError("Sync command finished \(command.commandType) with code = \(error.errorCode), message = \(error.message)", features: features)
                 }
               } else {
                 if command.commandType == .purchase && command.retryCount != 0 {
                   var features: [String: Any] = [:]
-                  features[SKLoggerFeatureType.requestType.name] = command.commandType
+                  features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
                   features[SKLoggerFeatureType.retryCount.name] = command.retryCount
                   features[SKLoggerFeatureType.purchase.name] = "true"
-                  SKLogger.logError("Sync purchase command was finished after retry", features: features)
+                  SKLogger.logError("Sync purchase command \(command.commandType) was finished after retry", features: features)
                 }
                 command.changeStatus(to: .done)
               }

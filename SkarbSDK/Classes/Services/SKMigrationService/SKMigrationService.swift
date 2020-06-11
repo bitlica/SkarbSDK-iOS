@@ -62,8 +62,8 @@ struct SKMigrationService {
       //source
       if let brokerJSONData = UserDefaults.standard.object(forKey: "sk_broker_key") as? Data,
         let brokerJSON = try? JSONSerialization.jsonObject(with: brokerJSONData, options: []) as? [String: Any],
-        let brocker = brokerJSON?["broker"] as? String,
-        let features = brokerJSON?["features"] as? [AnyHashable: Any] {
+        let brocker = brokerJSON["broker"] as? String,
+        let features = brokerJSON["features"] as? [AnyHashable: Any] {
         
         let brokerData = SKBrokerData(broker: brocker, features: features)
         SKServiceRegistry.userDefaultsService.setValue(brokerData.getData(), forKey: .brokerData)

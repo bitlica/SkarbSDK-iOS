@@ -15,4 +15,6 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '11.0'
   s.source       = { :git => "https://github.com/bitlica/SkarbSDK.git", :tag => "#{s.version}" }
   s.source_files  = 'SkarbSDK/Classes/**/*'
+  s.frameworks = 'Foundation', 'AdSupport', 'UIKit', 'StoreKit'
+  s.dependency 'SwiftProtobuf'
 end

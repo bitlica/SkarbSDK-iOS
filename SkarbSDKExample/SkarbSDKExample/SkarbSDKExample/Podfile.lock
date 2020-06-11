@@ -1,5 +1,7 @@
 PODS:
-  - SkarbSDK (0.3.0)
+  - SkarbSDK (0.3.1):
+    - SwiftProtobuf
+  - SwiftProtobuf (1.9.0)
 
 DEPENDENCIES:
   - SkarbSDK
@@ -7,9 +9,11 @@ DEPENDENCIES:
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
     - SkarbSDK
+    - SwiftProtobuf
 
 SPEC CHECKSUMS:
-  SkarbSDK: d3de1465eba22842d49259d2c2023923d8e93e6f
+  SkarbSDK: 26f8e05d089146da09b883ab29ec926f5b453d3d
+  SwiftProtobuf: ecbec1be9036d15655f6b3443a1c4ea693c97932
 
 PODFILE CHECKSUM: 346e3d83de032e28e565ced4d4190f58fa74659a
 

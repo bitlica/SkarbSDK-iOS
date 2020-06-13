@@ -6,6 +6,7 @@ source 'https://github.com/CocoaPods/Specs.git'
 target 'SkarbSDKExample' do
   use_frameworks!
 
-  pod 'SkarbSDK'
+#  pod 'SkarbSDK'
 
+  pod 'SkarbSDK', :git => 'https://github.com/bitlica/SkarbSDK', :branch => 'master'
 end

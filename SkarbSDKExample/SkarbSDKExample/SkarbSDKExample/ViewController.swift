@@ -18,6 +18,7 @@ class ViewController: UIViewController {
     view.backgroundColor = .red
 
     SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID", isObservable: true)
+    SkarbSDK.useAutomaticAppleSearchAdsAttributionCollection(false)
   } 
 }
 

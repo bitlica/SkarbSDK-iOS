@@ -15,16 +15,17 @@ enum SKCommandType: Int {
   case purchase
   case fetchProducts
   case logging
+  case automaticSearchAds
   
   // applicable only for server commands
   var endpoint: String {
     switch self {
       case .install, .source, .test, .purchase:
         return"/appgate"
-      case .fetchProducts:
-        return ""
       case .logging:
         return"/applog"
+      case .fetchProducts, .automaticSearchAds:
+        return ""
     }
   }
 }
@@ -55,6 +56,8 @@ extension SKCommandType: Codable {
         self = .fetchProducts
       case 5:
         self = .logging
+      case 6:
+        self = .automaticSearchAds
       default:
         throw CodingError.unknownValue
     }
@@ -75,6 +78,8 @@ extension SKCommandType: Codable {
         try container.encode(4, forKey: .rawValue)
       case .logging:
         try container.encode(5, forKey: .rawValue)
+      case .automaticSearchAds:
+        try container.encode(6, forKey: .rawValue)
     }
   }
 }

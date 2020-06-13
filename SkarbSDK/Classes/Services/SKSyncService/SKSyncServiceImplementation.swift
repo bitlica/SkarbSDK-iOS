@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import iAd
 
 class SKSyncServiceImplementation: SKSyncService {
   
@@ -65,7 +66,9 @@ class SKSyncServiceImplementation: SKSyncService {
         }
       }
       DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + delay, execute: {
+        
         SKLogger.logInfo("Command start executing: \(command.description)")
+        
         switch command.commandType {
           case .install, .source, .test, .purchase, .logging:
             SKServiceRegistry.serverAPI.syncCommand(command, completion: { error in
@@ -80,7 +83,7 @@ class SKSyncServiceImplementation: SKSyncService {
                 if firstPurchaseFail {
                   features[SKLoggerFeatureType.purchase.name] = "false"
                 }
-                  
+                
                 command.incrementRetryCount()
                 command.changeStatus(to: .pending)
                 
@@ -105,6 +108,23 @@ class SKSyncServiceImplementation: SKSyncService {
           case .fetchProducts:
             DispatchQueue.main.async {
               SKServiceRegistry.storeKitService.requestProductInfoAndSendPurchase(command: command)
+          }
+          case .automaticSearchAds:
+            DispatchQueue.main.async {
+              ADClient.shared().requestAttributionDetails({ (attributionJSON, error) in
+                guard error == nil else {
+                  command.incrementRetryCount()
+                  command.changeStatus(to: .pending)
+                  SKServiceRegistry.commandStore.saveCommand(command)
+                  return
+                }
+                
+                if let attributionJSON = attributionJSON {
+                  SkarbSDK.sendSource(broker: .searchads, features: attributionJSON)
+                }
+                command.changeStatus(to: .done)
+                SKServiceRegistry.commandStore.saveCommand(command)
+              })
           }
         }
       })

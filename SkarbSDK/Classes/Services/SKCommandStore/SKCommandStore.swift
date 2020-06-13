@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 class SKCommandStore {
   
@@ -34,6 +35,14 @@ class SKCommandStore {
     return result
   }
   
+  var hasAutomaticSearchAdsCommand: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .automaticSearchAds }) != nil
+    }
+    return result
+  }
+  
   func saveCommand(_ command: SKCommand) {
     SKLogger.logInfo("saveCommand: commandType = \(command.commandType), status = \(command.status)")
     exclusionSerialQueue.sync {
@@ -43,6 +52,14 @@ class SKCommandStore {
       } else {
         localAppgateCommands.append(command)
       }
+    }
+    saveState()
+  }
+  
+  func deleteCommand(_ command: SKCommand) {
+    SKLogger.logInfo("deleteCommand: commandType = \(command.commandType), status = \(command.status)")
+    exclusionSerialQueue.sync {
+      localAppgateCommands.removeAll { $0 == command }
     }
     saveState()
   }
@@ -63,7 +80,7 @@ class SKCommandStore {
     return result
   }
   
-  /// when user termonate app or go to background some commands might be inProgress
+  /// when user terminate app or go to background some commands might be inProgress
   /// and there is no guarantee that command will be handled by the app
   func markAllInProgressAsPendingAndSave() {
     var result: [SKCommand] = []
@@ -77,15 +94,59 @@ class SKCommandStore {
       saveCommand(command)
     }
   }
-}
-
-
-private extension SKCommandStore {
-  func getAllAppgateCommands() -> [SKCommand] {
-    var localAppgateCommands: [SKCommand] = []
-    exclusionSerialQueue.sync {
-      localAppgateCommands = self.localAppgateCommands
+  
+  func createInstallCommandIfNeeded(clientId: String, deviceId: String?) {
+    if SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) == nil {
+      let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+      let installDate = Formatter.iso8601.string(from: Date())
+      let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
+      var dataCount: Int = 0
+      if let appStoreReceiptURL = appStoreReceiptURL,
+        let recieptData = try? Data(contentsOf: appStoreReceiptURL) {
+        dataCount = recieptData.count
+      }
+      
+      let initData = SKInitData(clientId: clientId,
+                                deviceId: deviceId,
+                                installDate: installDate,
+                                receiptUrl: appStoreReceiptURL?.absoluteString ?? "",
+                                receiptLen: dataCount)
+      SKServiceRegistry.userDefaultsService.setValue(initData.getData(), forKey: .initData)
     }
-    return localAppgateCommands
+    
+    guard !SKServiceRegistry.commandStore.hasInstallCommand else {
+      return
+    }
+    let installCommand = SKCommand(timestamp: Date().nowTimestampInt,
+                                   commandType: .install,
+                                   status: .pending,
+                                   data: SKCommand.prepareAppgateData(),
+                                   retryCount: 0)
+    SKServiceRegistry.commandStore.saveCommand(installCommand)
+  }
+  
+  func createAutomaticSearchAdsCommand(_ enable: Bool) {
+    
+    guard enable else {
+      var automaticSearchAdsCommand: SKCommand? = nil
+      exclusionSerialQueue.sync {
+        automaticSearchAdsCommand = localAppgateCommands.filter({ $0.commandType == .automaticSearchAds }).first
+      }
+      if let automaticSearchAdsCommand = automaticSearchAdsCommand {
+        deleteCommand(automaticSearchAdsCommand)
+      }
+      return
+    }
+    
+    guard !hasAutomaticSearchAdsCommand else {
+      return
+    }
+    
+    let installCommand = SKCommand(timestamp: Date().nowTimestampInt,
+                                   commandType: .automaticSearchAds,
+                                   status: .pending,
+                                   data: Data(),
+                                   retryCount: 0)
+    SKServiceRegistry.commandStore.saveCommand(installCommand)
   }
 }

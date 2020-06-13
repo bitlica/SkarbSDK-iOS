@@ -17,33 +17,7 @@ public class SkarbSDK {
     
     SKServiceRegistry.migrationService.doMigrationIfNeeded()
     
-    if SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) == nil {
-      let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
-      let installDate = Formatter.iso8601.string(from: Date())
-      let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
-      var dataCount: Int = 0
-      if let appStoreReceiptURL = appStoreReceiptURL,
-        let recieptData = try? Data(contentsOf: appStoreReceiptURL) {
-        dataCount = recieptData.count
-      }
-      
-      let initData = SKInitData(clientId: clientId,
-                                deviceId: deviceId,
-                                installDate: installDate,
-                                receiptUrl: appStoreReceiptURL?.absoluteString ?? "",
-                                receiptLen: dataCount)
-      SKServiceRegistry.userDefaultsService.setValue(initData.getData(), forKey: .initData)
-    }
-    
-    guard !SKServiceRegistry.commandStore.hasInstallCommand else {
-      return
-    }
-    let installCommand = SKCommand(timestamp: Date().nowTimestampInt,
-                                   commandType: .install,
-                                   status: .pending,
-                                   data: SKCommand.prepareAppgateData(),
-                                   retryCount: 0)
-    SKServiceRegistry.commandStore.saveCommand(installCommand)
+    SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId, deviceId: deviceId)
   }
   
   public static func sendTest(name: String,
@@ -98,5 +72,9 @@ public class SkarbSDK {
                      features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
     
     return UUID().uuidString
+  }
+  
+  public static func useAutomaticAppleSearchAdsAttributionCollection(_ enable: Bool) {
+    SKServiceRegistry.commandStore.createAutomaticSearchAdsCommand(enable)
   }
 }

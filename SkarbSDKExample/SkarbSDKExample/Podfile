@@ -8,5 +8,4 @@ target 'SkarbSDKExample' do
 
   pod 'SkarbSDK'
 
-#  pod 'SkarbSDK', :git => 'https://github.com/bitlica/SkarbSDK', :branch => 'master'
 end

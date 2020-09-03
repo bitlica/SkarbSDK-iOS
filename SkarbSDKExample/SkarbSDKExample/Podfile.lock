@@ -91,7 +91,7 @@ EXTERNAL SOURCES:
 
 CHECKOUT OPTIONS:
   SkarbSDK:
-    :commit: e3435eb0a54a5f8825b2bb95fbf22268fcf00147
+    :commit: fddd1ed16f3766579426661a21dceeabbc91254a
     :git: https://github.com/bitlica/SkarbSDK
 
 SPEC CHECKSUMS:
@@ -117,6 +117,6 @@ SPEC CHECKSUMS:
   SwiftNIOTransportServices: 26d40c589fc8fe667af51b06ef0aa49fbc9ae7f2
   SwiftProtobuf: 2cbd9409689b7df170d82a92a33443c8e3e14a70
 
-PODFILE CHECKSUM: d88756f80989e074286193e49cdc8e1b372acc9c
+PODFILE CHECKSUM: b416157291c7145ccb98260bd71bc7cff1d356d5
 
 COCOAPODS: 1.9.1

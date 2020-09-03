@@ -43,6 +43,14 @@ class SKCommandStore {
     return result
   }
   
+  var hasSendSourceCommand: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .source }) != nil
+    }
+    return result
+  }
+  
   func saveCommand(_ command: SKCommand) {
     SKLogger.logInfo("saveCommand: commandType = \(command.commandType), status = \(command.status)")
     exclusionSerialQueue.sync {

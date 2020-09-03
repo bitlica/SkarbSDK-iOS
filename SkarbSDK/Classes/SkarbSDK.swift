@@ -34,7 +34,8 @@ public class SkarbSDK {
   }
   
   public static func sendSource(broker: SKBroker,
-                                features: [AnyHashable: Any]) {
+                                features: [AnyHashable: Any],
+                                once: Bool = true) {
     let broberData = SKBrokerData(broker: broker.name, features: features)
     SKServiceRegistry.userDefaultsService.setValue(broberData.getData(), forKey: .brokerData)
     
@@ -43,6 +44,9 @@ public class SkarbSDK {
                                   status: .pending,
                                   data: SKCommand.prepareAppgateData(),
                                   retryCount: 0)
+    if once && SKServiceRegistry.commandStore.hasSendSourceCommand {
+      return
+    }
     SKServiceRegistry.commandStore.saveCommand(sourceCommand)
   }
   

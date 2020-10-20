@@ -70,14 +70,12 @@ class SKSyncServiceImplementation: SKSyncService {
         SKLogger.logInfo("Command start executing: \(command.description)")
         
         switch command.commandType {
-          case .install, .source, .test, .purchase, .logging:
+          case .install, .source, .test, .purchase, .logging, .installV4, .sourceV4, .testV4:
             SKServiceRegistry.serverAPI.syncCommand(command, completion: { error in
               if let error = error {
                 var features: [String: Any] = [:]
                 features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
                 features[SKLoggerFeatureType.retryCount.name] = command.retryCount
-                features[SKLoggerFeatureType.responseHeaders.name] = error.headerFields
-                features[SKLoggerFeatureType.responseBody.name] = error.body
                 features[SKLoggerFeatureType.responseStatus.name] = error.errorCode
                 let firstPurchaseFail = command.commandType == .purchase && command.retryCount == 0
                 if firstPurchaseFail {

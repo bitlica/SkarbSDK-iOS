@@ -17,6 +17,8 @@ enum SKLoggerFeatureType {
   case purchase
   case internalError
   case internalValue
+  case agentName
+  case agentVer
   
   var name: String {
     switch self {
@@ -36,6 +38,10 @@ enum SKLoggerFeatureType {
         return "internalError"
       case .internalValue:
         return "internalValue"
+      case .agentName:
+        return "agentName"
+      case .agentVer:
+        return "agentVer"
     }
   }
 }
@@ -43,6 +49,9 @@ enum SKLoggerFeatureType {
 class SKLogger {
   
   static func logError(_ message: String, features: [String: Any]?) {
+    var features = features ?? [:]
+    features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
+    features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
     let command = SKCommand(timestamp: Date().nowTimestampInt,
                             commandType: .logging,
                             status: .pending,

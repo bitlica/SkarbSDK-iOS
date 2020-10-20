@@ -16,6 +16,9 @@ class SKUserDefaultsService {
     case purchaseData
     case appgateComands
     case migrationVersion(Int)
+    case initDataV4
+    case brokerDataV4
+    case testDataV4
     
     var keyName: String {
       switch self {
@@ -29,10 +32,14 @@ class SKUserDefaultsService {
           return "sk_purchase_data"
         case .appgateComands:
           return "sk_appgate_commands"
-//        case .fetchAllProductsAndSync:
-//          return "sk_fetch_all_products_and_sync"
         case .migrationVersion(let version):
           return "sk_migration_version_\(version)"
+        case .initDataV4:
+          return "sk_init_data_key_v4"
+        case .brokerDataV4:
+          return "sk_broker_data_key_v4"
+        case .testDataV4:
+          return "sk_test_data_key_v4"
       }
     }
   }

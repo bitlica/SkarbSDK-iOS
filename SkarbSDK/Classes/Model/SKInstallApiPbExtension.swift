@@ -1,0 +1,202 @@
+//
+//  SKInstallApiPbExtension.swift
+//  SkarbSDKExample
+//
+//  Created by Artem Hitrik on 10/13/20.
+//  Copyright © 2020 Prodinfire. All rights reserved.
+//
+
+import Foundation
+
+
+extension Api_Auth: SKCodableStruct {
+  
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let key = try container.decode(String.self, forKey: .key)
+    let bundleID = try container.decode(String.self, forKey: .bundleID)
+    let agentName = try container.decode(String.self, forKey: .agentName)
+    let agentVer = try container.decode(String.self, forKey: .agentVer)
+    self = Api_Auth()
+    self.key = key
+    self.bundleID = bundleID
+    self.agentName = agentName
+    self.agentVer = agentVer
+  }
+  
+  func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(key, forKey: .key)
+    try container.encode(bundleID, forKey: .bundleID)
+    try container.encode(agentName, forKey: .agentName)
+    try container.encode(agentVer, forKey: .agentVer)
+  }
+  
+  func getData() -> Data? {
+    let encoder = JSONEncoder()
+    if let encoded = try? encoder.encode(self) {
+      return encoded
+    }
+    
+    return nil
+  }
+  
+  enum CodingKeys: String, CodingKey {
+    case key
+    case bundleID
+    case agentName
+    case agentVer
+  }
+}
+
+extension Api_DeviceRequest: SKCodableStruct {
+  
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let auth = try container.decode(Api_Auth.self, forKey: .auth)
+    let installID = try container.decode(String.self, forKey: .installID)
+    let idfa = try container.decode(String.self, forKey: .idfa)
+    let idfv = try container.decode(String.self, forKey: .idfv)
+    let bundleVer = try container.decode(String.self, forKey: .bundleVer)
+    let locale = try container.decode(String.self, forKey: .locale)
+    let device = try container.decode(String.self, forKey: .device)
+    let osVer = try container.decode(String.self, forKey: .osVer)
+    let receiptURL = try container.decode(String.self, forKey: .receiptURL)
+    let receiptLen = try container.decode(String.self, forKey: .receiptLen)
+    
+    self = Api_DeviceRequest.with({
+      $0.auth = auth
+      $0.installID = installID
+      $0.idfa = idfa
+      $0.idfv = idfv
+      $0.bundleVer = bundleVer
+      $0.locale = locale
+      $0.device = device
+      $0.osVer = osVer
+      $0.receiptURL = receiptURL
+      $0.receiptLen = receiptLen
+    })
+  }
+  
+  func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(auth, forKey: .auth)
+    try container.encode(installID, forKey: .installID)
+    try container.encode(idfa, forKey: .idfa)
+    try container.encode(idfv, forKey: .idfv)
+    try container.encode(bundleVer, forKey: .bundleVer)
+    try container.encode(locale, forKey: .locale)
+    try container.encode(device, forKey: .device)
+    try container.encode(osVer, forKey: .osVer)
+    try container.encode(receiptURL, forKey: .receiptURL)
+    try container.encode(receiptLen, forKey: .receiptLen)
+  }
+  
+  func getData() -> Data? {
+    let encoder = JSONEncoder()
+    if let encoded = try? encoder.encode(self) {
+      return encoded
+    }
+    
+    return nil
+  }
+  
+  enum CodingKeys: String, CodingKey {
+    case auth
+    case installID
+    case idfa
+    case idfv
+    case bundleVer
+    case locale
+    case device
+    case osVer
+    case receiptURL
+    case receiptLen
+  }
+}
+
+
+extension Api_AttribRequest: SKCodableStruct {
+  
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let auth = try container.decode(Api_Auth.self, forKey: .auth)
+    let installID = try container.decode(String.self, forKey: .installID)
+    let broker = try container.decode(String.self, forKey: .broker)
+    let payload = try container.decode(Data.self, forKey: .payload)
+    
+    self = Api_AttribRequest.with({
+      $0.auth = auth
+      $0.installID = installID
+      $0.broker = broker
+      $0.payload = payload
+    })
+  }
+  
+  func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(auth, forKey: .auth)
+    try container.encode(installID, forKey: .installID)
+    try container.encode(broker, forKey: .broker)
+    try container.encode(payload, forKey: .payload)
+  }
+  
+  func getData() -> Data? {
+    let encoder = JSONEncoder()
+    if let encoded = try? encoder.encode(self) {
+      return encoded
+    }
+    
+    return nil
+  }
+  
+  enum CodingKeys: String, CodingKey {
+    case auth
+    case installID
+    case broker
+    case payload
+  }
+}
+
+extension Api_TestRequest: SKCodableStruct {
+  
+  init(from decoder: Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let auth = try container.decode(Api_Auth.self, forKey: .auth)
+    let installID = try container.decode(String.self, forKey: .installID)
+    let name = try container.decode(String.self, forKey: .name)
+    let group = try container.decode(String.self, forKey: .group)
+    
+    self = Api_TestRequest.with({
+      $0.auth = auth
+      $0.installID = installID
+      $0.name = name
+      $0.group = group
+    })
+  }
+  
+  func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(auth, forKey: .auth)
+    try container.encode(installID, forKey: .installID)
+    try container.encode(name, forKey: .name)
+    try container.encode(group, forKey: .group)
+  }
+  
+  func getData() -> Data? {
+    let encoder = JSONEncoder()
+    if let encoded = try? encoder.encode(self) {
+      return encoded
+    }
+    
+    return nil
+  }
+  
+  enum CodingKeys: String, CodingKey {
+    case auth
+    case installID
+    case name
+    case group
+  }
+}
+

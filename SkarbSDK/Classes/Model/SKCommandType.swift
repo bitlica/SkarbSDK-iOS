@@ -17,6 +17,10 @@ enum SKCommandType: Int {
   case logging
   case automaticSearchAds
   
+  case installV4
+  case sourceV4
+  case testV4
+  
   // applicable only for server commands
   var endpoint: String {
     switch self {
@@ -26,6 +30,17 @@ enum SKCommandType: Int {
         return"/applog"
       case .fetchProducts, .automaticSearchAds:
         return ""
+      case .installV4, .sourceV4, .testV4:
+        return ""
+    }
+  }
+  
+  var isV4: Bool {
+    switch self {
+      case .install, .source, .test, .purchase, .logging, .fetchProducts, .automaticSearchAds:
+        return false
+      case .installV4, .sourceV4, .testV4:
+        return true
     }
   }
 }
@@ -58,6 +73,12 @@ extension SKCommandType: Codable {
         self = .logging
       case 6:
         self = .automaticSearchAds
+      case 7:
+        self = .installV4
+      case 8:
+        self = .sourceV4
+      case 9:
+        self = .testV4
       default:
         throw CodingError.unknownValue
     }
@@ -80,6 +101,12 @@ extension SKCommandType: Codable {
         try container.encode(5, forKey: .rawValue)
       case .automaticSearchAds:
         try container.encode(6, forKey: .rawValue)
+      case .installV4:
+        try container.encode(7, forKey: .rawValue)
+      case .sourceV4:
+        try container.encode(8, forKey: .rawValue)
+      case .testV4:
+        try container.encode(9, forKey: .rawValue)
     }
   }
 }

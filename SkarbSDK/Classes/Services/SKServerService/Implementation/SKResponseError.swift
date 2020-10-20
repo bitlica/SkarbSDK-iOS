@@ -8,6 +8,11 @@
 
 import Foundation
 
+public extension Error {
+    var code: Int { return (self as NSError).code }
+    var domain: String { return (self as NSError).domain }
+}
+
 public struct SKResponseError: Error {
   
   var isInternetCode: Bool {
@@ -20,36 +25,13 @@ public struct SKResponseError: Error {
   
   let errorCode: Int
   let message: String
-  let headerFields: [AnyHashable: Any]?
-  let body: [AnyHashable: Any]?
 
   public static let noResponseCode = 9999
   static let genericRetryMessage = "General response error"
 
   init(errorCode: Int,
-       message: String = SKResponseError.genericRetryMessage,
-       headerFields: [AnyHashable: Any]?,
-       body: [AnyHashable: Any]?) {
+       message: String = SKResponseError.genericRetryMessage) {
     self.errorCode = errorCode
     self.message = message
-    self.headerFields = headerFields
-    self.body = body
-  }
-
-  init(serverStatusCode: Int,
-       message: String?,
-       headerFields: [AnyHashable: Any]?,
-       body: [AnyHashable: Any]?) {
-    errorCode = serverStatusCode
-    switch serverStatusCode {
-      case -1009, -1003, -1001:
-        self.message = "No internet connection, unable to upload events"
-      case 400..<501:
-        self.message = message ?? SKResponseError.genericRetryMessage
-      default:
-        self.message = message ?? SKResponseError.genericRetryMessage
-    }
-    self.headerFields = headerFields
-    self.body = body
   }
 }

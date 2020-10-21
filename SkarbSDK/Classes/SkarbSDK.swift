@@ -43,6 +43,11 @@ public class SkarbSDK {
                                 data: SKCommand.prepareAppgateData(),
                                 retryCount: 0)
     SKServiceRegistry.commandStore.saveCommand(testCommand)
+    
+    // V4
+    guard !SKServiceRegistry.commandStore.hasInstallV4Command else {
+      return
+    }
   }
   
   public static func sendSource(broker: SKBroker,
@@ -64,6 +69,9 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.saveCommand(sourceCommand)
     
     // V4
+    guard !SKServiceRegistry.commandStore.hasInstallV4Command else {
+      return
+    }
     let attributionRequest = Api_AttribRequest(broker: broker.name, features: features)
     let sourceV4Command = SKCommand(timestamp: Date().nowTimestampInt,
                                     commandType: .sourceV4,
@@ -94,6 +102,9 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.saveCommand(purchaseCommand)
    
 //    TODO: Add for V4 later
+    guard !SKServiceRegistry.commandStore.hasInstallV4Command else {
+      return
+    }
   }
   
   public static func getDeviceId() -> String {

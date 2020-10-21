@@ -25,6 +25,14 @@ class SKCommandStore {
     }
     return result
   }
+
+  var hasInstallV4Command: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .installV4 }) != nil
+    }
+    return result
+  }
   
   var hasPurhcaseCommand: Bool {
     var result = false

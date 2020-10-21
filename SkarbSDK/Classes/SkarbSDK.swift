@@ -14,8 +14,8 @@ public class SkarbSDK {
   static let agentName: String = "SkarbSDK"
   static let version: String = "0.4.0"
   
-  private static var clientId: String = ""
-  private static var deviceId: String = ""
+  static var clientId: String = ""
+  static var deviceId: String = ""
   
   public static func initialize(clientId: String,
                                 isObservable: Bool,
@@ -63,33 +63,24 @@ public class SkarbSDK {
                                   retryCount: 0)
     SKServiceRegistry.commandStore.saveCommand(sourceCommand)
     
-    let attributionRequest = Api_AttribRequest.with {
-      let authData = Api_Auth.with {
-        $0.key = SkarbSDK.clientId
-        $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
-        $0.agentName = SkarbSDK.agentName
-        $0.agentVer = SkarbSDK.version
-      }
-      $0.auth = authData
-      $0.installID = SkarbSDK.deviceId
-      $0.broker = broker.name
-      if let payloadData = try? JSONSerialization.data(withJSONObject: features, options: .prettyPrinted) {
-        $0.payload = payloadData
-      }
-    }
-    SKServiceRegistry.userDefaultsService.setValue(attributionRequest.getData(), forKey: .brokerDataV4)
+    // V4
+    let attributionRequest = Api_AttribRequest(broker: broker.name, features: features)
     let sourceV4Command = SKCommand(timestamp: Date().nowTimestampInt,
                                     commandType: .sourceV4,
                                     status: .pending,
                                     data: attributionRequest.getData() ?? Data(),
                                     retryCount: 0)
     SKServiceRegistry.commandStore.saveCommand(sourceV4Command)
-    
   }
   
   public static func sendPurchase(productId: String,
                                   price: Float,
                                   currency: String) {
+    
+    guard !SKServiceRegistry.commandStore.hasPurhcaseCommand else {
+      return
+    }
+    
     let purchaseData = SKPurchaseData(productId: productId,
                                       price: price,
                                       currency: currency)
@@ -101,18 +92,12 @@ public class SkarbSDK {
                                     data: SKCommand.prepareAppgateData(),
                                     retryCount: 0)
     SKServiceRegistry.commandStore.saveCommand(purchaseCommand)
+   
+//    TODO: Add for V4 later
   }
   
   public static func getDeviceId() -> String {
-    let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self)
-    if let deviceId = initData?.deviceId {
-      return deviceId
-    }
-    
-    SKLogger.logWarn("SkarbSDK getDeviceId: called and deviceId is nill. Use UUID().uuidString",
-                     features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
-    
-    return UUID().uuidString
+    return deviceId
   }
   
   public static func useAutomaticAppleSearchAdsAttributionCollection(_ enable: Bool) {

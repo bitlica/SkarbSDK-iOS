@@ -7,7 +7,8 @@
 //
 
 import Foundation
-
+import UIKit
+import AdSupport
 
 extension Api_Auth: SKCodableStruct {
   
@@ -50,6 +51,49 @@ extension Api_Auth: SKCodableStruct {
 }
 
 extension Api_DeviceRequest: SKCodableStruct {
+  
+  init(clientId: String, deviceId: String) {
+    let authData = Api_Auth.with {
+      $0.key = clientId
+      $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
+      $0.agentName = SkarbSDK.agentName
+      $0.agentVer = SkarbSDK.version
+    }
+    
+    auth = authData
+    installID = deviceId
+    idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
+    idfv = UIDevice.current.identifierForVendor?.uuidString ?? ""
+    bundleVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
+    if let preferredLanguage = Locale.preferredLanguages.first {
+      locale = preferredLanguage
+    } else {
+      locale = "unknown"
+    }
+    var systemInfo = utsname()
+    uname(&systemInfo)
+    let machineMirror = Mirror(reflecting: systemInfo.machine)
+    let identifier = machineMirror.children.reduce("") { identifier, element in
+      guard let value = element.value as? Int8, value != 0 else { return identifier }
+      return identifier + String(UnicodeScalar(UInt8(value)))
+    }
+    device = identifier
+    osVer = UIDevice.current.systemVersion
+    let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
+    if let appStoreReceiptURL = appStoreReceiptURL {
+      receiptURL = appStoreReceiptURL.absoluteString
+    } else {
+      receiptURL = ""
+      SKLogger.logError("Create install for V4. AppStoreReceiptURL is nil",
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+    }
+    var dataCount: Int = 0
+    if let appStoreReceiptURL = appStoreReceiptURL,
+      let recieptData = try? Data(contentsOf: appStoreReceiptURL) {
+      dataCount = recieptData.count
+    }
+    receiptLen = "\(dataCount)"
+  }
   
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -117,6 +161,34 @@ extension Api_DeviceRequest: SKCodableStruct {
 
 
 extension Api_AttribRequest: SKCodableStruct {
+  
+  init(broker: String, features: [AnyHashable: Any]) {
+    
+    let authData = Api_Auth.with {
+      $0.key = SkarbSDK.clientId
+      $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
+      $0.agentName = SkarbSDK.agentName
+      $0.agentVer = SkarbSDK.version
+    }
+    self.auth = authData
+    self.installID = SkarbSDK.deviceId
+    self.broker = broker
+    
+    guard JSONSerialization.isValidJSONObject(features) else {
+      SKLogger.logError("Api_AttribRequest init: json isValidJSONObject",
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.internalValue.name: features.description])
+      return
+    }
+    do {
+      payload = try JSONSerialization.data(withJSONObject: features, options: .fragmentsAllowed)
+    } catch {
+      payload = Data()
+      SKLogger.logError("Api_AttribRequest: can't json serialization to Data",
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.internalValue.name: features.description])
+    }
+  }
   
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)

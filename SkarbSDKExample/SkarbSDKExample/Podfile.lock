@@ -1,65 +1,65 @@
 PODS:
-  - CGRPCZlib (1.0.0-alpha.11)
-  - CNIOAtomics (2.15.0)
-  - CNIOBoringSSL (2.7.1)
-  - CNIOBoringSSLShims (2.7.1):
-    - CNIOBoringSSL (= 2.7.1)
-  - CNIODarwin (2.15.0)
-  - CNIOHTTPParser (2.15.0)
-  - CNIOLinux (2.15.0)
-  - CNIOSHA1 (2.15.0)
-  - gRPC-Swift (1.0.0-alpha.11):
-    - CGRPCZlib (= 1.0.0-alpha.11)
-    - Logging (= 1.2.0)
-    - SwiftNIO (= 2.15.0)
-    - SwiftNIOHTTP2 (= 1.11.0)
-    - SwiftNIOSSL (= 2.7.1)
-    - SwiftNIOTransportServices (= 1.3.0)
-    - SwiftProtobuf (= 1.8.0)
-  - Logging (1.2.0)
-  - SkarbSDK (0.3.2):
-    - gRPC-Swift (= 1.0.0-alpha.11)
-  - SwiftNIO (2.15.0):
-    - CNIOAtomics (= 2.15.0)
-    - CNIODarwin (= 2.15.0)
-    - CNIOLinux (= 2.15.0)
-    - CNIOSHA1 (= 2.15.0)
-    - SwiftNIOConcurrencyHelpers (= 2.15.0)
-  - SwiftNIOConcurrencyHelpers (2.15.0):
-    - CNIOAtomics (= 2.15.0)
-  - SwiftNIOFoundationCompat (2.15.0):
-    - SwiftNIO (= 2.15.0)
-  - SwiftNIOHPACK (1.11.0):
-    - SwiftNIO (= 2.15.0)
-    - SwiftNIOConcurrencyHelpers (= 2.15.0)
-    - SwiftNIOHTTP1 (= 2.15.0)
-  - SwiftNIOHTTP1 (2.15.0):
-    - CNIOHTTPParser (= 2.15.0)
-    - SwiftNIO (= 2.15.0)
-    - SwiftNIOConcurrencyHelpers (= 2.15.0)
-  - SwiftNIOHTTP2 (1.11.0):
-    - SwiftNIO (= 2.15.0)
-    - SwiftNIOConcurrencyHelpers (= 2.15.0)
-    - SwiftNIOHPACK (= 1.11.0)
-    - SwiftNIOHTTP1 (= 2.15.0)
-    - SwiftNIOTLS (= 2.15.0)
-  - SwiftNIOSSL (2.7.1):
-    - CNIOBoringSSL (= 2.7.1)
-    - CNIOBoringSSLShims (= 2.7.1)
-    - SwiftNIO (= 2.15.0)
-    - SwiftNIOConcurrencyHelpers (= 2.15.0)
-    - SwiftNIOTLS (= 2.15.0)
-  - SwiftNIOTLS (2.15.0):
-    - SwiftNIO (= 2.15.0)
-  - SwiftNIOTransportServices (1.3.0):
-    - SwiftNIO (~> 2.0)
-    - SwiftNIOConcurrencyHelpers (~> 2.0)
-    - SwiftNIOFoundationCompat (~> 2.0)
-    - SwiftNIOTLS (~> 2.0)
-  - SwiftProtobuf (1.8.0)
+  - CGRPCZlib (1.0.0-alpha.20)
+  - CNIOAtomics (2.23.0)
+  - CNIOBoringSSL (2.9.2)
+  - CNIOBoringSSLShims (2.9.2):
+    - CNIOBoringSSL (= 2.9.2)
+  - CNIODarwin (2.23.0)
+  - CNIOHTTPParser (2.23.0)
+  - CNIOLinux (2.23.0)
+  - CNIOSHA1 (2.23.0)
+  - CNIOWindows (2.23.0)
+  - gRPC-Swift (1.0.0-alpha.20):
+    - CGRPCZlib (= 1.0.0-alpha.20)
+    - Logging (< 2, >= 1.4.0)
+    - SwiftNIO (< 3, >= 2.22.0)
+    - SwiftNIOHTTP2 (< 2, >= 1.14.1)
+    - SwiftNIOSSL (< 3, >= 2.8.0)
+    - SwiftNIOTransportServices (< 2, >= 1.6.0)
+    - SwiftProtobuf (< 2, >= 1.9.0)
+  - Logging (1.4.0)
+  - SwiftNIO (2.23.0):
+    - CNIOAtomics (= 2.23.0)
+    - CNIODarwin (= 2.23.0)
+    - CNIOLinux (= 2.23.0)
+    - CNIOSHA1 (= 2.23.0)
+    - CNIOWindows (= 2.23.0)
+    - SwiftNIOConcurrencyHelpers (= 2.23.0)
+  - SwiftNIOConcurrencyHelpers (2.23.0):
+    - CNIOAtomics (= 2.23.0)
+  - SwiftNIOFoundationCompat (2.23.0):
+    - SwiftNIO (= 2.23.0)
+  - SwiftNIOHPACK (1.15.0):
+    - SwiftNIO (< 3, >= 2.11.0)
+    - SwiftNIOConcurrencyHelpers (< 3, >= 2.11.0)
+    - SwiftNIOHTTP1 (< 3, >= 2.11.0)
+  - SwiftNIOHTTP1 (2.23.0):
+    - CNIOHTTPParser (= 2.23.0)
+    - SwiftNIO (= 2.23.0)
+    - SwiftNIOConcurrencyHelpers (= 2.23.0)
+  - SwiftNIOHTTP2 (1.15.0):
+    - SwiftNIO (< 3, >= 2.11.0)
+    - SwiftNIOConcurrencyHelpers (< 3, >= 2.11.0)
+    - SwiftNIOHPACK (= 1.15.0)
+    - SwiftNIOHTTP1 (< 3, >= 2.11.0)
+    - SwiftNIOTLS (< 3, >= 2.11.0)
+  - SwiftNIOSSL (2.9.2):
+    - CNIOBoringSSL (= 2.9.2)
+    - CNIOBoringSSLShims (= 2.9.2)
+    - SwiftNIO (< 3, >= 2.15.0)
+    - SwiftNIOConcurrencyHelpers (< 3, >= 2.15.0)
+    - SwiftNIOTLS (< 3, >= 2.15.0)
+  - SwiftNIOTLS (2.23.0):
+    - SwiftNIO (= 2.23.0)
+  - SwiftNIOTransportServices (1.9.0):
+    - SwiftNIO (< 3, >= 2.22.0)
+    - SwiftNIOConcurrencyHelpers (< 3, >= 2.22.0)
+    - SwiftNIOFoundationCompat (< 3, >= 2.22.0)
+    - SwiftNIOTLS (< 3, >= 2.22.0)
+  - SwiftProtobuf (1.12.0)
 
 DEPENDENCIES:
-  - SkarbSDK (from `https://github.com/bitlica/SkarbSDK`, branch `master`)
+  - gRPC-Swift (= 1.0.0-alpha.20)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -71,6 +71,7 @@ SPEC REPOS:
     - CNIOHTTPParser
     - CNIOLinux
     - CNIOSHA1
+    - CNIOWindows
     - gRPC-Swift
     - Logging
     - SwiftNIO
@@ -84,39 +85,29 @@ SPEC REPOS:
     - SwiftNIOTransportServices
     - SwiftProtobuf
 
-EXTERNAL SOURCES:
-  SkarbSDK:
-    :branch: master
-    :git: https://github.com/bitlica/SkarbSDK
-
-CHECKOUT OPTIONS:
-  SkarbSDK:
-    :commit: fddd1ed16f3766579426661a21dceeabbc91254a
-    :git: https://github.com/bitlica/SkarbSDK
-
 SPEC CHECKSUMS:
-  CGRPCZlib: e595387378d0601be796e858dd30c505458c4b1f
-  CNIOAtomics: ba49b1c86f281e1ecfd84c9205fbc27a81826847
-  CNIOBoringSSL: e4766830ab6d7c7fcd3618331f05fcb11638314d
-  CNIOBoringSSLShims: c3f3c6f05b7ce9b576521328a5b1b566d8f4665b
-  CNIODarwin: 2e341dd283fa3972706568b12925366145a8e2cd
-  CNIOHTTPParser: 25e1d1bc84c0612cbbbd6baedc4be05d77a17e01
-  CNIOLinux: 61598a8e49510207acb74c87f8fc11f762f76b5a
-  CNIOSHA1: 7b1dcceef9682aef4c6578b9fc67f87a03f0c48e
-  gRPC-Swift: 79f04da038f9a62005271d5b638611ce1bb31304
-  Logging: 7838d379d234d7e5ae1265fa02804a9084caf04c
-  SkarbSDK: 7f3ede663020b9406fe7e390030dc56f679f8445
-  SwiftNIO: c9889dcd8aed2655af9163b42fc11ebd4ce94252
-  SwiftNIOConcurrencyHelpers: 2357037a16e9c51880c01b896a5ac3cd41066044
-  SwiftNIOFoundationCompat: f09ee499a8a9c636ec9007f73c5a1cedc23dcad3
-  SwiftNIOHPACK: 906596511ff9d1e095b7a72a0011351591bcae03
-  SwiftNIOHTTP1: b05f4061ba18482006a264a5aa087bbcd35d153c
-  SwiftNIOHTTP2: 3a52499594c6ec073af2a2801cf3c5d3d1c8700f
-  SwiftNIOSSL: 7c82b8393a6b69a3ef9b12fe74240e92c2bd7add
-  SwiftNIOTLS: 51580e51240d1a4d51efb2d317e92cf243181042
-  SwiftNIOTransportServices: 26d40c589fc8fe667af51b06ef0aa49fbc9ae7f2
-  SwiftProtobuf: 2cbd9409689b7df170d82a92a33443c8e3e14a70
+  CGRPCZlib: 9421db015a274b3cd5cce57334826881f61c0785
+  CNIOAtomics: 9f81e08a07afa84d14f93828071f5f28d2c120be
+  CNIOBoringSSL: 0148c2789bab42bcc6e52eb45a8ac0c1a004ece0
+  CNIOBoringSSLShims: 28455716e829ee9ef14db643c00a43901c6f0686
+  CNIODarwin: 1c9538456b597430c897f5a31398b9b94c84b7a0
+  CNIOHTTPParser: da679ec58791620a89c2153bfd2ff2f05786f54d
+  CNIOLinux: e4487ef3f25ce7b0019224cbf621ae2153d1f8bb
+  CNIOSHA1: cdd2e93752f5273b528946560337ca092cdbe0aa
+  CNIOWindows: a0f8814c907c2621b66bc2789682d5e889602b45
+  gRPC-Swift: 074c94af029b6bf70bab68cd0e278428a4470997
+  Logging: beeb016c9c80cf77042d62e83495816847ef108b
+  SwiftNIO: 6de64e420297508cfcf7582e556c7ab027ac8bc7
+  SwiftNIOConcurrencyHelpers: 6ddf30c130f872fae39c590f8fa88517b336ee0b
+  SwiftNIOFoundationCompat: 15cc9abc4922445833f69972237e252d810eb839
+  SwiftNIOHPACK: 4f7a01905cac8eb583f0fb60915c9855071f79dd
+  SwiftNIOHTTP1: fee56f32e365ab83dbfbe2fe7a251f563b1bc480
+  SwiftNIOHTTP2: f88c52a54507911d27a34ae5a5ea58938ee37876
+  SwiftNIOSSL: fc672dc6a26e6ab78edd729568cd5a44aabb3409
+  SwiftNIOTLS: 905a7e7e26a3f7d9661da34e0edf01be086c596d
+  SwiftNIOTransportServices: 801923921fbecdcde1e1c1ff38e812167d01ead1
+  SwiftProtobuf: 4ef85479c18ca85b5482b343df9c319c62bda699
 
-PODFILE CHECKSUM: b416157291c7145ccb98260bd71bc7cff1d356d5
+PODFILE CHECKSUM: 0e74ff898f12241b9252602fc7c2359264ed737e
 
-COCOAPODS: 1.9.1
+COCOAPODS: 1.9.3

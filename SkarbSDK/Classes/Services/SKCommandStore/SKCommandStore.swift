@@ -7,8 +7,6 @@
 //
 
 import Foundation
-import UIKit
-import AdSupport
 
 class SKCommandStore {
   
@@ -105,6 +103,11 @@ class SKCommandStore {
   }
   
   func createInstallCommandIfNeeded(clientId: String, deviceId: String) {
+    
+    guard !SKServiceRegistry.commandStore.hasInstallCommand else {
+      return
+    }
+    
     if SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) == nil {
       let installDate = Formatter.iso8601.string(from: Date())
       let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
@@ -121,69 +124,24 @@ class SKCommandStore {
                                 receiptLen: dataCount)
       SKServiceRegistry.userDefaultsService.setValue(initData.getData(), forKey: .initData)
       
-      let authData = Api_Auth.with {
-        $0.key = clientId
-        $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
-        $0.agentName = SkarbSDK.agentName
-        $0.agentVer = SkarbSDK.version
-      }
-      
-      let initDataV4 = Api_DeviceRequest.with {
-        $0.auth = authData
-        $0.installID = deviceId
-        $0.idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
-        $0.idfv = UIDevice.current.identifierForVendor?.uuidString ?? ""
-        $0.bundleVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
-        if let preferredLanguage = Locale.preferredLanguages.first {
-          $0.locale = preferredLanguage
-        } else {
-          $0.locale = "unknown"
-        }
-        var systemInfo = utsname()
-        uname(&systemInfo)
-        let machineMirror = Mirror(reflecting: systemInfo.machine)
-        let identifier = machineMirror.children.reduce("") { identifier, element in
-          guard let value = element.value as? Int8, value != 0 else { return identifier }
-          return identifier + String(UnicodeScalar(UInt8(value)))
-        }
-        $0.device = identifier
-        $0.osVer = UIDevice.current.systemVersion
-        let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
-        if let appStoreReceiptURL = appStoreReceiptURL {
-          $0.receiptURL = appStoreReceiptURL.absoluteString
-        } else {
-          $0.receiptURL = ""
-          SKLogger.logError("Create install for V4. AppStoreReceiptURL is nil",
-                            features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
-        }
-        var dataCount: Int = 0
-        if let appStoreReceiptURL = appStoreReceiptURL,
-          let recieptData = try? Data(contentsOf: appStoreReceiptURL) {
-          dataCount = recieptData.count
-        }
-        $0.receiptLen = "\(dataCount)"
-      }
-
-      SKServiceRegistry.userDefaultsService.setValue(initDataV4.getData(), forKey: .initDataV4)
-    }
-    
-    guard !SKServiceRegistry.commandStore.hasInstallCommand else {
-      return
-    }
-    let installCommand = SKCommand(timestamp: Date().nowTimestampInt,
-                                   commandType: .install,
-                                   status: .pending,
-                                   data: SKCommand.prepareAppgateData(),
-                                   retryCount: 0)
-    SKServiceRegistry.commandStore.saveCommand(installCommand)
-    
-    let initDataV4 = SKServiceRegistry.userDefaultsService.codable(forKey: .initDataV4, objectType: Api_DeviceRequest.self)
-    let installCommandV4 = SKCommand(timestamp: Date().nowTimestampInt,
-                                     commandType: .installV4,
+      let installCommand = SKCommand(timestamp: Date().nowTimestampInt,
+                                     commandType: .install,
                                      status: .pending,
-                                     data: initDataV4?.getData() ?? Data(),
+                                     data: SKCommand.prepareAppgateData(),
                                      retryCount: 0)
-    SKServiceRegistry.commandStore.saveCommand(installCommandV4)
+      SKServiceRegistry.commandStore.saveCommand(installCommand)
+      
+      // Logic for V4 - if user has v3 then v4 install command will not be created and executed
+      // Need to create v4 install command only for new users for clean tests.
+      // V4
+      let initDataV4 = Api_DeviceRequest(clientId: clientId, deviceId: deviceId)
+      let installCommandV4 = SKCommand(timestamp: Date().nowTimestampInt,
+                                       commandType: .installV4,
+                                       status: .pending,
+                                       data: initDataV4.getData() ?? Data(),
+                                       retryCount: 0)
+      SKServiceRegistry.commandStore.saveCommand(installCommandV4)
+    }
   }
   
   func createAutomaticSearchAdsCommand(_ enable: Bool) {

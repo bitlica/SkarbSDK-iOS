@@ -46,9 +46,6 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     
     requestProductInfo(productId: productId) { products in
       if let product = products.filter({ $0.productIdentifier == productId }).first {
-        guard !SKServiceRegistry.commandStore.hasPurhcaseCommand else {
-          return
-        }
         SkarbSDK.sendPurchase(productId: productId,
                               price: product.price.floatValue,
                               currency: product.priceLocale.currencyCode ?? "")
@@ -75,8 +72,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
           DispatchQueue.main.async { [weak self] in
             
             guard let self = self,
-              self.isObservable,
-              !SKServiceRegistry.commandStore.hasPurhcaseCommand else {
+              self.isObservable else {
                 return
             }
             

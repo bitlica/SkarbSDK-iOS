@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import AdSupport
 
-extension Api_Auth: SKCodableStruct {
+extension Apiinstall_Auth: SKCodableStruct {
   
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -18,7 +18,7 @@ extension Api_Auth: SKCodableStruct {
     let bundleID = try container.decode(String.self, forKey: .bundleID)
     let agentName = try container.decode(String.self, forKey: .agentName)
     let agentVer = try container.decode(String.self, forKey: .agentVer)
-    self = Api_Auth()
+    self = Apiinstall_Auth()
     self.key = key
     self.bundleID = bundleID
     self.agentName = agentName
@@ -50,10 +50,10 @@ extension Api_Auth: SKCodableStruct {
   }
 }
 
-extension Api_DeviceRequest: SKCodableStruct {
+extension Apiinstall_DeviceRequest: SKCodableStruct {
   
   init(clientId: String, deviceId: String) {
-    let authData = Api_Auth.with {
+    let authData = Apiinstall_Auth.with {
       $0.key = clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
       $0.agentName = SkarbSDK.agentName
@@ -97,7 +97,7 @@ extension Api_DeviceRequest: SKCodableStruct {
   
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let auth = try container.decode(Api_Auth.self, forKey: .auth)
+    let auth = try container.decode(Apiinstall_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let idfa = try container.decode(String.self, forKey: .idfa)
     let idfv = try container.decode(String.self, forKey: .idfv)
@@ -108,7 +108,7 @@ extension Api_DeviceRequest: SKCodableStruct {
     let receiptURL = try container.decode(String.self, forKey: .receiptURL)
     let receiptLen = try container.decode(String.self, forKey: .receiptLen)
     
-    self = Api_DeviceRequest.with({
+    self = Apiinstall_DeviceRequest.with({
       $0.auth = auth
       $0.installID = installID
       $0.idfa = idfa
@@ -160,11 +160,11 @@ extension Api_DeviceRequest: SKCodableStruct {
 }
 
 
-extension Api_AttribRequest: SKCodableStruct {
+extension Apiinstall_AttribRequest: SKCodableStruct {
   
   init(broker: String, features: [AnyHashable: Any]) {
     
-    let authData = Api_Auth.with {
+    let authData = Apiinstall_Auth.with {
       $0.key = SkarbSDK.clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
       $0.agentName = SkarbSDK.agentName
@@ -192,12 +192,12 @@ extension Api_AttribRequest: SKCodableStruct {
   
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let auth = try container.decode(Api_Auth.self, forKey: .auth)
+    let auth = try container.decode(Apiinstall_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let broker = try container.decode(String.self, forKey: .broker)
     let payload = try container.decode(Data.self, forKey: .payload)
     
-    self = Api_AttribRequest.with({
+    self = Apiinstall_AttribRequest.with({
       $0.auth = auth
       $0.installID = installID
       $0.broker = broker
@@ -230,16 +230,16 @@ extension Api_AttribRequest: SKCodableStruct {
   }
 }
 
-extension Api_TestRequest: SKCodableStruct {
+extension Apiinstall_TestRequest: SKCodableStruct {
   
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let auth = try container.decode(Api_Auth.self, forKey: .auth)
+    let auth = try container.decode(Apiinstall_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let name = try container.decode(String.self, forKey: .name)
     let group = try container.decode(String.self, forKey: .group)
     
-    self = Api_TestRequest.with({
+    self = Apiinstall_TestRequest.with({
       $0.auth = auth
       $0.installID = installID
       $0.name = name

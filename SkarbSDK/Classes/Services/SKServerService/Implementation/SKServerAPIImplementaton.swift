@@ -28,13 +28,13 @@ class SKServerAPIImplementaton: SKServerAPI {
                                                          tls: tls)
       let clientConnection = ClientConnection(configuration: configuration)
 
-      let service = Api_IngesterClient(channel: clientConnection)
+      let service = Apiinstall_IngesterClient(channel: clientConnection)
       
       let decoder = JSONDecoder()
       
       switch command.commandType {
         case .installV4:
-          guard let deviceRequest = try? decoder.decode(Api_DeviceRequest.self, from: command.data) else {
+          guard let deviceRequest = try? decoder.decode(Apiinstall_DeviceRequest.self, from: command.data) else {
             SKLogger.logError("SyncCommand called with installV4. Api_DeviceRequest cannt be decoded",
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
             return
@@ -50,7 +50,7 @@ class SKServerAPIImplementaton: SKServerAPI {
             }
           }
         case .sourceV4:
-          guard let attribRequest = try? decoder.decode(Api_AttribRequest.self, from: command.data) else {
+          guard let attribRequest = try? decoder.decode(Apiinstall_AttribRequest.self, from: command.data) else {
             SKLogger.logError("SyncCommand called with sourceV4. Api_AttribRequest cannt be decoded",
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
             return
@@ -66,7 +66,7 @@ class SKServerAPIImplementaton: SKServerAPI {
             }
           }
         case .testV4:
-          guard let testRequest = try? decoder.decode(Api_TestRequest.self, from: command.data) else {
+          guard let testRequest = try? decoder.decode(Apiinstall_TestRequest.self, from: command.data) else {
             SKLogger.logError("SyncCommand called with testV4. Api_AttribRequest cannt be decoded",
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
             return

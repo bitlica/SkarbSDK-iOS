@@ -25,26 +25,26 @@ import NIO
 import SwiftProtobuf
 
 
-/// Usage: instantiate Api_IngesterClient, then call methods of this protocol to make API calls.
-internal protocol Api_IngesterClientProtocol: GRPCClient {
+/// Usage: instantiate Apiinstall_IngesterClient, then call methods of this protocol to make API calls.
+internal protocol Apiinstall_IngesterClientProtocol: GRPCClient {
   func setDevice(
-    _ request: Api_DeviceRequest,
+    _ request: Apiinstall_DeviceRequest,
     callOptions: CallOptions?
-  ) -> UnaryCall<Api_DeviceRequest, SwiftProtobuf.Google_Protobuf_Empty>
+  ) -> UnaryCall<Apiinstall_DeviceRequest, SwiftProtobuf.Google_Protobuf_Empty>
 
   func setAttribution(
-    _ request: Api_AttribRequest,
+    _ request: Apiinstall_AttribRequest,
     callOptions: CallOptions?
-  ) -> UnaryCall<Api_AttribRequest, SwiftProtobuf.Google_Protobuf_Empty>
+  ) -> UnaryCall<Apiinstall_AttribRequest, SwiftProtobuf.Google_Protobuf_Empty>
 
   func setTest(
-    _ request: Api_TestRequest,
+    _ request: Apiinstall_TestRequest,
     callOptions: CallOptions?
-  ) -> UnaryCall<Api_TestRequest, SwiftProtobuf.Google_Protobuf_Empty>
+  ) -> UnaryCall<Apiinstall_TestRequest, SwiftProtobuf.Google_Protobuf_Empty>
 
 }
 
-extension Api_IngesterClientProtocol {
+extension Apiinstall_IngesterClientProtocol {
 
   /// Unary call to SetDevice
   ///
@@ -53,11 +53,11 @@ extension Api_IngesterClientProtocol {
   ///   - callOptions: Call options.
   /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
   internal func setDevice(
-    _ request: Api_DeviceRequest,
+    _ request: Apiinstall_DeviceRequest,
     callOptions: CallOptions? = nil
-  ) -> UnaryCall<Api_DeviceRequest, SwiftProtobuf.Google_Protobuf_Empty> {
+  ) -> UnaryCall<Apiinstall_DeviceRequest, SwiftProtobuf.Google_Protobuf_Empty> {
     return self.makeUnaryCall(
-      path: "/api.Ingester/SetDevice",
+      path: "/apiinstall.Ingester/SetDevice",
       request: request,
       callOptions: callOptions ?? self.defaultCallOptions
     )
@@ -70,11 +70,11 @@ extension Api_IngesterClientProtocol {
   ///   - callOptions: Call options.
   /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
   internal func setAttribution(
-    _ request: Api_AttribRequest,
+    _ request: Apiinstall_AttribRequest,
     callOptions: CallOptions? = nil
-  ) -> UnaryCall<Api_AttribRequest, SwiftProtobuf.Google_Protobuf_Empty> {
+  ) -> UnaryCall<Apiinstall_AttribRequest, SwiftProtobuf.Google_Protobuf_Empty> {
     return self.makeUnaryCall(
-      path: "/api.Ingester/SetAttribution",
+      path: "/apiinstall.Ingester/SetAttribution",
       request: request,
       callOptions: callOptions ?? self.defaultCallOptions
     )
@@ -87,22 +87,22 @@ extension Api_IngesterClientProtocol {
   ///   - callOptions: Call options.
   /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
   internal func setTest(
-    _ request: Api_TestRequest,
+    _ request: Apiinstall_TestRequest,
     callOptions: CallOptions? = nil
-  ) -> UnaryCall<Api_TestRequest, SwiftProtobuf.Google_Protobuf_Empty> {
+  ) -> UnaryCall<Apiinstall_TestRequest, SwiftProtobuf.Google_Protobuf_Empty> {
     return self.makeUnaryCall(
-      path: "/api.Ingester/SetTest",
+      path: "/apiinstall.Ingester/SetTest",
       request: request,
       callOptions: callOptions ?? self.defaultCallOptions
     )
   }
 }
 
-internal final class Api_IngesterClient: Api_IngesterClientProtocol {
+internal final class Apiinstall_IngesterClient: Apiinstall_IngesterClientProtocol {
   internal let channel: GRPCChannel
   internal var defaultCallOptions: CallOptions
 
-  /// Creates a client for the api.Ingester service.
+  /// Creates a client for the apiinstall.Ingester service.
   ///
   /// - Parameters:
   ///   - channel: `GRPCChannel` to the service host.
@@ -114,14 +114,14 @@ internal final class Api_IngesterClient: Api_IngesterClientProtocol {
 }
 
 /// To build a server, implement a class that conforms to this protocol.
-internal protocol Api_IngesterProvider: CallHandlerProvider {
-  func setDevice(request: Api_DeviceRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
-  func setAttribution(request: Api_AttribRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
-  func setTest(request: Api_TestRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
+internal protocol Apiinstall_IngesterProvider: CallHandlerProvider {
+  func setDevice(request: Apiinstall_DeviceRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
+  func setAttribution(request: Apiinstall_AttribRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
+  func setTest(request: Apiinstall_TestRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
 }
 
-extension Api_IngesterProvider {
-  internal var serviceName: Substring { return "api.Ingester" }
+extension Apiinstall_IngesterProvider {
+  internal var serviceName: Substring { return "apiinstall.Ingester" }
 
   /// Determines, calls and returns the appropriate request handler, depending on the request's method.
   /// Returns nil for methods not handled by this service.

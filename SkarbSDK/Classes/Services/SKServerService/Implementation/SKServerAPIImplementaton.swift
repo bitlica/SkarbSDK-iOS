@@ -28,7 +28,8 @@ class SKServerAPIImplementaton: SKServerAPI {
                                                          tls: tls)
       let clientConnection = ClientConnection(configuration: configuration)
 
-      let service = Apiinstall_IngesterClient(channel: clientConnection)
+      let installService = Apiinstall_IngesterClient(channel: clientConnection)
+      let purchaseService = Apipurchase_IngesterClient(channel: clientConnection)
       
       let decoder = JSONDecoder()
       
@@ -39,7 +40,7 @@ class SKServerAPIImplementaton: SKServerAPI {
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
             return
           }
-          let call = service.setDevice(deviceRequest)
+          let call = installService.setDevice(deviceRequest)
           call.response.whenComplete { result in
             SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
             switch result {
@@ -55,7 +56,7 @@ class SKServerAPIImplementaton: SKServerAPI {
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
             return
           }
-          let call = service.setAttribution(attribRequest)
+          let call = installService.setAttribution(attribRequest)
           call.response.whenComplete { result in
             SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
             switch result {
@@ -71,7 +72,39 @@ class SKServerAPIImplementaton: SKServerAPI {
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
             return
           }
-          let call = service.setTest(testRequest)
+          let call = installService.setTest(testRequest)
+          call.response.whenComplete { result in
+            SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
+            switch result {
+              case .success:
+                completion?(nil)
+              case .failure(let error):
+                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+            }
+          }
+        case .purchaseV4:
+          guard let purchaseRequest = try? decoder.decode(Apipurchase_ReceiptRequest.self, from: command.data) else {
+            SKLogger.logError("SyncCommand called with testV4. Apipurchase_ReceiptRequest cannt be decoded",
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+            return
+          }
+          let call = purchaseService.setReceipt(purchaseRequest)
+          call.response.whenComplete { result in
+            SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
+            switch result {
+              case .success:
+                completion?(nil)
+              case .failure(let error):
+                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+            }
+          }
+        case .transactionV4:
+          guard let transactionRequest = try? decoder.decode(Apipurchase_TransactionsRequest.self, from: command.data) else {
+            SKLogger.logError("SyncCommand called with testV4. Apipurchase_TransactionsRequest cannt be decoded",
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+            return
+          }
+          let call = purchaseService.setTransactions(transactionRequest)
           call.response.whenComplete { result in
             SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
             switch result {

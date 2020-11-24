@@ -64,21 +64,20 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
   /// Sent when the transaction array has changed (additions or state changes).  Client should check state of transactions and finish as appropriate.
   public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
     
-    for transaction in transactions.reversed() {
-      
-      switch transaction.transactionState {
-        case .purchased:
-          SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
-          DispatchQueue.main.async { [weak self] in
-            
+    DispatchQueue.main.async { [weak self] in
+      for transaction in transactions {
+        
+        switch transaction.transactionState {
+          case .purchased:
+            SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
             guard let self = self,
-              self.isObservable else {
-                return
+                  self.isObservable else {
+              return
             }
             
             let purchasedProductId = transaction.payment.productIdentifier
             if let allProducts = self.allProducts,
-              let product = allProducts.filter({ $0.productIdentifier == purchasedProductId }).first {
+               let product = allProducts.filter({ $0.productIdentifier == purchasedProductId }).first {
               SkarbSDK.sendPurchase(productId: purchasedProductId,
                                     price: product.price.floatValue,
                                     currency: product.priceLocale.currencyCode ?? "")
@@ -95,13 +94,43 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
                                            retryCount: 0)
               SKServiceRegistry.commandStore.saveCommand(fetchCommand)
             }
+          case .failed:
+            SKLogger.logInfo("updatedTransactions: called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
+          case .restored:
+            SKLogger.logInfo("updatedTransactions: called. Transaction was restored. Date = \(String(describing: transaction.transactionDate))")
+          default:
+            break
         }
-        case .failed:
-          SKLogger.logInfo("updatedTransactions: called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
-        case .restored:
-          SKLogger.logInfo("updatedTransactions: called. Transaction was restored. Date = \(String(describing: transaction.transactionDate))")
-        default:
-          break
+      }
+      
+      // V4 part
+      let purchasedTransactions = transactions.filter { $0.transactionState == .purchased }
+      guard !purchasedTransactions.isEmpty,
+            SKServiceRegistry.commandStore.hasInstallV4Command else {
+        return
+      }
+      let transactionIds: [String] = transactions.compactMap { $0.transactionIdentifier }
+      if SKServiceRegistry.commandStore.hasPurhcaseV4Command {
+        let newTransactions = SKServiceRegistry.commandStore.getNewTransactionIds(transactionIds)
+        if !newTransactions.isEmpty {
+          let transactionDataV4 = Apipurchase_TransactionsRequest(deviceId: SkarbSDK.deviceId,
+                                                                  newTransactions: newTransactions)
+          let transactionV4Command = SKCommand(timestamp: Date().nowTimestampInt,
+                                               commandType: .purchaseV4,
+                                               status: .pending,
+                                               data: transactionDataV4.getData() ?? Data(),
+                                               retryCount: 0)
+          SKServiceRegistry.commandStore.saveCommand(transactionV4Command)
+        }
+      } else {
+        let purchaseDataV4 = Apipurchase_ReceiptRequest(deviceId: SkarbSDK.deviceId,
+                                                        newTransactions: transactionIds)
+        let purchaseV4Command = SKCommand(timestamp: Date().nowTimestampInt,
+                                          commandType: .purchaseV4,
+                                          status: .pending,
+                                          data: purchaseDataV4.getData() ?? Data(),
+                                          retryCount: 0)
+        SKServiceRegistry.commandStore.saveCommand(purchaseV4Command)
       }
     }
   }

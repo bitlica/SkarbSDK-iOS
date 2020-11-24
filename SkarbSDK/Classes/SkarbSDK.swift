@@ -48,6 +48,8 @@ public class SkarbSDK {
     guard !SKServiceRegistry.commandStore.hasInstallV4Command else {
       return
     }
+    
+//    TODO: Add later
   }
   
   public static func sendSource(broker: SKBroker,
@@ -100,11 +102,6 @@ public class SkarbSDK {
                                     data: SKCommand.prepareAppgateData(),
                                     retryCount: 0)
     SKServiceRegistry.commandStore.saveCommand(purchaseCommand)
-   
-//    TODO: Add for V4 later
-    guard !SKServiceRegistry.commandStore.hasInstallV4Command else {
-      return
-    }
   }
   
   public static func getDeviceId() -> String {

@@ -42,6 +42,14 @@ class SKCommandStore {
     return result
   }
   
+  var hasPurhcaseV4Command: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .purchaseV4 }) != nil
+    }
+    return result
+  }
+  
   var hasAutomaticSearchAdsCommand: Bool {
     var result = false
     exclusionSerialQueue.sync {
@@ -108,6 +116,32 @@ class SKCommandStore {
       inProgress.changeStatus(to: .pending)
       saveCommand(command)
     }
+  }
+  
+  func getNewTransactionIds(_ transactions: [String]) -> [String] {
+    var result: [SKCommand] = []
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.filter({ $0.commandType == .transactionV4 })
+    }
+    
+    let decoder = JSONDecoder()
+    var existing: Set<String> = []
+    for command in result {
+      if let transaction = try? decoder.decode(Apipurchase_TransactionsRequest.self, from: command.data) {
+        transaction.transactions.forEach { transactionId in
+          existing.insert(transactionId)
+        }
+      }
+    }
+    
+    var newTransaction: Set<String> = []
+    for transaction in transactions {
+      if !existing.contains(transaction) {
+        newTransaction.insert(transaction)
+      }
+    }
+    
+    return Array(newTransaction)
   }
   
   func createInstallCommandIfNeeded(clientId: String, deviceId: String) {

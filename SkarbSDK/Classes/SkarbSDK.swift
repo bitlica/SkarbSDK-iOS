@@ -71,7 +71,7 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.saveCommand(sourceCommand)
     
     // V4
-    guard !SKServiceRegistry.commandStore.hasInstallV4Command else {
+    guard SKServiceRegistry.commandStore.hasInstallV4Command else {
       return
     }
     let attributionRequest = Apiinstall_AttribRequest(broker: broker.name, features: features)

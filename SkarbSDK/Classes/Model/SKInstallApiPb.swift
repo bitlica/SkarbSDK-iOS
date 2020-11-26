@@ -20,7 +20,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-struct Apiinstall_Auth {
+struct Installapi_Auth {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -38,13 +38,13 @@ struct Apiinstall_Auth {
   init() {}
 }
 
-struct Apiinstall_DeviceRequest {
+struct Installapi_DeviceRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var auth: Apiinstall_Auth {
-    get {return _auth ?? Apiinstall_Auth()}
+  var auth: Installapi_Auth {
+    get {return _auth ?? Installapi_Auth()}
     set {_auth = newValue}
   }
   /// Returns true if `auth` has been explicitly set.
@@ -75,16 +75,16 @@ struct Apiinstall_DeviceRequest {
 
   init() {}
 
-  fileprivate var _auth: Apiinstall_Auth? = nil
+  fileprivate var _auth: Installapi_Auth? = nil
 }
 
-struct Apiinstall_AttribRequest {
+struct Installapi_AttribRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var auth: Apiinstall_Auth {
-    get {return _auth ?? Apiinstall_Auth()}
+  var auth: Installapi_Auth {
+    get {return _auth ?? Installapi_Auth()}
     set {_auth = newValue}
   }
   /// Returns true if `auth` has been explicitly set.
@@ -103,16 +103,16 @@ struct Apiinstall_AttribRequest {
 
   init() {}
 
-  fileprivate var _auth: Apiinstall_Auth? = nil
+  fileprivate var _auth: Installapi_Auth? = nil
 }
 
-struct Apiinstall_TestRequest {
+struct Installapi_TestRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var auth: Apiinstall_Auth {
-    get {return _auth ?? Apiinstall_Auth()}
+  var auth: Installapi_Auth {
+    get {return _auth ?? Installapi_Auth()}
     set {_auth = newValue}
   }
   /// Returns true if `auth` has been explicitly set.
@@ -130,14 +130,14 @@ struct Apiinstall_TestRequest {
 
   init() {}
 
-  fileprivate var _auth: Apiinstall_Auth? = nil
+  fileprivate var _auth: Installapi_Auth? = nil
 }
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-fileprivate let _protobuf_package = "apiinstall"
+fileprivate let _protobuf_package = "installapi"
 
-extension Apiinstall_Auth: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Installapi_Auth: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Auth"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "key"),
@@ -174,7 +174,7 @@ extension Apiinstall_Auth: SwiftProtobuf.Message, SwiftProtobuf._MessageImplemen
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Apiinstall_Auth, rhs: Apiinstall_Auth) -> Bool {
+  static func ==(lhs: Installapi_Auth, rhs: Installapi_Auth) -> Bool {
     if lhs.key != rhs.key {return false}
     if lhs.bundleID != rhs.bundleID {return false}
     if lhs.agentName != rhs.agentName {return false}
@@ -184,7 +184,7 @@ extension Apiinstall_Auth: SwiftProtobuf.Message, SwiftProtobuf._MessageImplemen
   }
 }
 
-extension Apiinstall_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DeviceRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "auth"),
@@ -251,7 +251,7 @@ extension Apiinstall_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Apiinstall_DeviceRequest, rhs: Apiinstall_DeviceRequest) -> Bool {
+  static func ==(lhs: Installapi_DeviceRequest, rhs: Installapi_DeviceRequest) -> Bool {
     if lhs._auth != rhs._auth {return false}
     if lhs.installID != rhs.installID {return false}
     if lhs.idfa != rhs.idfa {return false}
@@ -267,7 +267,7 @@ extension Apiinstall_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
   }
 }
 
-extension Apiinstall_AttribRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Installapi_AttribRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".AttribRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "auth"),
@@ -304,7 +304,7 @@ extension Apiinstall_AttribRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Apiinstall_AttribRequest, rhs: Apiinstall_AttribRequest) -> Bool {
+  static func ==(lhs: Installapi_AttribRequest, rhs: Installapi_AttribRequest) -> Bool {
     if lhs._auth != rhs._auth {return false}
     if lhs.installID != rhs.installID {return false}
     if lhs.broker != rhs.broker {return false}
@@ -314,7 +314,7 @@ extension Apiinstall_AttribRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
   }
 }
 
-extension Apiinstall_TestRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Installapi_TestRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".TestRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "auth"),
@@ -351,7 +351,7 @@ extension Apiinstall_TestRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageI
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Apiinstall_TestRequest, rhs: Apiinstall_TestRequest) -> Bool {
+  static func ==(lhs: Installapi_TestRequest, rhs: Installapi_TestRequest) -> Bool {
     if lhs._auth != rhs._auth {return false}
     if lhs.installID != rhs.installID {return false}
     if lhs.name != rhs.name {return false}

@@ -176,7 +176,7 @@ class SKCommandStore {
       // Logic for V4 - if user has v3 then v4 install command will not be created and executed
       // Need to create v4 install command only for new users for clean tests.
       // V4
-      let initDataV4 = Apiinstall_DeviceRequest(clientId: clientId, deviceId: deviceId)
+      let initDataV4 = Installapi_DeviceRequest(clientId: clientId, deviceId: deviceId)
       let installCommandV4 = SKCommand(timestamp: Date().nowTimestampInt,
                                        commandType: .installV4,
                                        status: .pending,

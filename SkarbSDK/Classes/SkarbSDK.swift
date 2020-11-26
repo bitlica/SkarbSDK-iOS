@@ -74,7 +74,7 @@ public class SkarbSDK {
     guard SKServiceRegistry.commandStore.hasInstallV4Command else {
       return
     }
-    let attributionRequest = Apiinstall_AttribRequest(broker: broker.name, features: features)
+    let attributionRequest = Installapi_AttribRequest(broker: broker.name, features: features)
     let sourceV4Command = SKCommand(timestamp: Date().nowTimestampInt,
                                     commandType: .sourceV4,
                                     status: .pending,

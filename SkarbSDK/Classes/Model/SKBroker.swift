@@ -12,6 +12,8 @@ public enum SKBroker {
   case facebook
   case searchads
   case appsflyer
+  case adjust
+  case branch
   case custom(String)
   
   var name: String {
@@ -22,6 +24,10 @@ public enum SKBroker {
         return "searchads"
       case .appsflyer:
         return "appsflyer"
+      case .adjust:
+        return "adjust"
+      case .branch:
+        return "branch"
       case .custom(let value):
         return value
     }

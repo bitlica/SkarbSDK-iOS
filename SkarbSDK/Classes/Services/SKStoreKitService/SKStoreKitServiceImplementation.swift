@@ -116,7 +116,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
           let transactionDataV4 = Apipurchase_TransactionsRequest(deviceId: SkarbSDK.deviceId,
                                                                   newTransactions: newTransactions)
           let transactionV4Command = SKCommand(timestamp: Date().nowTimestampInt,
-                                               commandType: .purchaseV4,
+                                               commandType: .transactionV4,
                                                status: .pending,
                                                data: transactionDataV4.getData() ?? Data(),
                                                retryCount: 0)

@@ -113,7 +113,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       if SKServiceRegistry.commandStore.hasPurhcaseV4Command {
         let newTransactions = SKServiceRegistry.commandStore.getNewTransactionIds(transactionIds)
         if !newTransactions.isEmpty {
-          let transactionDataV4 = Apipurchase_TransactionsRequest(deviceId: SkarbSDK.deviceId,
+          let transactionDataV4 = Purchaseapi_TransactionsRequest(deviceId: SkarbSDK.deviceId,
                                                                   newTransactions: newTransactions)
           let transactionV4Command = SKCommand(timestamp: Date().nowTimestampInt,
                                                commandType: .transactionV4,
@@ -123,7 +123,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
           SKServiceRegistry.commandStore.saveCommand(transactionV4Command)
         }
       } else {
-        let purchaseDataV4 = Apipurchase_ReceiptRequest(deviceId: SkarbSDK.deviceId,
+        let purchaseDataV4 = Purchaseapi_ReceiptRequest(deviceId: SkarbSDK.deviceId,
                                                         newTransactions: transactionIds)
         let purchaseV4Command = SKCommand(timestamp: Date().nowTimestampInt,
                                           commandType: .purchaseV4,

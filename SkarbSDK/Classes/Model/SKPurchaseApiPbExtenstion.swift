@@ -10,7 +10,7 @@ import Foundation
 import UIKit
 import AdSupport
 
-extension Apipurchase_Auth: SKCodableStruct {
+extension Purchaseapi_Auth: SKCodableStruct {
   
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -18,7 +18,7 @@ extension Apipurchase_Auth: SKCodableStruct {
     let bundleID = try container.decode(String.self, forKey: .bundleID)
     let agentName = try container.decode(String.self, forKey: .agentName)
     let agentVer = try container.decode(String.self, forKey: .agentVer)
-    self = Apipurchase_Auth.with({
+    self = Purchaseapi_Auth.with({
       $0.key = key
       $0.bundleID = bundleID
       $0.agentName = agentName
@@ -51,10 +51,10 @@ extension Apipurchase_Auth: SKCodableStruct {
   }
 }
 
-extension Apipurchase_TransactionsRequest: SKCodableStruct {
+extension Purchaseapi_TransactionsRequest: SKCodableStruct {
   
   init(deviceId: String, newTransactions: [String]) {
-    let authData = Apipurchase_Auth.with {
+    let authData = Purchaseapi_Auth.with {
       $0.key = SkarbSDK.clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
       $0.agentName = SkarbSDK.agentName
@@ -67,11 +67,11 @@ extension Apipurchase_TransactionsRequest: SKCodableStruct {
   
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let auth = try container.decode(Apipurchase_Auth.self, forKey: .auth)
+    let auth = try container.decode(Purchaseapi_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let transactions = try container.decode(Array<String>.self, forKey: .transactions)
     
-    self = Apipurchase_TransactionsRequest.with({
+    self = Purchaseapi_TransactionsRequest.with({
       $0.auth = auth
       $0.installID = installID
       $0.transactions = transactions
@@ -101,10 +101,10 @@ extension Apipurchase_TransactionsRequest: SKCodableStruct {
   }
 }
 
-extension Apipurchase_ReceiptRequest: SKCodableStruct {
+extension Purchaseapi_ReceiptRequest: SKCodableStruct {
   
   init(deviceId: String, newTransactions: [String]) {
-    let authData = Apipurchase_Auth.with {
+    let authData = Purchaseapi_Auth.with {
       $0.key = SkarbSDK.clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
       $0.agentName = SkarbSDK.agentName
@@ -141,7 +141,7 @@ extension Apipurchase_ReceiptRequest: SKCodableStruct {
   
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let auth = try container.decode(Apipurchase_Auth.self, forKey: .auth)
+    let auth = try container.decode(Purchaseapi_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let transactions = try container.decode(Array<String>.self, forKey: .transactions)
     let idfa = try container.decode(String.self, forKey: .idfa)
@@ -150,7 +150,7 @@ extension Apipurchase_ReceiptRequest: SKCodableStruct {
     let receiptLen = try container.decode(String.self, forKey: .receiptLen)
     let receipt = try container.decode(Data.self, forKey: .receipt)
     
-    self = Apipurchase_ReceiptRequest.with({
+    self = Purchaseapi_ReceiptRequest.with({
       $0.auth = auth
       $0.installID = installID
       $0.transactions = transactions

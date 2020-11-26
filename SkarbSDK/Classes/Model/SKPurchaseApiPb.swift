@@ -20,7 +20,7 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-struct Apipurchase_Auth {
+struct Purchaseapi_Auth {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -38,13 +38,13 @@ struct Apipurchase_Auth {
   init() {}
 }
 
-struct Apipurchase_TransactionsRequest {
+struct Purchaseapi_TransactionsRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var auth: Apipurchase_Auth {
-    get {return _auth ?? Apipurchase_Auth()}
+  var auth: Purchaseapi_Auth {
+    get {return _auth ?? Purchaseapi_Auth()}
     set {_auth = newValue}
   }
   /// Returns true if `auth` has been explicitly set.
@@ -61,16 +61,16 @@ struct Apipurchase_TransactionsRequest {
 
   init() {}
 
-  fileprivate var _auth: Apipurchase_Auth? = nil
+  fileprivate var _auth: Purchaseapi_Auth? = nil
 }
 
-struct Apipurchase_ReceiptRequest {
+struct Purchaseapi_ReceiptRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var auth: Apipurchase_Auth {
-    get {return _auth ?? Apipurchase_Auth()}
+  var auth: Purchaseapi_Auth {
+    get {return _auth ?? Purchaseapi_Auth()}
     set {_auth = newValue}
   }
   /// Returns true if `auth` has been explicitly set.
@@ -94,14 +94,23 @@ struct Apipurchase_ReceiptRequest {
 
   var receipt: Data = SwiftProtobuf.Internal.emptyData
 
+  /// startting from iOS13
+  var storefront: String = String()
+
+  /// code from priceLocale or Locale
+  var region: String = String()
+
+  /// code from priceLocale or Locale
+  var currency: String = String()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
-  fileprivate var _auth: Apipurchase_Auth? = nil
+  fileprivate var _auth: Purchaseapi_Auth? = nil
 }
 
-struct Apipurchase_ReceiptResponse {
+struct Purchaseapi_ReceiptResponse {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
@@ -115,9 +124,9 @@ struct Apipurchase_ReceiptResponse {
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-fileprivate let _protobuf_package = "apipurchase"
+fileprivate let _protobuf_package = "purchaseapi"
 
-extension Apipurchase_Auth: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Purchaseapi_Auth: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Auth"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "key"),
@@ -154,7 +163,7 @@ extension Apipurchase_Auth: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Apipurchase_Auth, rhs: Apipurchase_Auth) -> Bool {
+  static func ==(lhs: Purchaseapi_Auth, rhs: Purchaseapi_Auth) -> Bool {
     if lhs.key != rhs.key {return false}
     if lhs.bundleID != rhs.bundleID {return false}
     if lhs.agentName != rhs.agentName {return false}
@@ -164,7 +173,7 @@ extension Apipurchase_Auth: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
   }
 }
 
-extension Apipurchase_TransactionsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Purchaseapi_TransactionsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".TransactionsRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "auth"),
@@ -196,7 +205,7 @@ extension Apipurchase_TransactionsRequest: SwiftProtobuf.Message, SwiftProtobuf.
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Apipurchase_TransactionsRequest, rhs: Apipurchase_TransactionsRequest) -> Bool {
+  static func ==(lhs: Purchaseapi_TransactionsRequest, rhs: Purchaseapi_TransactionsRequest) -> Bool {
     if lhs._auth != rhs._auth {return false}
     if lhs.installID != rhs.installID {return false}
     if lhs.transactions != rhs.transactions {return false}
@@ -205,7 +214,7 @@ extension Apipurchase_TransactionsRequest: SwiftProtobuf.Message, SwiftProtobuf.
   }
 }
 
-extension Apipurchase_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ReceiptRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "auth"),
@@ -216,6 +225,9 @@ extension Apipurchase_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
     7: .standard(proto: "receipt_url"),
     8: .standard(proto: "receipt_len"),
     9: .same(proto: "receipt"),
+    10: .same(proto: "storefront"),
+    11: .same(proto: "region"),
+    12: .same(proto: "currency"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -229,6 +241,9 @@ extension Apipurchase_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
       case 7: try decoder.decodeSingularStringField(value: &self.receiptURL)
       case 8: try decoder.decodeSingularStringField(value: &self.receiptLen)
       case 9: try decoder.decodeSingularBytesField(value: &self.receipt)
+      case 10: try decoder.decodeSingularStringField(value: &self.storefront)
+      case 11: try decoder.decodeSingularStringField(value: &self.region)
+      case 12: try decoder.decodeSingularStringField(value: &self.currency)
       default: break
       }
     }
@@ -259,10 +274,19 @@ extension Apipurchase_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
     if !self.receipt.isEmpty {
       try visitor.visitSingularBytesField(value: self.receipt, fieldNumber: 9)
     }
+    if !self.storefront.isEmpty {
+      try visitor.visitSingularStringField(value: self.storefront, fieldNumber: 10)
+    }
+    if !self.region.isEmpty {
+      try visitor.visitSingularStringField(value: self.region, fieldNumber: 11)
+    }
+    if !self.currency.isEmpty {
+      try visitor.visitSingularStringField(value: self.currency, fieldNumber: 12)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Apipurchase_ReceiptRequest, rhs: Apipurchase_ReceiptRequest) -> Bool {
+  static func ==(lhs: Purchaseapi_ReceiptRequest, rhs: Purchaseapi_ReceiptRequest) -> Bool {
     if lhs._auth != rhs._auth {return false}
     if lhs.installID != rhs.installID {return false}
     if lhs.transactions != rhs.transactions {return false}
@@ -271,12 +295,15 @@ extension Apipurchase_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
     if lhs.receiptURL != rhs.receiptURL {return false}
     if lhs.receiptLen != rhs.receiptLen {return false}
     if lhs.receipt != rhs.receipt {return false}
+    if lhs.storefront != rhs.storefront {return false}
+    if lhs.region != rhs.region {return false}
+    if lhs.currency != rhs.currency {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
 }
 
-extension Apipurchase_ReceiptResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+extension Purchaseapi_ReceiptResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ReceiptResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "id"),
@@ -298,7 +325,7 @@ extension Apipurchase_ReceiptResponse: SwiftProtobuf.Message, SwiftProtobuf._Mes
     try unknownFields.traverse(visitor: &visitor)
   }
 
-  static func ==(lhs: Apipurchase_ReceiptResponse, rhs: Apipurchase_ReceiptResponse) -> Bool {
+  static func ==(lhs: Purchaseapi_ReceiptResponse, rhs: Purchaseapi_ReceiptResponse) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

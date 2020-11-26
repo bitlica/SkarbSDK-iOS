@@ -127,7 +127,7 @@ class SKCommandStore {
     let decoder = JSONDecoder()
     var existing: Set<String> = []
     for command in result {
-      if let transaction = try? decoder.decode(Apipurchase_TransactionsRequest.self, from: command.data) {
+      if let transaction = try? decoder.decode(Purchaseapi_TransactionsRequest.self, from: command.data) {
         transaction.transactions.forEach { transactionId in
           existing.insert(transactionId)
         }

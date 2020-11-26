@@ -25,21 +25,21 @@ import NIO
 import SwiftProtobuf
 
 
-/// Usage: instantiate Apipurchase_IngesterClient, then call methods of this protocol to make API calls.
-internal protocol Apipurchase_IngesterClientProtocol: GRPCClient {
+/// Usage: instantiate Purchaseapi_IngesterClient, then call methods of this protocol to make API calls.
+internal protocol Purchaseapi_IngesterClientProtocol: GRPCClient {
   func setReceipt(
-    _ request: Apipurchase_ReceiptRequest,
+    _ request: Purchaseapi_ReceiptRequest,
     callOptions: CallOptions?
-  ) -> UnaryCall<Apipurchase_ReceiptRequest, Apipurchase_ReceiptResponse>
+  ) -> UnaryCall<Purchaseapi_ReceiptRequest, Purchaseapi_ReceiptResponse>
 
   func setTransactions(
-    _ request: Apipurchase_TransactionsRequest,
+    _ request: Purchaseapi_TransactionsRequest,
     callOptions: CallOptions?
-  ) -> UnaryCall<Apipurchase_TransactionsRequest, SwiftProtobuf.Google_Protobuf_Empty>
+  ) -> UnaryCall<Purchaseapi_TransactionsRequest, SwiftProtobuf.Google_Protobuf_Empty>
 
 }
 
-extension Apipurchase_IngesterClientProtocol {
+extension Purchaseapi_IngesterClientProtocol {
 
   /// Unary call to SetReceipt
   ///
@@ -48,11 +48,11 @@ extension Apipurchase_IngesterClientProtocol {
   ///   - callOptions: Call options.
   /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
   internal func setReceipt(
-    _ request: Apipurchase_ReceiptRequest,
+    _ request: Purchaseapi_ReceiptRequest,
     callOptions: CallOptions? = nil
-  ) -> UnaryCall<Apipurchase_ReceiptRequest, Apipurchase_ReceiptResponse> {
+  ) -> UnaryCall<Purchaseapi_ReceiptRequest, Purchaseapi_ReceiptResponse> {
     return self.makeUnaryCall(
-      path: "/apipurchase.Ingester/SetReceipt",
+      path: "/purchaseapi.Ingester/SetReceipt",
       request: request,
       callOptions: callOptions ?? self.defaultCallOptions
     )
@@ -65,22 +65,22 @@ extension Apipurchase_IngesterClientProtocol {
   ///   - callOptions: Call options.
   /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
   internal func setTransactions(
-    _ request: Apipurchase_TransactionsRequest,
+    _ request: Purchaseapi_TransactionsRequest,
     callOptions: CallOptions? = nil
-  ) -> UnaryCall<Apipurchase_TransactionsRequest, SwiftProtobuf.Google_Protobuf_Empty> {
+  ) -> UnaryCall<Purchaseapi_TransactionsRequest, SwiftProtobuf.Google_Protobuf_Empty> {
     return self.makeUnaryCall(
-      path: "/apipurchase.Ingester/SetTransactions",
+      path: "/purchaseapi.Ingester/SetTransactions",
       request: request,
       callOptions: callOptions ?? self.defaultCallOptions
     )
   }
 }
 
-internal final class Apipurchase_IngesterClient: Apipurchase_IngesterClientProtocol {
+internal final class Purchaseapi_IngesterClient: Purchaseapi_IngesterClientProtocol {
   internal let channel: GRPCChannel
   internal var defaultCallOptions: CallOptions
 
-  /// Creates a client for the apipurchase.Ingester service.
+  /// Creates a client for the purchaseapi.Ingester service.
   ///
   /// - Parameters:
   ///   - channel: `GRPCChannel` to the service host.
@@ -92,13 +92,13 @@ internal final class Apipurchase_IngesterClient: Apipurchase_IngesterClientProto
 }
 
 /// To build a server, implement a class that conforms to this protocol.
-internal protocol Apipurchase_IngesterProvider: CallHandlerProvider {
-  func setReceipt(request: Apipurchase_ReceiptRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Apipurchase_ReceiptResponse>
-  func setTransactions(request: Apipurchase_TransactionsRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
+internal protocol Purchaseapi_IngesterProvider: CallHandlerProvider {
+  func setReceipt(request: Purchaseapi_ReceiptRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Purchaseapi_ReceiptResponse>
+  func setTransactions(request: Purchaseapi_TransactionsRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
 }
 
-extension Apipurchase_IngesterProvider {
-  internal var serviceName: Substring { return "apipurchase.Ingester" }
+extension Purchaseapi_IngesterProvider {
+  internal var serviceName: Substring { return "purchaseapi.Ingester" }
 
   /// Determines, calls and returns the appropriate request handler, depending on the request's method.
   /// Returns nil for methods not handled by this service.

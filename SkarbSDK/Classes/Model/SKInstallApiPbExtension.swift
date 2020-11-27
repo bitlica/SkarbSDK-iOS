@@ -232,6 +232,20 @@ extension Installapi_AttribRequest: SKCodableStruct {
 
 extension Installapi_TestRequest: SKCodableStruct {
   
+  init(name: String, group: String) {
+    
+    let authData = Installapi_Auth.with {
+      $0.key = SkarbSDK.clientId
+      $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
+      $0.agentName = SkarbSDK.agentName
+      $0.agentVer = SkarbSDK.version
+    }
+    self.auth = authData
+    self.installID = SkarbSDK.deviceId
+    self.name = name
+    self.group = group
+  }
+  
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let auth = try container.decode(Installapi_Auth.self, forKey: .auth)

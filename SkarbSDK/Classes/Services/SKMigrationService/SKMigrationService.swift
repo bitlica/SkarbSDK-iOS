@@ -99,5 +99,8 @@ struct SKMigrationService {
       SKServiceRegistry.commandStore.saveState()
       SKServiceRegistry.userDefaultsService.setValue(true, forKey: .migrationVersion(version1))
     }
+    
+//  TODO: Add migration for deviceId. Need t to store the value that will be
+//  used for all requests.
   }
 }

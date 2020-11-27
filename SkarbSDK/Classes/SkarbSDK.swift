@@ -45,11 +45,16 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.saveCommand(testCommand)
     
     // V4
-    guard !SKServiceRegistry.commandStore.hasInstallV4Command else {
+    guard SKServiceRegistry.commandStore.hasInstallV4Command else {
       return
     }
-    
-//    TODO: Add later
+    let testRequest = Installapi_TestRequest(name: name, group: group)
+    let testV4Command = SKCommand(timestamp: Date().nowTimestampInt,
+                                  commandType: .testV4,
+                                  status: .pending,
+                                  data: testRequest.getData() ?? Data(),
+                                  retryCount: 0)
+    SKServiceRegistry.commandStore.saveCommand(testV4Command)
   }
   
   public static func sendSource(broker: SKBroker,

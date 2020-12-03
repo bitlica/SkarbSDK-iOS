@@ -134,14 +134,14 @@ class SKCommandStore {
       }
     }
     
-    var newTransaction: Set<String> = []
+    var newTransactions: Set<String> = []
     for transaction in transactions {
       if !existing.contains(transaction) {
-        newTransaction.insert(transaction)
+        newTransactions.insert(transaction)
       }
     }
     
-    return Array(newTransaction)
+    return Array(newTransactions)
   }
   
   func createInstallCommandIfNeeded(clientId: String, deviceId: String) {

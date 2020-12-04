@@ -17,6 +17,18 @@ struct SKCommand: Codable {
   let data: Data
   private(set) var retryCount: Int
   
+  init(timestamp: Int = Date().nowTimestampInt,
+       commandType: SKCommandType,
+       status: SKCommandStatus,
+       data: Data?,
+       retryCount: Int = 0) {
+    self.timestamp = timestamp
+    self.commandType = commandType
+    self.status = status
+    self.data = data ?? Data()
+    self.retryCount = retryCount
+  }
+  
   var description: String {
     return "timestamp=\(timestamp), commandType=\(commandType), status=\(status), retryCount=\(retryCount), data = \(String(describing: String(data: data, encoding: .utf8)))"
   }

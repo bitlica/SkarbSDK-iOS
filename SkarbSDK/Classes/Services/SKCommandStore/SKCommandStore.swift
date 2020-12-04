@@ -166,22 +166,18 @@ class SKCommandStore {
                                 receiptLen: dataCount)
       SKServiceRegistry.userDefaultsService.setValue(initData.getData(), forKey: .initData)
       
-      let installCommand = SKCommand(timestamp: Date().nowTimestampInt,
-                                     commandType: .install,
+      let installCommand = SKCommand(commandType: .install,
                                      status: .pending,
-                                     data: SKCommand.prepareAppgateData(),
-                                     retryCount: 0)
+                                     data: SKCommand.prepareAppgateData())
       SKServiceRegistry.commandStore.saveCommand(installCommand)
       
       // Logic for V4 - if user has v3 then v4 install command will not be created and executed
       // Need to create v4 install command only for new users for clean tests.
       // V4
       let initDataV4 = Installapi_DeviceRequest(clientId: clientId, deviceId: deviceId)
-      let installCommandV4 = SKCommand(timestamp: Date().nowTimestampInt,
-                                       commandType: .installV4,
+      let installCommandV4 = SKCommand(commandType: .installV4,
                                        status: .pending,
-                                       data: initDataV4.getData() ?? Data(),
-                                       retryCount: 0)
+                                       data: initDataV4.getData())
       SKServiceRegistry.commandStore.saveCommand(installCommandV4)
     }
   }
@@ -203,11 +199,9 @@ class SKCommandStore {
       return
     }
     
-    let installCommand = SKCommand(timestamp: Date().nowTimestampInt,
-                                   commandType: .automaticSearchAds,
+    let installCommand = SKCommand(commandType: .automaticSearchAds,
                                    status: .pending,
-                                   data: Data(),
-                                   retryCount: 0)
+                                   data: Data())
     SKServiceRegistry.commandStore.saveCommand(installCommand)
   }
 }

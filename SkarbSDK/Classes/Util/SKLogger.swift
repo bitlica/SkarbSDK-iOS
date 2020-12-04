@@ -52,11 +52,9 @@ class SKLogger {
     var features = features ?? [:]
     features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
     features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
-    let command = SKCommand(timestamp: Date().nowTimestampInt,
-                            commandType: .logging,
+    let command = SKCommand(commandType: .logging,
                             status: .pending,
-                            data: SKCommand.prepareApplogData(message: message, features: features),
-                            retryCount: 0)
+                            data: SKCommand.prepareApplogData(message: message, features: features))
     SKServiceRegistry.commandStore.saveCommand(command)
     if isDebug {
       print("\(Formatter.milliSec.string(from: Date())) [ERROR] \(message)")
@@ -64,11 +62,9 @@ class SKLogger {
   }
   
   static func logWarn(_ message: String, features: [String: Any]?) {
-    let command = SKCommand(timestamp: Date().nowTimestampInt,
-                            commandType: .logging,
+    let command = SKCommand(commandType: .logging,
                             status: .pending,
-                            data: SKCommand.prepareApplogData(message: message, features: features),
-                            retryCount: 0)
+                            data: SKCommand.prepareApplogData(message: message, features: features))
     SKServiceRegistry.commandStore.saveCommand(command)
     if isDebug {
       print("\(Formatter.milliSec.string(from: Date())) [WARN] \(message)")

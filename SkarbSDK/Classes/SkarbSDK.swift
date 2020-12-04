@@ -37,11 +37,9 @@ public class SkarbSDK {
     let testData = SKTestData(name: name, group: group)
     SKServiceRegistry.userDefaultsService.setValue(testData.getData(), forKey: .testData)
     
-    let testCommand = SKCommand(timestamp: Date().nowTimestampInt,
-                                commandType: .test,
+    let testCommand = SKCommand(commandType: .test,
                                 status: .pending,
-                                data: SKCommand.prepareAppgateData(),
-                                retryCount: 0)
+                                data: SKCommand.prepareAppgateData())
     SKServiceRegistry.commandStore.saveCommand(testCommand)
     
     // V4
@@ -49,11 +47,9 @@ public class SkarbSDK {
       return
     }
     let testRequest = Installapi_TestRequest(name: name, group: group)
-    let testV4Command = SKCommand(timestamp: Date().nowTimestampInt,
-                                  commandType: .testV4,
+    let testV4Command = SKCommand(commandType: .testV4,
                                   status: .pending,
-                                  data: testRequest.getData() ?? Data(),
-                                  retryCount: 0)
+                                  data: testRequest.getData())
     SKServiceRegistry.commandStore.saveCommand(testV4Command)
   }
   
@@ -68,11 +64,9 @@ public class SkarbSDK {
     let broberData = SKBrokerData(broker: broker.name, features: features)
     SKServiceRegistry.userDefaultsService.setValue(broberData.getData(), forKey: .brokerData)
     
-    let sourceCommand = SKCommand(timestamp: Date().nowTimestampInt,
-                                  commandType: .source,
+    let sourceCommand = SKCommand(commandType: .source,
                                   status: .pending,
-                                  data: SKCommand.prepareAppgateData(),
-                                  retryCount: 0)
+                                  data: SKCommand.prepareAppgateData())
     SKServiceRegistry.commandStore.saveCommand(sourceCommand)
     
     // V4
@@ -80,11 +74,9 @@ public class SkarbSDK {
       return
     }
     let attributionRequest = Installapi_AttribRequest(broker: broker.name, features: features)
-    let sourceV4Command = SKCommand(timestamp: Date().nowTimestampInt,
-                                    commandType: .sourceV4,
+    let sourceV4Command = SKCommand(commandType: .sourceV4,
                                     status: .pending,
-                                    data: attributionRequest.getData() ?? Data(),
-                                    retryCount: 0)
+                                    data: attributionRequest.getData())
     SKServiceRegistry.commandStore.saveCommand(sourceV4Command)
   }
   
@@ -101,11 +93,9 @@ public class SkarbSDK {
                                       currency: currency)
     SKServiceRegistry.userDefaultsService.setValue(purchaseData.getData(), forKey: .purchaseData)
     
-    let purchaseCommand = SKCommand(timestamp: Date().nowTimestampInt,
-                                    commandType: .purchase,
+    let purchaseCommand = SKCommand(commandType: .purchase,
                                     status: .pending,
-                                    data: SKCommand.prepareAppgateData(),
-                                    retryCount: 0)
+                                    data: SKCommand.prepareAppgateData())
     SKServiceRegistry.commandStore.saveCommand(purchaseCommand)
   }
   

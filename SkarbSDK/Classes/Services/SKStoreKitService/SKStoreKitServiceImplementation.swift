@@ -87,11 +87,9 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
                                   features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
                 return
               }
-              let fetchCommand = SKCommand(timestamp: Date().nowTimestampInt,
-                                           commandType: .fetchProducts,
+              let fetchCommand = SKCommand(commandType: .fetchProducts,
                                            status: .pending,
-                                           data: productData,
-                                           retryCount: 0)
+                                           data: productData)
               SKServiceRegistry.commandStore.saveCommand(fetchCommand)
             }
           case .failed:
@@ -115,21 +113,17 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
         if !newTransactions.isEmpty {
           let transactionDataV4 = Purchaseapi_TransactionsRequest(deviceId: SkarbSDK.deviceId,
                                                                   newTransactions: newTransactions)
-          let transactionV4Command = SKCommand(timestamp: Date().nowTimestampInt,
-                                               commandType: .transactionV4,
+          let transactionV4Command = SKCommand(commandType: .transactionV4,
                                                status: .pending,
-                                               data: transactionDataV4.getData() ?? Data(),
-                                               retryCount: 0)
+                                               data: transactionDataV4.getData())
           SKServiceRegistry.commandStore.saveCommand(transactionV4Command)
         }
       } else {
         let purchaseDataV4 = Purchaseapi_ReceiptRequest(deviceId: SkarbSDK.deviceId,
                                                         newTransactions: transactionIds)
-        let purchaseV4Command = SKCommand(timestamp: Date().nowTimestampInt,
-                                          commandType: .purchaseV4,
+        let purchaseV4Command = SKCommand(commandType: .purchaseV4,
                                           status: .pending,
-                                          data: purchaseDataV4.getData() ?? Data(),
-                                          retryCount: 0)
+                                          data: purchaseDataV4.getData())
         SKServiceRegistry.commandStore.saveCommand(purchaseV4Command)
       }
     }

@@ -37,16 +37,16 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   
   func requestProductInfoAndSendPurchase(command: SKCommand) {
     var editedCommand = command
-    guard let productId = String(data: command.data, encoding: .utf8) else {
+    guard let productIds = String(data: command.data, encoding: .utf8) else {
       SKLogger.logError("SKSyncServiceImplementation requestProductInfoAndSendPurchase: called with fetchProducts but command.data is not String. Command.data == \(String(describing: String(data: command.data, encoding: .utf8)))", features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
       editedCommand.changeStatus(to: .canceled)
       SKServiceRegistry.commandStore.saveCommand(command)
       return
     }
     
-    requestProductInfo(productId: productId) { products in
-      if let product = products.filter({ $0.productIdentifier == productId }).first {
-        SkarbSDK.sendPurchase(productId: productId,
+    requestProductInfo(productIds: productIds.components(separatedBy: ",")) { products in
+      if let product = products.first {
+        SkarbSDK.sendPurchase(productId: product.productIdentifier,
                               price: product.price.floatValue,
                               currency: product.priceLocale.currencyCode ?? "")
       } else {
@@ -54,6 +54,17 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
         editedCommand.changeStatus(to: .pending)
         SKServiceRegistry.commandStore.saveCommand(command)
       }
+      
+      // Send command for price
+      let priceApiProducts = products.map { Priceapi_Product(product: $0) }
+      let productRequest = Priceapi_PricesRequest(storefront: SKPaymentQueue.default().storefront?.countryCode,
+                                                  region: products.first?.priceLocale.regionCode,
+                                                  currency: products.first?.priceLocale.currencyCode,
+                                                  products: priceApiProducts)
+      let command = SKCommand(commandType: .priceV4,
+                              status: .pending,
+                              data: productRequest.getData())
+      SKServiceRegistry.commandStore.saveCommand(command)
     }
   }
 }
@@ -85,7 +96,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
               guard let productData = purchasedProductId.data(using: .utf8) else {
                 SKLogger.logError("paymentQueue updatedTransactions: called. Need to fetch products but purchasedProductId.data(using: .utf8) == nil",
                                   features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
-                return
+                continue
               }
               let fetchCommand = SKCommand(commandType: .fetchProducts,
                                            status: .pending,
@@ -101,8 +112,37 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
         }
       }
       
-      // V4 part
+      guard let self = self,
+            self.isObservable else {
+        return
+      }
+      
       let purchasedTransactions = transactions.filter { $0.transactionState == .purchased }
+      
+      //V3
+      
+      if let allProducts = self.allProducts,
+         let purchasedTransaction = purchasedTransactions.first,
+         let product = allProducts.filter({ $0.productIdentifier == purchasedTransaction.payment.productIdentifier }).first {
+        SkarbSDK.sendPurchase(productId: purchasedTransaction.payment.productIdentifier,
+                              price: product.price.floatValue,
+                              currency: product.priceLocale.currencyCode ?? "")
+      }
+      
+      
+      let purchasedProductIds = Array(Set(purchasedTransactions.map { $0.payment.productIdentifier })).joined(separator: ",")
+      guard let productData = purchasedProductIds.data(using: .utf8) else {
+        SKLogger.logError("paymentQueue updatedTransactions: called. Need to fetch products but purchasedProductId.data(using: .utf8) == nil",
+                          features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+        return
+      }
+      let fetchCommand = SKCommand(commandType: .fetchProducts,
+                                   status: .pending,
+                                   data: productData)
+      SKServiceRegistry.commandStore.saveCommand(fetchCommand)
+      
+      // V4 part
+      
       guard !purchasedTransactions.isEmpty,
             SKServiceRegistry.commandStore.hasInstallV4Command else {
         return
@@ -165,12 +205,12 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
 }
 
 private extension SKStoreKitServiceImplementation {
-  func requestProductInfo(productId: String, completion: @escaping ([SKProduct]) -> Void) {
+  func requestProductInfo(productIds: [String], completion: @escaping ([SKProduct]) -> Void) {
     dispatchPrecondition(condition: .onQueue(.main))
     
     productInfoCompletion = completion
     
-    let request = SKProductsRequest(productIdentifiers: Set([productId]))
+    let request = SKProductsRequest(productIdentifiers: Set(productIds))
     request.delegate = self
     
     request.start()

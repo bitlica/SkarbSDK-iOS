@@ -63,13 +63,9 @@ extension Priceapi_PricesRequest: SKCodableStruct {
       $0.agentVer = SkarbSDK.version
     }
     self.auth = authData
-    if let storefront = storefront {
-      self.storefront = storefront
-    } else {
-      self.region = region ?? ""
-      self.currency = currency ?? ""
-    }
-    
+    self.storefront = storefront ?? ""
+    self.region = region ?? ""
+    self.currency = currency ?? ""
     self.products = products
   }
   

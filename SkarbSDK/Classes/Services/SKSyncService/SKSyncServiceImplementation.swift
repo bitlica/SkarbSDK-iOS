@@ -106,7 +106,7 @@ class SKSyncServiceImplementation: SKSyncService {
           case .fetchProducts:
             DispatchQueue.main.async {
               SKServiceRegistry.storeKitService.requestProductInfoAndSendPurchase(command: command)
-          }
+            }
           case .automaticSearchAds:
             DispatchQueue.main.async {
               ADClient.shared().requestAttributionDetails({ (attributionJSON, error) in
@@ -123,7 +123,7 @@ class SKSyncServiceImplementation: SKSyncService {
                 command.changeStatus(to: .done)
                 SKServiceRegistry.commandStore.saveCommand(command)
               })
-          }
+            }
         }
       })
     }

@@ -114,6 +114,9 @@ class SKServerAPIImplementaton: SKServerAPI {
                 completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
             }
           }
+        case .priceV4:
+//          TODO:
+          break
         default:
           SKLogger.logError("SyncCommand called default. Unpredictable case",
                             features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])

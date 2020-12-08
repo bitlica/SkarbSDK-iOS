@@ -30,6 +30,7 @@ class SKServerAPIImplementaton: SKServerAPI {
 
       let installService = Installapi_IngesterClient(channel: clientConnection)
       let purchaseService = Purchaseapi_IngesterClient(channel: clientConnection)
+      let priceService = Priceapi_PricerClient(channel: clientConnection)
       
       let decoder = JSONDecoder()
       
@@ -115,8 +116,21 @@ class SKServerAPIImplementaton: SKServerAPI {
             }
           }
         case .priceV4:
-//          TODO:
-          break
+          guard let priceRequest = try? decoder.decode(Priceapi_PricesRequest.self, from: command.data) else {
+            SKLogger.logError("SyncCommand called with testV4. Priceapi_PricesRequest cannt be decoded",
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+            return
+          }
+          let call = priceService.setPrices(priceRequest)
+          call.response.whenComplete { result in
+            SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
+            switch result {
+              case .success:
+                completion?(nil)
+              case .failure(let error):
+                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+            }
+          }
         default:
           SKLogger.logError("SyncCommand called default. Unpredictable case",
                             features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])

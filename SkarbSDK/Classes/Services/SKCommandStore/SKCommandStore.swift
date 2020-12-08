@@ -179,6 +179,10 @@ class SKCommandStore {
                                        status: .pending,
                                        data: initDataV4.getData())
       SKServiceRegistry.commandStore.saveCommand(installCommandV4)
+      
+      if SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) == nil {
+        SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
+      }
     }
   }
   

@@ -171,7 +171,7 @@ extension Installapi_AttribRequest: SKCodableStruct {
       $0.agentVer = SkarbSDK.version
     }
     self.auth = authData
-    self.installID = SkarbSDK.deviceId
+    self.installID = SkarbSDK.getDeviceId()
     self.broker = broker
     
     guard JSONSerialization.isValidJSONObject(features) else {
@@ -241,7 +241,7 @@ extension Installapi_TestRequest: SKCodableStruct {
       $0.agentVer = SkarbSDK.version
     }
     self.auth = authData
-    self.installID = SkarbSDK.deviceId
+    self.installID = SkarbSDK.getDeviceId()
     self.name = name
     self.group = group
   }

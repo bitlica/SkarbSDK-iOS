@@ -53,7 +53,7 @@ extension Purchaseapi_Auth: SKCodableStruct {
 
 extension Purchaseapi_TransactionsRequest: SKCodableStruct {
   
-  init(deviceId: String, newTransactions: [String]) {
+  init(newTransactions: [String]) {
     let authData = Purchaseapi_Auth.with {
       $0.key = SkarbSDK.clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
@@ -61,7 +61,7 @@ extension Purchaseapi_TransactionsRequest: SKCodableStruct {
       $0.agentVer = SkarbSDK.version
     }
     auth = authData
-    installID = deviceId
+    installID = SkarbSDK.getDeviceId()
     transactions = newTransactions
   }
   
@@ -103,7 +103,7 @@ extension Purchaseapi_TransactionsRequest: SKCodableStruct {
 
 extension Purchaseapi_ReceiptRequest: SKCodableStruct {
   
-  init(deviceId: String, newTransactions: [String]) {
+  init(newTransactions: [String]) {
     let authData = Purchaseapi_Auth.with {
       $0.key = SkarbSDK.clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
@@ -111,7 +111,7 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
       $0.agentVer = SkarbSDK.version
     }
     auth = authData
-    installID = deviceId
+    installID = SkarbSDK.getDeviceId()
     transactions = newTransactions
     idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
     idfv = UIDevice.current.identifierForVendor?.uuidString ?? ""

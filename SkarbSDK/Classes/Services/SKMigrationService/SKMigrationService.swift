@@ -92,7 +92,10 @@ struct SKMigrationService {
       SKServiceRegistry.userDefaultsService.setValue(true, forKey: .migrationVersion(version1))
     }
     
-//  TODO: Add migration for deviceId. Need t to store the value that will be
-//  used for all requests.
+    // Means that user has v3 version and need to store deviceId for V4
+    if let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self),
+       SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) == nil  {
+      SKServiceRegistry.userDefaultsService.setValue(initData.deviceId, forKey: .deviceId)
+    }
   }
 }

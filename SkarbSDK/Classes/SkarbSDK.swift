@@ -15,7 +15,6 @@ public class SkarbSDK {
   static let version: String = "0.4.0"
   
   static var clientId: String = ""
-  static var deviceId: String = ""
   
   public static func initialize(clientId: String,
                                 isObservable: Bool,
@@ -23,7 +22,6 @@ public class SkarbSDK {
     
     SkarbSDK.clientId = clientId
     let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
-    SkarbSDK.deviceId = deviceId
     
     SKServiceRegistry.initialize(isObservable: isObservable)
     
@@ -100,6 +98,12 @@ public class SkarbSDK {
   }
   
   public static func getDeviceId() -> String {
+    guard let deviceId = SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) else {
+      SKLogger.logError("SkarbSDK: getDeviceId() - deviceId is nil",
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.internalValue.name: "deviceId is nil"])
+      return UUID().uuidString
+    }
     return deviceId
   }
   

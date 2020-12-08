@@ -7,6 +7,6 @@ target 'SkarbSDKExample' do
   use_frameworks!
 
 #  pod 'SkarbSDK'
-  pod 'gRPC-Swift', '1.0.0-alpha.20'
+  pod 'gRPC-Swift', '1.0.0-alpha.21'
 
 end

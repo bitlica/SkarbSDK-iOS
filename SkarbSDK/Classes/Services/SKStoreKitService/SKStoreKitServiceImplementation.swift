@@ -80,41 +80,6 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
   public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
     
     DispatchQueue.main.async { [weak self] in
-      for transaction in transactions {
-        
-        switch transaction.transactionState {
-          case .purchased:
-            SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
-            guard let self = self,
-                  self.isObservable else {
-              return
-            }
-            
-            let purchasedProductId = transaction.payment.productIdentifier
-            if let allProducts = self.allProducts,
-               let product = allProducts.filter({ $0.productIdentifier == purchasedProductId }).first {
-              SkarbSDK.sendPurchase(productId: purchasedProductId,
-                                    price: product.price.floatValue,
-                                    currency: product.priceLocale.currencyCode ?? "")
-            } else {
-              guard let productData = purchasedProductId.data(using: .utf8) else {
-                SKLogger.logError("paymentQueue updatedTransactions: called. Need to fetch products but purchasedProductId.data(using: .utf8) == nil",
-                                  features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
-                continue
-              }
-              let fetchCommand = SKCommand(commandType: .fetchProducts,
-                                           status: .pending,
-                                           data: productData)
-              SKServiceRegistry.commandStore.saveCommand(fetchCommand)
-            }
-          case .failed:
-            SKLogger.logInfo("updatedTransactions: called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
-          case .restored:
-            SKLogger.logInfo("updatedTransactions: called. Transaction was restored. Date = \(String(describing: transaction.transactionDate))")
-          default:
-            break
-        }
-      }
       
       guard let self = self,
             self.isObservable else {
@@ -122,6 +87,10 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       }
       
       let purchasedTransactions = transactions.filter { $0.transactionState == .purchased }
+      
+      for transaction in purchasedTransactions {
+        SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
+      }
       
       //V3
       

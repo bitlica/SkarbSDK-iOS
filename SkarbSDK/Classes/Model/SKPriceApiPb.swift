@@ -52,6 +52,8 @@ struct Priceapi_ProductsRequest {
   /// Clears the value of `auth`. Subsequent reads from it will return its default value.
   mutating func clearAuth() {self._auth = nil}
 
+  var installID: String = String()
+
   var storefront: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -86,6 +88,8 @@ struct Priceapi_PricesRequest {
   var hasAuth: Bool {return self._auth != nil}
   /// Clears the value of `auth`. Subsequent reads from it will return its default value.
   mutating func clearAuth() {self._auth = nil}
+
+  var installID: String = String()
 
   var storefront: String = String()
 
@@ -247,14 +251,16 @@ extension Priceapi_ProductsRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
   static let protoMessageName: String = _protobuf_package + ".ProductsRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "auth"),
-    2: .same(proto: "storefront"),
+    2: .standard(proto: "install_id"),
+    3: .same(proto: "storefront"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
       case 1: try decoder.decodeSingularMessageField(value: &self._auth)
-      case 2: try decoder.decodeSingularStringField(value: &self.storefront)
+      case 2: try decoder.decodeSingularStringField(value: &self.installID)
+      case 3: try decoder.decodeSingularStringField(value: &self.storefront)
       default: break
       }
     }
@@ -264,14 +270,18 @@ extension Priceapi_ProductsRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if let v = self._auth {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     }
+    if !self.installID.isEmpty {
+      try visitor.visitSingularStringField(value: self.installID, fieldNumber: 2)
+    }
     if !self.storefront.isEmpty {
-      try visitor.visitSingularStringField(value: self.storefront, fieldNumber: 2)
+      try visitor.visitSingularStringField(value: self.storefront, fieldNumber: 3)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Priceapi_ProductsRequest, rhs: Priceapi_ProductsRequest) -> Bool {
     if lhs._auth != rhs._auth {return false}
+    if lhs.installID != rhs.installID {return false}
     if lhs.storefront != rhs.storefront {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -311,20 +321,22 @@ extension Priceapi_PricesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageI
   static let protoMessageName: String = _protobuf_package + ".PricesRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "auth"),
-    2: .same(proto: "storefront"),
-    3: .same(proto: "region"),
-    4: .same(proto: "currency"),
-    5: .same(proto: "products"),
+    2: .standard(proto: "install_id"),
+    3: .same(proto: "storefront"),
+    4: .same(proto: "region"),
+    5: .same(proto: "currency"),
+    6: .same(proto: "products"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
       switch fieldNumber {
       case 1: try decoder.decodeSingularMessageField(value: &self._auth)
-      case 2: try decoder.decodeSingularStringField(value: &self.storefront)
-      case 3: try decoder.decodeSingularStringField(value: &self.region)
-      case 4: try decoder.decodeSingularStringField(value: &self.currency)
-      case 5: try decoder.decodeRepeatedMessageField(value: &self.products)
+      case 2: try decoder.decodeSingularStringField(value: &self.installID)
+      case 3: try decoder.decodeSingularStringField(value: &self.storefront)
+      case 4: try decoder.decodeSingularStringField(value: &self.region)
+      case 5: try decoder.decodeSingularStringField(value: &self.currency)
+      case 6: try decoder.decodeRepeatedMessageField(value: &self.products)
       default: break
       }
     }
@@ -334,23 +346,27 @@ extension Priceapi_PricesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageI
     if let v = self._auth {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     }
+    if !self.installID.isEmpty {
+      try visitor.visitSingularStringField(value: self.installID, fieldNumber: 2)
+    }
     if !self.storefront.isEmpty {
-      try visitor.visitSingularStringField(value: self.storefront, fieldNumber: 2)
+      try visitor.visitSingularStringField(value: self.storefront, fieldNumber: 3)
     }
     if !self.region.isEmpty {
-      try visitor.visitSingularStringField(value: self.region, fieldNumber: 3)
+      try visitor.visitSingularStringField(value: self.region, fieldNumber: 4)
     }
     if !self.currency.isEmpty {
-      try visitor.visitSingularStringField(value: self.currency, fieldNumber: 4)
+      try visitor.visitSingularStringField(value: self.currency, fieldNumber: 5)
     }
     if !self.products.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.products, fieldNumber: 5)
+      try visitor.visitRepeatedMessageField(value: self.products, fieldNumber: 6)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Priceapi_PricesRequest, rhs: Priceapi_PricesRequest) -> Bool {
     if lhs._auth != rhs._auth {return false}
+    if lhs.installID != rhs.installID {return false}
     if lhs.storefront != rhs.storefront {return false}
     if lhs.region != rhs.region {return false}
     if lhs.currency != rhs.currency {return false}

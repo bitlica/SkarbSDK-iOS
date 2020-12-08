@@ -63,6 +63,7 @@ extension Priceapi_PricesRequest: SKCodableStruct {
       $0.agentVer = SkarbSDK.version
     }
     self.auth = authData
+    self.installID = SkarbSDK.getDeviceId()
     self.storefront = storefront ?? ""
     self.region = region ?? ""
     self.currency = currency ?? ""
@@ -72,11 +73,13 @@ extension Priceapi_PricesRequest: SKCodableStruct {
   init(from decoder: Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let auth = try container.decode(Priceapi_Auth.self, forKey: .auth)
+    let installID = try container.decode(String.self, forKey: .installID)
     let storefront = try container.decode(String.self, forKey: .storefront)
     let products = try container.decode(Array<Priceapi_Product>.self, forKey: .products)
     
     self = Priceapi_PricesRequest.with({
       $0.auth = auth
+      $0.installID = installID
       $0.storefront = storefront
       $0.products = products
     })
@@ -85,6 +88,7 @@ extension Priceapi_PricesRequest: SKCodableStruct {
   func encode(to encoder: Encoder) throws {
     var container = encoder.container(keyedBy: CodingKeys.self)
     try container.encode(auth, forKey: .auth)
+    try container.encode(installID, forKey: .installID)
     try container.encode(storefront, forKey: .storefront)
     try container.encode(products, forKey: .products)
   }
@@ -100,6 +104,7 @@ extension Priceapi_PricesRequest: SKCodableStruct {
   
   enum CodingKeys: String, CodingKey {
     case auth
+    case installID
     case storefront
     case products
   }

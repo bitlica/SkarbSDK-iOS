@@ -57,7 +57,11 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
       
       // Send command for price
       let priceApiProducts = products.map { Priceapi_Product(product: $0) }
-      let productRequest = Priceapi_PricesRequest(storefront: SKPaymentQueue.default().storefront?.countryCode,
+      var countryCode: String? = nil
+      if #available(iOS 13.0, *) {
+        countryCode = SKPaymentQueue.default().storefront?.countryCode
+      }
+      let productRequest = Priceapi_PricesRequest(storefront: countryCode,
                                                   region: products.first?.priceLocale.regionCode,
                                                   currency: products.first?.priceLocale.currencyCode,
                                                   products: priceApiProducts)

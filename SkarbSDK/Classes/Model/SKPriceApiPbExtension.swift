@@ -109,7 +109,12 @@ extension Priceapi_Product: SKCodableStruct {
   
   init(product: SKProduct) {
     productID = product.productIdentifier
-    groupID = product.subscriptionGroupIdentifier ?? ""
+    if #available(iOS 12.0, *) {
+      groupID = product.subscriptionGroupIdentifier ?? ""
+    } else {
+      groupID = ""
+    }
+    
     if let subscriptionPeriod = product.subscriptionPeriod {
       period = Priceapi_Period(productPeriod: subscriptionPeriod)
     }
@@ -117,7 +122,11 @@ extension Priceapi_Product: SKCodableStruct {
     if let introductoryPrice = product.introductoryPrice {
       intro = Priceapi_Discount(discount: introductoryPrice)
     }
-    discounts = product.discounts.map({ Priceapi_Discount(discount: $0) })
+    if #available(iOS 12.2, *) {
+      discounts = product.discounts.map({ Priceapi_Discount(discount: $0) })
+    } else {
+      discounts = []
+    }
   }
   
   init(from decoder: Decoder) throws {
@@ -211,8 +220,14 @@ extension Priceapi_Discount: SKCodableStruct {
   
   init(discount: SKProductDiscount) {
     price = discount.price.doubleValue
-    discountID = discount.identifier ?? ""
-    type = Int32(discount.type.rawValue)
+    if #available(iOS 12.2, *) {
+      discountID = discount.identifier ?? ""
+      type = Int32(discount.type.rawValue)
+    } else {
+      discountID = ""
+      type = 0
+    }
+    
     mode = Int32(discount.paymentMode.rawValue)
     period = Priceapi_Period(productPeriod: discount.subscriptionPeriod)
     periodCount = Int32(discount.numberOfPeriods)

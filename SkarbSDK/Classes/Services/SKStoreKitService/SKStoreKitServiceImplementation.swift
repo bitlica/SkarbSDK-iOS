@@ -102,17 +102,18 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
                               currency: product.priceLocale.currencyCode ?? "")
       }
       
-      
-      let purchasedProductIds = Array(Set(purchasedTransactions.map { $0.payment.productIdentifier })).joined(separator: ",")
-      guard let productData = purchasedProductIds.data(using: .utf8) else {
-        SKLogger.logError("paymentQueue updatedTransactions: called. Need to fetch products but purchasedProductId.data(using: .utf8) == nil",
-                          features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
-        return
+      if !purchasedTransactions.isEmpty {
+        let purchasedProductIds = Array(Set(purchasedTransactions.map { $0.payment.productIdentifier })).joined(separator: ",")
+        if let productData = purchasedProductIds.data(using: .utf8) {
+          let fetchCommand = SKCommand(commandType: .fetchProducts,
+                                       status: .pending,
+                                       data: productData)
+          SKServiceRegistry.commandStore.saveCommand(fetchCommand)
+        } else {
+          SKLogger.logError("paymentQueue updatedTransactions: called. Need to fetch products but purchasedProductId.data(using: .utf8) == nil",
+                            features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+        }
       }
-      let fetchCommand = SKCommand(commandType: .fetchProducts,
-                                   status: .pending,
-                                   data: productData)
-      SKServiceRegistry.commandStore.saveCommand(fetchCommand)
       
       // V4 part
       

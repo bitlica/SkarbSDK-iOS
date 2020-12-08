@@ -75,12 +75,16 @@ extension Priceapi_PricesRequest: SKCodableStruct {
     let auth = try container.decode(Priceapi_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let storefront = try container.decode(String.self, forKey: .storefront)
+    let region = try container.decode(String.self, forKey: .region)
+    let currency = try container.decode(String.self, forKey: .currency)
     let products = try container.decode(Array<Priceapi_Product>.self, forKey: .products)
     
     self = Priceapi_PricesRequest.with({
       $0.auth = auth
       $0.installID = installID
       $0.storefront = storefront
+      $0.region = region
+      $0.currency = currency
       $0.products = products
     })
   }
@@ -90,6 +94,8 @@ extension Priceapi_PricesRequest: SKCodableStruct {
     try container.encode(auth, forKey: .auth)
     try container.encode(installID, forKey: .installID)
     try container.encode(storefront, forKey: .storefront)
+    try container.encode(region, forKey: .region)
+    try container.encode(currency, forKey: .currency)
     try container.encode(products, forKey: .products)
   }
   
@@ -106,6 +112,8 @@ extension Priceapi_PricesRequest: SKCodableStruct {
     case auth
     case installID
     case storefront
+    case region
+    case currency
     case products
   }
 }

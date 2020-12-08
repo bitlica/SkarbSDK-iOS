@@ -185,7 +185,7 @@ extension Priceapi_Product: SKCodableStruct {
 extension Priceapi_Period: SKCodableStruct {
   
   init(productPeriod: SKProductSubscriptionPeriod) {
-    unit = "\(productPeriod.unit)"
+    unit = "\(productPeriod.unit.rawValue)"
     count = Int32(productPeriod.numberOfUnits)
   }
   

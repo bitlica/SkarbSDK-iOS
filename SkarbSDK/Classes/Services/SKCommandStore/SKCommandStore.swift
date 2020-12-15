@@ -66,6 +66,23 @@ class SKCommandStore {
     return result
   }
   
+//  TODO: Add to sendSource() after removing V3
+  func hasSendSourceV4Command(broker: SKBroker) -> Bool {
+    var result = false
+    let decoder = JSONDecoder()
+    exclusionSerialQueue.sync {
+      let allSourceCommands = localAppgateCommands.filter { $0.commandType == .sourceV4 }
+      for sourceCommand in allSourceCommands {
+        if let attribRequest = try? decoder.decode(Installapi_AttribRequest.self, from: sourceCommand.data),
+           attribRequest.broker == broker.name {
+          result = true
+          break
+        }
+      }
+    }
+    return result
+  }
+  
   func saveCommand(_ command: SKCommand) {
     SKLogger.logInfo("saveCommand: commandType = \(command.commandType), status = \(command.status)")
     exclusionSerialQueue.sync {

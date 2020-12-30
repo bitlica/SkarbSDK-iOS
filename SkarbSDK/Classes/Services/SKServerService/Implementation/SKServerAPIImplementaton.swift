@@ -14,7 +14,7 @@ class SKServerAPIImplementaton: SKServerAPI {
   
   private static let serverName = "https://track3.skarb.club"
   
-  func syncCommand(_ command: SKCommand, completion: ((SKResponseError?) -> Void)?) {
+  func syncCommand(_ command: SKCommand, completion: ((SKSkarbError?) -> Void)?) {
     
     if command.commandType.isV4 {
       let tls = ClientConnection.Configuration.TLS.init(certificateChain: [], privateKey: .none, trustRoots: .default, certificateVerification: .fullVerification, hostnameOverride: nil)
@@ -48,7 +48,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+                completion?(SKSkarbError(errorCode: error.code, message: error.localizedDescription))
             }
           }
         case .sourceV4:
@@ -64,7 +64,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code,  message: error.localizedDescription))
+                completion?(SKSkarbError(errorCode: error.code,  message: error.localizedDescription))
             }
           }
         case .testV4:
@@ -80,7 +80,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+                completion?(SKSkarbError(errorCode: error.code, message: error.localizedDescription))
             }
           }
         case .purchaseV4:
@@ -96,7 +96,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+                completion?(SKSkarbError(errorCode: error.code, message: error.localizedDescription))
             }
           }
         case .transactionV4:
@@ -112,7 +112,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+                completion?(SKSkarbError(errorCode: error.code, message: error.localizedDescription))
             }
           }
         case .priceV4:
@@ -128,7 +128,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+                completion?(SKSkarbError(errorCode: error.code, message: error.localizedDescription))
             }
           }
         default:
@@ -184,10 +184,10 @@ private extension SKServerAPIImplementaton {
           if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any] {
             skRequest.completionHandler(.success(json))
           } else {
-            skRequest.completionHandler(.failure(SKResponseError(errorCode: 0)))
+            skRequest.completionHandler(.failure(SKSkarbError(errorCode: 0)))
           }
         } catch let error as NSError {
-          skRequest.completionHandler(.failure(SKResponseError(errorCode: 0,
+          skRequest.completionHandler(.failure(SKSkarbError(errorCode: 0,
                                                                message: error.localizedDescription)))
         }
       }
@@ -195,15 +195,15 @@ private extension SKServerAPIImplementaton {
     task.resume()
   }
   
-  func validateResponseError(response: URLResponse?, data: Data?, error: Error?) -> SKResponseError? {
+  func validateResponseError(response: URLResponse?, data: Data?, error: Error?) -> SKSkarbError? {
         
     if let error = error {
-      return SKResponseError(errorCode: error.code,
+      return SKSkarbError(errorCode: error.code,
                              message: error.localizedDescription)
     }
     
     guard let response = response as? HTTPURLResponse else {
-      return SKResponseError(errorCode: SKResponseError.noResponseCode,
+      return SKSkarbError(errorCode: SKSkarbError.noResponseCode,
                              message: "Response empty, error empty for NSURLConnection")
     }
     
@@ -211,12 +211,12 @@ private extension SKServerAPIImplementaton {
       case (200..<399):
         return nil
       case 500, 400:
-        return SKResponseError(errorCode: response.statusCode)
+        return SKSkarbError(errorCode: response.statusCode)
       default:
         break
     }
     
-    return SKResponseError(errorCode: response.statusCode,
+    return SKSkarbError(errorCode: response.statusCode,
                            message: "Validating response general error")
   }
   

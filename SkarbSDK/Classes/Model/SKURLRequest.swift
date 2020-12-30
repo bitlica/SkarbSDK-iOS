@@ -13,11 +13,11 @@ public class SKURLRequest {
 
   let request: URLRequest
   let command: SKCommand
-  let completionHandler: (Swift.Result<[String: Any], SKResponseError>) -> Void
+  let completionHandler: (Swift.Result<[String: Any], SKSkarbError>) -> Void
 
   init(request: URLRequest,
        command: SKCommand,
-       parsingHandler: @escaping (Swift.Result<[String: Any], SKResponseError>) -> Void) {
+       parsingHandler: @escaping (Swift.Result<[String: Any], SKSkarbError>) -> Void) {
 
     self.request = request
     self.command = command

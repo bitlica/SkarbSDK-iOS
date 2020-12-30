@@ -27,14 +27,22 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     return localAllProducts
   }
   
-  init(isObservable: Bool) {
-    self.isObservable = isObservable
-    self.paymentQueue = SKPaymentQueue.default()
-    cachedAllProducts = []
-    super.init()
-    self.paymentQueue.add(self)
+  private var canMakePayments: Bool {
+    SKPaymentQueue.canMakePayments()
   }
   
+  init(isObservable: Bool) {
+    self.isObservable = isObservable
+    paymentQueue = SKPaymentQueue.default()
+    cachedAllProducts = []
+    super.init()
+    if isObservable {
+      paymentQueue.add(self)
+    }
+    NotificationCenter.default.addObserver(self, selector: #selector(stopObserving), name: UIApplication.willTerminateNotification, object: nil)
+  }
+  
+//  MARK: Public
   func requestProductInfoAndSendPurchase(command: SKCommand) {
     var editedCommand = command
     guard let productIds = String(data: command.data, encoding: .utf8) else {
@@ -44,7 +52,10 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
       return
     }
     
-    requestProductInfo(productIds: productIds.components(separatedBy: ",")) { products in
+    requestProductInfo(productIds: productIds.components(separatedBy: ",")) { [weak self] products in
+      guard let self = self else {
+        return
+      }
       if let product = products.first {
         SkarbSDK.sendPurchase(productId: product.productIdentifier,
                               price: product.price.floatValue,
@@ -59,7 +70,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
       let priceApiProducts = products.map { Priceapi_Product(product: $0) }
       var countryCode: String? = nil
       if #available(iOS 13.0, *) {
-        countryCode = SKPaymentQueue.default().storefront?.countryCode
+        countryCode = self.paymentQueue.storefront?.countryCode
       }
       let productRequest = Priceapi_PricesRequest(storefront: countryCode,
                                                   region: products.first?.priceLocale.regionCode,
@@ -70,6 +81,15 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
                               data: productRequest.getData())
       SKServiceRegistry.commandStore.saveCommand(command)
     }
+  }
+  
+//  TODO: Add OfferId for promotion offers when server side will implement this feature
+  func purhase(product: SKProduct, completion: (Swift.Result<SKPaymentTransaction, SKSkarbError>) -> Void) {
+    guard canMakePayments else {
+      completion(Result.failure(SKSkarbError(errorCode: 0, message: "")))
+      return
+    }
+    
   }
 }
 
@@ -141,12 +161,10 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
     }
   }
   
-  /// Sent when all transactions from the user's purchase history have successfully been added back to the queue.
   public func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
     SKLogger.logInfo("paymentQueueRestoreCompletedTransactionsFinished was called")
   }
   
-  /// Sent when an error is encountered while adding transactions from the user's purchase history back to the queue.
   public func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
     SKLogger.logInfo(String(format: "paymentQueueRestoreCompletedTransactionsFailedWithError was called with error %@", error.localizedDescription))
   }
@@ -186,5 +204,10 @@ private extension SKStoreKitServiceImplementation {
     request.delegate = self
     
     request.start()
+  }
+  
+  @objc
+  func stopObserving() {
+    paymentQueue.remove(self)
   }
 }

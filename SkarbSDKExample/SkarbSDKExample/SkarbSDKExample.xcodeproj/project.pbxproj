@@ -7,16 +7,79 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4F0D0FBB2494D7FB007623B6 /* SKLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0F972494D7FB007623B6 /* SKLogger.swift */; };
+		4F0D0FBC2494D7FB007623B6 /* SkarbSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0F982494D7FB007623B6 /* SkarbSDK.swift */; };
+		4F0D0FBD2494D7FB007623B6 /* FormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0F9A2494D7FB007623B6 /* FormatterExtension.swift */; };
+		4F0D0FBE2494D7FB007623B6 /* LocaleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0F9B2494D7FB007623B6 /* LocaleExtension.swift */; };
+		4F0D0FBF2494D7FB007623B6 /* DateExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0F9C2494D7FB007623B6 /* DateExtension.swift */; };
+		4F0D0FC02494D7FB007623B6 /* SKCodableStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0F9E2494D7FB007623B6 /* SKCodableStruct.swift */; };
+		4F0D0FC12494D7FB007623B6 /* SKBrokerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0F9F2494D7FB007623B6 /* SKBrokerData.swift */; };
+		4F0D0FC22494D7FB007623B6 /* SKCommandType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FA02494D7FB007623B6 /* SKCommandType.swift */; };
+		4F0D0FC32494D7FB007623B6 /* SKCommandStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FA12494D7FB007623B6 /* SKCommandStatus.swift */; };
+		4F0D0FC42494D7FB007623B6 /* SKInitData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FA22494D7FB007623B6 /* SKInitData.swift */; };
+		4F0D0FC52494D7FB007623B6 /* SKPurchaseData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FA32494D7FB007623B6 /* SKPurchaseData.swift */; };
+		4F0D0FC62494D7FB007623B6 /* SKBroker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FA42494D7FB007623B6 /* SKBroker.swift */; };
+		4F0D0FC72494D7FB007623B6 /* SKCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FA52494D7FB007623B6 /* SKCommand.swift */; };
+		4F0D0FC82494D7FB007623B6 /* SKTestData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FA62494D7FB007623B6 /* SKTestData.swift */; };
+		4F0D0FC92494D7FB007623B6 /* SKURLRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FA72494D7FB007623B6 /* SKURLRequest.swift */; };
+		4F0D0FCA2494D7FB007623B6 /* SKServiceRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FA92494D7FB007623B6 /* SKServiceRegistry.swift */; };
+		4F0D0FCB2494D7FB007623B6 /* SKCommandStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FAB2494D7FB007623B6 /* SKCommandStore.swift */; };
+		4F0D0FCC2494D7FB007623B6 /* SKStoreKitServiceImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FAD2494D7FB007623B6 /* SKStoreKitServiceImplementation.swift */; };
+		4F0D0FCD2494D7FB007623B6 /* SKStoreKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FAE2494D7FB007623B6 /* SKStoreKitService.swift */; };
+		4F0D0FCE2494D7FB007623B6 /* SKMigrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FB02494D7FB007623B6 /* SKMigrationService.swift */; };
+		4F0D0FCF2494D7FB007623B6 /* SKServerAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FB22494D7FB007623B6 /* SKServerAPI.swift */; };
+		4F0D0FD02494D7FB007623B6 /* SKSkarbError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FB42494D7FB007623B6 /* SKSkarbError.swift */; };
+		4F0D0FD12494D7FB007623B6 /* SKServerAPIImplementaton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FB52494D7FB007623B6 /* SKServerAPIImplementaton.swift */; };
+		4F0D0FD22494D7FB007623B6 /* SKSyncServiceImplementation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FB72494D7FB007623B6 /* SKSyncServiceImplementation.swift */; };
+		4F0D0FD32494D7FB007623B6 /* SKSyncService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FB82494D7FB007623B6 /* SKSyncService.swift */; };
+		4F0D0FD42494D7FB007623B6 /* SKUserDefaultsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F0D0FBA2494D7FB007623B6 /* SKUserDefaultsService.swift */; };
+		4F41D27725700B5C00FFD774 /* SKPriceApiPb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F41D27625700B5C00FFD774 /* SKPriceApiPb.swift */; };
+		4F41D27A25700B7600FFD774 /* SKPriceApiGrpc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F41D27925700B7500FFD774 /* SKPriceApiGrpc.swift */; };
 		4F735BDF23D7279400A8A537 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735BDE23D7279400A8A537 /* AppDelegate.swift */; };
 		4F735BE123D7279400A8A537 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735BE023D7279400A8A537 /* SceneDelegate.swift */; };
 		4F735BE323D7279400A8A537 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F735BE223D7279400A8A537 /* ViewController.swift */; };
 		4F735BE623D7279400A8A537 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE423D7279400A8A537 /* Main.storyboard */; };
 		4F735BE823D7279500A8A537 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE723D7279500A8A537 /* Assets.xcassets */; };
 		4F735BEB23D7279500A8A537 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE923D7279500A8A537 /* LaunchScreen.storyboard */; };
+		4FD312E2256D045B00E5DBB9 /* SKPurchaseApiPb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD312E1256D045B00E5DBB9 /* SKPurchaseApiPb.swift */; };
+		4FD312E5256D080F00E5DBB9 /* SKPurchaseApiGrpc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD312E4256D080F00E5DBB9 /* SKPurchaseApiGrpc.swift */; };
+		4FD312E8256D0B6C00E5DBB9 /* SKPurchaseApiPbExtenstion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD312E7256D0B6C00E5DBB9 /* SKPurchaseApiPbExtenstion.swift */; };
+		4FD9ECE82534AD0A00C1C173 /* SKInstallApiGrpc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD9ECE62534AD0A00C1C173 /* SKInstallApiGrpc.swift */; };
+		4FD9ECF72535B83D00C1C173 /* SKInstallApiPbExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD9ECF62535B83D00C1C173 /* SKInstallApiPbExtension.swift */; };
+		4FD9ED0D253DCA7400C1C173 /* SKInstallApiPb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD9ED0C253DCA7400C1C173 /* SKInstallApiPb.swift */; };
+		4FDD50512577C8B600860DF9 /* SKPriceApiPbExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FDD50502577C8B600860DF9 /* SKPriceApiPbExtension.swift */; };
 		97F5B54E4D9C915F1F0408A7 /* Pods_SkarbSDKExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5313EE38F51E3FA1305834B1 /* Pods_SkarbSDKExample.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		4F0D0F972494D7FB007623B6 /* SKLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKLogger.swift; sourceTree = "<group>"; };
+		4F0D0F982494D7FB007623B6 /* SkarbSDK.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SkarbSDK.swift; sourceTree = "<group>"; };
+		4F0D0F9A2494D7FB007623B6 /* FormatterExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormatterExtension.swift; sourceTree = "<group>"; };
+		4F0D0F9B2494D7FB007623B6 /* LocaleExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocaleExtension.swift; sourceTree = "<group>"; };
+		4F0D0F9C2494D7FB007623B6 /* DateExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateExtension.swift; sourceTree = "<group>"; };
+		4F0D0F9E2494D7FB007623B6 /* SKCodableStruct.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKCodableStruct.swift; sourceTree = "<group>"; };
+		4F0D0F9F2494D7FB007623B6 /* SKBrokerData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKBrokerData.swift; sourceTree = "<group>"; };
+		4F0D0FA02494D7FB007623B6 /* SKCommandType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKCommandType.swift; sourceTree = "<group>"; };
+		4F0D0FA12494D7FB007623B6 /* SKCommandStatus.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKCommandStatus.swift; sourceTree = "<group>"; };
+		4F0D0FA22494D7FB007623B6 /* SKInitData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKInitData.swift; sourceTree = "<group>"; };
+		4F0D0FA32494D7FB007623B6 /* SKPurchaseData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKPurchaseData.swift; sourceTree = "<group>"; };
+		4F0D0FA42494D7FB007623B6 /* SKBroker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKBroker.swift; sourceTree = "<group>"; };
+		4F0D0FA52494D7FB007623B6 /* SKCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKCommand.swift; sourceTree = "<group>"; };
+		4F0D0FA62494D7FB007623B6 /* SKTestData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKTestData.swift; sourceTree = "<group>"; };
+		4F0D0FA72494D7FB007623B6 /* SKURLRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKURLRequest.swift; sourceTree = "<group>"; };
+		4F0D0FA92494D7FB007623B6 /* SKServiceRegistry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKServiceRegistry.swift; sourceTree = "<group>"; };
+		4F0D0FAB2494D7FB007623B6 /* SKCommandStore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKCommandStore.swift; sourceTree = "<group>"; };
+		4F0D0FAD2494D7FB007623B6 /* SKStoreKitServiceImplementation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKStoreKitServiceImplementation.swift; sourceTree = "<group>"; };
+		4F0D0FAE2494D7FB007623B6 /* SKStoreKitService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKStoreKitService.swift; sourceTree = "<group>"; };
+		4F0D0FB02494D7FB007623B6 /* SKMigrationService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKMigrationService.swift; sourceTree = "<group>"; };
+		4F0D0FB22494D7FB007623B6 /* SKServerAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKServerAPI.swift; sourceTree = "<group>"; };
+		4F0D0FB42494D7FB007623B6 /* SKSkarbError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKSkarbError.swift; sourceTree = "<group>"; };
+		4F0D0FB52494D7FB007623B6 /* SKServerAPIImplementaton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKServerAPIImplementaton.swift; sourceTree = "<group>"; };
+		4F0D0FB72494D7FB007623B6 /* SKSyncServiceImplementation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKSyncServiceImplementation.swift; sourceTree = "<group>"; };
+		4F0D0FB82494D7FB007623B6 /* SKSyncService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKSyncService.swift; sourceTree = "<group>"; };
+		4F0D0FBA2494D7FB007623B6 /* SKUserDefaultsService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKUserDefaultsService.swift; sourceTree = "<group>"; };
+		4F41D27625700B5C00FFD774 /* SKPriceApiPb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKPriceApiPb.swift; sourceTree = "<group>"; };
+		4F41D27925700B7500FFD774 /* SKPriceApiGrpc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKPriceApiGrpc.swift; sourceTree = "<group>"; };
 		4F735BDB23D7279400A8A537 /* SkarbSDKExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SkarbSDKExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F735BDE23D7279400A8A537 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		4F735BE023D7279400A8A537 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -25,6 +88,13 @@
 		4F735BE723D7279500A8A537 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4F735BEA23D7279500A8A537 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4F735BEC23D7279500A8A537 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4FD312E1256D045B00E5DBB9 /* SKPurchaseApiPb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKPurchaseApiPb.swift; sourceTree = "<group>"; };
+		4FD312E4256D080F00E5DBB9 /* SKPurchaseApiGrpc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKPurchaseApiGrpc.swift; sourceTree = "<group>"; };
+		4FD312E7256D0B6C00E5DBB9 /* SKPurchaseApiPbExtenstion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKPurchaseApiPbExtenstion.swift; sourceTree = "<group>"; };
+		4FD9ECE62534AD0A00C1C173 /* SKInstallApiGrpc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKInstallApiGrpc.swift; sourceTree = "<group>"; };
+		4FD9ECF62535B83D00C1C173 /* SKInstallApiPbExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKInstallApiPbExtension.swift; sourceTree = "<group>"; };
+		4FD9ED0C253DCA7400C1C173 /* SKInstallApiPb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKInstallApiPb.swift; sourceTree = "<group>"; };
+		4FDD50502577C8B600860DF9 /* SKPriceApiPbExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKPriceApiPbExtension.swift; sourceTree = "<group>"; };
 		5313EE38F51E3FA1305834B1 /* Pods_SkarbSDKExample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SkarbSDKExample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DF303FD11171F762CC3F8D0 /* Pods-SkarbSDKExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SkarbSDKExample.debug.xcconfig"; path = "Target Support Files/Pods-SkarbSDKExample/Pods-SkarbSDKExample.debug.xcconfig"; sourceTree = "<group>"; };
 		E28BEF55D1AAAAC247DEE6DA /* Pods-SkarbSDKExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SkarbSDKExample.release.xcconfig"; path = "Target Support Files/Pods-SkarbSDKExample/Pods-SkarbSDKExample.release.xcconfig"; sourceTree = "<group>"; };
@@ -42,6 +112,145 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4F0D0F942494D7FB007623B6 /* SkarbSDK */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0F952494D7FB007623B6 /* Classes */,
+			);
+			name = SkarbSDK;
+			path = ../../../SkarbSDK;
+			sourceTree = "<group>";
+		};
+		4F0D0F952494D7FB007623B6 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0F962494D7FB007623B6 /* Util */,
+				4F0D0F982494D7FB007623B6 /* SkarbSDK.swift */,
+				4F0D0F992494D7FB007623B6 /* Extensions */,
+				4F0D0F9D2494D7FB007623B6 /* Model */,
+				4F0D0FA82494D7FB007623B6 /* Services */,
+			);
+			path = Classes;
+			sourceTree = "<group>";
+		};
+		4F0D0F962494D7FB007623B6 /* Util */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0F972494D7FB007623B6 /* SKLogger.swift */,
+			);
+			path = Util;
+			sourceTree = "<group>";
+		};
+		4F0D0F992494D7FB007623B6 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0F9A2494D7FB007623B6 /* FormatterExtension.swift */,
+				4F0D0F9B2494D7FB007623B6 /* LocaleExtension.swift */,
+				4F0D0F9C2494D7FB007623B6 /* DateExtension.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		4F0D0F9D2494D7FB007623B6 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0F9E2494D7FB007623B6 /* SKCodableStruct.swift */,
+				4F0D0F9F2494D7FB007623B6 /* SKBrokerData.swift */,
+				4F0D0FA02494D7FB007623B6 /* SKCommandType.swift */,
+				4F0D0FA12494D7FB007623B6 /* SKCommandStatus.swift */,
+				4F0D0FA22494D7FB007623B6 /* SKInitData.swift */,
+				4F0D0FA32494D7FB007623B6 /* SKPurchaseData.swift */,
+				4F0D0FA42494D7FB007623B6 /* SKBroker.swift */,
+				4F0D0FA52494D7FB007623B6 /* SKCommand.swift */,
+				4F0D0FA62494D7FB007623B6 /* SKTestData.swift */,
+				4F0D0FA72494D7FB007623B6 /* SKURLRequest.swift */,
+				4FD9ED0C253DCA7400C1C173 /* SKInstallApiPb.swift */,
+				4FD9ECF62535B83D00C1C173 /* SKInstallApiPbExtension.swift */,
+				4FD312E1256D045B00E5DBB9 /* SKPurchaseApiPb.swift */,
+				4FD312E7256D0B6C00E5DBB9 /* SKPurchaseApiPbExtenstion.swift */,
+				4F41D27625700B5C00FFD774 /* SKPriceApiPb.swift */,
+				4FDD50502577C8B600860DF9 /* SKPriceApiPbExtension.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		4F0D0FA82494D7FB007623B6 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0FA92494D7FB007623B6 /* SKServiceRegistry.swift */,
+				4F0D0FAA2494D7FB007623B6 /* SKCommandStore */,
+				4F0D0FAC2494D7FB007623B6 /* SKStoreKitService */,
+				4F0D0FAF2494D7FB007623B6 /* SKMigrationService */,
+				4F0D0FB12494D7FB007623B6 /* SKServerService */,
+				4F0D0FB62494D7FB007623B6 /* SKSyncService */,
+				4F0D0FB92494D7FB007623B6 /* SKUserDefaultsService */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		4F0D0FAA2494D7FB007623B6 /* SKCommandStore */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0FAB2494D7FB007623B6 /* SKCommandStore.swift */,
+			);
+			path = SKCommandStore;
+			sourceTree = "<group>";
+		};
+		4F0D0FAC2494D7FB007623B6 /* SKStoreKitService */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0FAD2494D7FB007623B6 /* SKStoreKitServiceImplementation.swift */,
+				4F0D0FAE2494D7FB007623B6 /* SKStoreKitService.swift */,
+			);
+			path = SKStoreKitService;
+			sourceTree = "<group>";
+		};
+		4F0D0FAF2494D7FB007623B6 /* SKMigrationService */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0FB02494D7FB007623B6 /* SKMigrationService.swift */,
+			);
+			path = SKMigrationService;
+			sourceTree = "<group>";
+		};
+		4F0D0FB12494D7FB007623B6 /* SKServerService */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0FB22494D7FB007623B6 /* SKServerAPI.swift */,
+				4FD9ECE62534AD0A00C1C173 /* SKInstallApiGrpc.swift */,
+				4FD312E4256D080F00E5DBB9 /* SKPurchaseApiGrpc.swift */,
+				4F41D27925700B7500FFD774 /* SKPriceApiGrpc.swift */,
+				4F0D0FB32494D7FB007623B6 /* Implementation */,
+			);
+			path = SKServerService;
+			sourceTree = "<group>";
+		};
+		4F0D0FB32494D7FB007623B6 /* Implementation */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0FB42494D7FB007623B6 /* SKSkarbError.swift */,
+				4F0D0FB52494D7FB007623B6 /* SKServerAPIImplementaton.swift */,
+			);
+			path = Implementation;
+			sourceTree = "<group>";
+		};
+		4F0D0FB62494D7FB007623B6 /* SKSyncService */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0FB72494D7FB007623B6 /* SKSyncServiceImplementation.swift */,
+				4F0D0FB82494D7FB007623B6 /* SKSyncService.swift */,
+			);
+			path = SKSyncService;
+			sourceTree = "<group>";
+		};
+		4F0D0FB92494D7FB007623B6 /* SKUserDefaultsService */ = {
+			isa = PBXGroup;
+			children = (
+				4F0D0FBA2494D7FB007623B6 /* SKUserDefaultsService.swift */,
+			);
+			path = SKUserDefaultsService;
+			sourceTree = "<group>";
+		};
 		4F735BD223D7279400A8A537 = {
 			isa = PBXGroup;
 			children = (
@@ -63,6 +272,7 @@
 		4F735BDD23D7279400A8A537 /* SkarbSDKExample */ = {
 			isa = PBXGroup;
 			children = (
+				4F0D0F942494D7FB007623B6 /* SkarbSDK */,
 				4F735BDE23D7279400A8A537 /* AppDelegate.swift */,
 				4F735BE023D7279400A8A537 /* SceneDelegate.swift */,
 				4F735BE223D7279400A8A537 /* ViewController.swift */,
@@ -206,9 +416,44 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4F0D0FC52494D7FB007623B6 /* SKPurchaseData.swift in Sources */,
+				4FD9ECF72535B83D00C1C173 /* SKInstallApiPbExtension.swift in Sources */,
+				4F0D0FD02494D7FB007623B6 /* SKSkarbError.swift in Sources */,
+				4F0D0FD42494D7FB007623B6 /* SKUserDefaultsService.swift in Sources */,
+				4F0D0FCC2494D7FB007623B6 /* SKStoreKitServiceImplementation.swift in Sources */,
+				4F0D0FCA2494D7FB007623B6 /* SKServiceRegistry.swift in Sources */,
+				4F41D27725700B5C00FFD774 /* SKPriceApiPb.swift in Sources */,
+				4F0D0FCF2494D7FB007623B6 /* SKServerAPI.swift in Sources */,
+				4F0D0FBE2494D7FB007623B6 /* LocaleExtension.swift in Sources */,
+				4F0D0FD32494D7FB007623B6 /* SKSyncService.swift in Sources */,
+				4F0D0FCD2494D7FB007623B6 /* SKStoreKitService.swift in Sources */,
+				4F0D0FC82494D7FB007623B6 /* SKTestData.swift in Sources */,
+				4F0D0FBF2494D7FB007623B6 /* DateExtension.swift in Sources */,
+				4FD312E2256D045B00E5DBB9 /* SKPurchaseApiPb.swift in Sources */,
+				4F0D0FC22494D7FB007623B6 /* SKCommandType.swift in Sources */,
+				4FD312E8256D0B6C00E5DBB9 /* SKPurchaseApiPbExtenstion.swift in Sources */,
+				4FD9ECE82534AD0A00C1C173 /* SKInstallApiGrpc.swift in Sources */,
 				4F735BE323D7279400A8A537 /* ViewController.swift in Sources */,
+				4F0D0FC42494D7FB007623B6 /* SKInitData.swift in Sources */,
+				4FD9ED0D253DCA7400C1C173 /* SKInstallApiPb.swift in Sources */,
 				4F735BDF23D7279400A8A537 /* AppDelegate.swift in Sources */,
+				4F0D0FCB2494D7FB007623B6 /* SKCommandStore.swift in Sources */,
+				4F0D0FC72494D7FB007623B6 /* SKCommand.swift in Sources */,
+				4F0D0FD12494D7FB007623B6 /* SKServerAPIImplementaton.swift in Sources */,
+				4F0D0FC32494D7FB007623B6 /* SKCommandStatus.swift in Sources */,
+				4F0D0FC12494D7FB007623B6 /* SKBrokerData.swift in Sources */,
+				4F41D27A25700B7600FFD774 /* SKPriceApiGrpc.swift in Sources */,
+				4F0D0FD22494D7FB007623B6 /* SKSyncServiceImplementation.swift in Sources */,
+				4F0D0FBD2494D7FB007623B6 /* FormatterExtension.swift in Sources */,
+				4F0D0FBC2494D7FB007623B6 /* SkarbSDK.swift in Sources */,
+				4F0D0FC02494D7FB007623B6 /* SKCodableStruct.swift in Sources */,
 				4F735BE123D7279400A8A537 /* SceneDelegate.swift in Sources */,
+				4FDD50512577C8B600860DF9 /* SKPriceApiPbExtension.swift in Sources */,
+				4F0D0FBB2494D7FB007623B6 /* SKLogger.swift in Sources */,
+				4F0D0FC62494D7FB007623B6 /* SKBroker.swift in Sources */,
+				4FD312E5256D080F00E5DBB9 /* SKPurchaseApiGrpc.swift in Sources */,
+				4F0D0FC92494D7FB007623B6 /* SKURLRequest.swift in Sources */,
+				4F0D0FCE2494D7FB007623B6 /* SKMigrationService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,11 +601,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9W667Q75FZ;
 				INFOPLIST_FILE = SkarbSDKExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.bitlica.SkarbSDKExample;
+				MARKETING_VERSION = 1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bitlica.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -375,11 +622,13 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9W667Q75FZ;
 				INFOPLIST_FILE = SkarbSDKExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.bitlica.SkarbSDKExample;
+				MARKETING_VERSION = 1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.bitlica.example;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

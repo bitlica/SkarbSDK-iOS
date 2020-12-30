@@ -10,5 +10,5 @@ import Foundation
 import UIKit
 
 protocol SKServerAPI {
-  func syncCommand(_ command: SKCommand, completion: ((SKResponseError?) -> Void)?)
+  func syncCommand(_ command: SKCommand, completion: ((SKSkarbError?) -> Void)?)
 }

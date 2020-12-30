@@ -11,4 +11,5 @@ import StoreKit
 
 protocol SKStoreKitService {
   func requestProductInfoAndSendPurchase(command: SKCommand)
+  func purhase(product: SKProduct, completion: (Swift.Result<SKPaymentTransaction, SKSkarbError>) -> Void)
 }

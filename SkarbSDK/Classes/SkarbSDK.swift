@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import StoreKit
 
 public class SkarbSDK {
   
@@ -109,5 +110,9 @@ public class SkarbSDK {
   
   public static func useAutomaticAppleSearchAdsAttributionCollection(_ enable: Bool) {
     SKServiceRegistry.commandStore.createAutomaticSearchAdsCommand(enable)
+  }
+  
+  public static func purhase(product: SKProduct, completion: (Result<SKPaymentTransaction, SKSkarbError>) -> Void) {
+    SKServiceRegistry.storeKitService.purhase(product: product, completion: completion)
   }
 }

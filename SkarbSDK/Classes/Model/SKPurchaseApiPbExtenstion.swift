@@ -103,7 +103,10 @@ extension Purchaseapi_TransactionsRequest: SKCodableStruct {
 
 extension Purchaseapi_ReceiptRequest: SKCodableStruct {
   
-  init(newTransactions: [String]) {
+  init(storefront: String?,
+       region: String?,
+       currency: String?,
+       newTransactions: [String]) {
     let authData = Purchaseapi_Auth.with {
       $0.key = SkarbSDK.clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
@@ -137,6 +140,9 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
       SKLogger.logError("Create purchase for V4. recieptData is nil",
                         features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
     }
+    self.storefront = storefront ?? ""
+    self.region = region ?? ""
+    self.currency = currency ?? ""
   }
   
   init(from decoder: Decoder) throws {
@@ -149,6 +155,9 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
     let receiptURL = try container.decode(String.self, forKey: .receiptURL)
     let receiptLen = try container.decode(String.self, forKey: .receiptLen)
     let receipt = try container.decode(Data.self, forKey: .receipt)
+    let storefront = try container.decode(String.self, forKey: .storefront)
+    let region = try container.decode(String.self, forKey: .region)
+    let currency = try container.decode(String.self, forKey: .currency)
     
     self = Purchaseapi_ReceiptRequest.with({
       $0.auth = auth
@@ -159,6 +168,9 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
       $0.receiptURL = receiptURL
       $0.receiptLen = receiptLen
       $0.receipt = receipt
+      $0.storefront = storefront
+      $0.region = region
+      $0.currency = currency
     })
   }
   
@@ -172,6 +184,9 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
     try container.encode(receiptURL, forKey: .receiptURL)
     try container.encode(receiptLen, forKey: .receiptLen)
     try container.encode(receipt, forKey: .receipt)
+    try container.encode(storefront, forKey: .storefront)
+    try container.encode(region, forKey: .region)
+    try container.encode(currency, forKey: .currency)
   }
   
   func getData() -> Data? {
@@ -192,5 +207,8 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
     case receiptURL
     case receiptLen
     case receipt
+    case storefront
+    case region
+    case currency
   }
 }

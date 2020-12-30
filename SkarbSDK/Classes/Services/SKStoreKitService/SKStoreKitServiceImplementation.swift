@@ -132,7 +132,14 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
           SKServiceRegistry.commandStore.saveCommand(transactionV4Command)
         }
       } else {
-        let purchaseDataV4 = Purchaseapi_ReceiptRequest(newTransactions: transactionIds)
+        var countryCode: String? = nil
+        if #available(iOS 13.0, *) {
+          countryCode = SKPaymentQueue.default().storefront?.countryCode
+        }
+        let purchaseDataV4 = Purchaseapi_ReceiptRequest(storefront: countryCode,
+                                                        region: self.allProducts?.first?.priceLocale.regionCode,
+                                                        currency: self.allProducts?.first?.priceLocale.currencyCode,
+                                                        newTransactions: transactionIds)
         let purchaseV4Command = SKCommand(commandType: .purchaseV4,
                                           status: .pending,
                                           data: purchaseDataV4.getData())
@@ -165,7 +172,7 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
     }
     SKLogger.logInfo("SKRequestDelegate fetched products successful")
     
-    productInfoCompletion?(response.products)
+    productInfoCompletion?(allProducts ?? [])
   }
   
   func request(_ request: SKRequest, didFailWithError error: Error) {

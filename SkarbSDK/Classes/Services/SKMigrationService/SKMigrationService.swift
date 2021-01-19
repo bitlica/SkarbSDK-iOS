@@ -97,5 +97,32 @@ struct SKMigrationService {
        SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) == nil  {
       SKServiceRegistry.userDefaultsService.setValue(initData.deviceId, forKey: .deviceId)
     }
+    
+    // Need to migrate SKCommand for fetchProducts from old format
+    // that has only productId field
+    let fetchProductsCommands = SKServiceRegistry.commandStore.getAllCommands(by: .fetchProducts)
+    if !fetchProductsCommands.isEmpty {
+      let decoder = JSONDecoder()
+      for command in fetchProductsCommands {
+        if (try? decoder.decode(Array<SKFetchProduct>.self, from: command.data)) != nil {
+          continue
+        }
+        guard let productIds = String(data: command.data, encoding: .utf8) else {
+          continue
+        }
+        var fetchProducts: [SKFetchProduct] = []
+        var editedCommand = command
+        
+        for productId in productIds.components(separatedBy: ",") {
+          let fetchProduct = SKFetchProduct(productId: productId, transactionDate: nil, transactionId: nil)
+          fetchProducts.append(fetchProduct)
+        }
+        let encoder = JSONEncoder()
+        if let fetchProductsData = try? encoder.encode(fetchProducts) {
+          editedCommand.updateData(fetchProductsData)
+          SKServiceRegistry.commandStore.saveCommand(editedCommand)
+        }
+      }
+    }
   }
 }

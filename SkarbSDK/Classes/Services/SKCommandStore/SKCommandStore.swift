@@ -120,6 +120,14 @@ class SKCommandStore {
     return result
   }
   
+  func getAllCommands(by comandType: SKCommandType) -> [SKCommand] {
+    var result: [SKCommand] = []
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.filter({ $0.commandType == comandType })
+    }
+    return result
+  }
+  
   /// when user terminate app or go to background some commands might be inProgress
   /// and there is no guarantee that command will be handled by the app
   func markAllInProgressAsPendingAndSave() {

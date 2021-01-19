@@ -37,26 +37,44 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   
   func requestProductInfoAndSendPurchase(command: SKCommand) {
     var editedCommand = command
-    guard let productIds = String(data: command.data, encoding: .utf8) else {
-      SKLogger.logError("SKSyncServiceImplementation requestProductInfoAndSendPurchase: called with fetchProducts but command.data is not String. Command.data == \(String(describing: String(data: command.data, encoding: .utf8)))", features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+    let decoder = JSONDecoder()
+
+    guard let fetchProducts = try? decoder.decode(Array<SKFetchProduct>.self, from: command.data) else {
+      SKLogger.logError("SKSyncServiceImplementation requestProductInfoAndSendPurchase: called with fetchProducts but command.data is not SKFetchProduct. Command.data == \(String(describing: String(data: command.data, encoding: .utf8)))", features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
       editedCommand.changeStatus(to: .canceled)
       SKServiceRegistry.commandStore.saveCommand(command)
       return
     }
     
-    requestProductInfo(productIds: productIds.components(separatedBy: ",")) { products in
+    requestProductInfo(productIds: fetchProducts.map({ $0.productId })) { products in
       if let product = products.first {
         SkarbSDK.sendPurchase(productId: product.productIdentifier,
                               price: product.price.floatValue,
                               currency: product.priceLocale.currencyCode ?? "")
+        editedCommand.changeStatus(to: .done)
       } else {
         editedCommand.incrementRetryCount()
         editedCommand.changeStatus(to: .pending)
-        SKServiceRegistry.commandStore.saveCommand(command)
       }
+      SKServiceRegistry.commandStore.saveCommand(command)
       
       // Send command for price
-      let priceApiProducts = products.map { Priceapi_Product(product: $0) }
+      var priceApiProducts: [Priceapi_Product] = []
+      for fetchProduct in fetchProducts {
+        guard let product = products.first(where: { $0.productIdentifier == fetchProduct.productId }) else {
+          SKLogger.logError("SKSyncServiceImplementation. Send command for price. Product is nil. FetchProduct = \(fetchProduct.productId)", features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+          continue
+        }
+        let priceApiProduct = Priceapi_Product(product: product,
+                                               transactionDate: fetchProduct.transactionDate,
+                                               transactionId: fetchProduct.transactionId)
+        priceApiProducts.append(priceApiProduct)
+      }
+      
+      guard !priceApiProducts.isEmpty else {
+        return
+      }
+      
       var countryCode: String? = nil
       if #available(iOS 13.0, *) {
         countryCode = SKPaymentQueue.default().storefront?.countryCode

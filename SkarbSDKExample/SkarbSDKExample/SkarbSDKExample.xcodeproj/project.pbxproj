@@ -13,6 +13,7 @@
 		4F735BE623D7279400A8A537 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE423D7279400A8A537 /* Main.storyboard */; };
 		4F735BE823D7279500A8A537 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE723D7279500A8A537 /* Assets.xcassets */; };
 		4F735BEB23D7279500A8A537 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE923D7279500A8A537 /* LaunchScreen.storyboard */; };
+		4FA3DBD225B5A18B00DECDDD /* SKFetchProduct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FA3DBD125B5A18B00DECDDD /* SKFetchProduct.swift */; };
 		4FC970C5259C8F7D003F1C84 /* SKLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC97098259C8F7D003F1C84 /* SKLogger.swift */; };
 		4FC970C6259C8F7D003F1C84 /* SkarbSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC97099259C8F7D003F1C84 /* SkarbSDK.swift */; };
 		4FC970C7259C8F7D003F1C84 /* FormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC9709B259C8F7D003F1C84 /* FormatterExtension.swift */; };
@@ -60,6 +61,7 @@
 		4F735BE723D7279500A8A537 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4F735BEA23D7279500A8A537 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4F735BEC23D7279500A8A537 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4FA3DBD125B5A18B00DECDDD /* SKFetchProduct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKFetchProduct.swift; sourceTree = "<group>"; };
 		4FC97098259C8F7D003F1C84 /* SKLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKLogger.swift; sourceTree = "<group>"; };
 		4FC97099259C8F7D003F1C84 /* SkarbSDK.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SkarbSDK.swift; sourceTree = "<group>"; };
 		4FC9709B259C8F7D003F1C84 /* FormatterExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormatterExtension.swift; sourceTree = "<group>"; };
@@ -203,6 +205,7 @@
 				4FC970AC259C8F7D003F1C84 /* SKCommand.swift */,
 				4FC970AD259C8F7D003F1C84 /* SKTestData.swift */,
 				4FC970AE259C8F7D003F1C84 /* SKURLRequest.swift */,
+				4FA3DBD125B5A18B00DECDDD /* SKFetchProduct.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -452,6 +455,7 @@
 				4FC970DA259C8F7E003F1C84 /* SKServiceRegistry.swift in Sources */,
 				4FC970DE259C8F7E003F1C84 /* SKMigrationService.swift in Sources */,
 				4FC970D9259C8F7E003F1C84 /* SKURLRequest.swift in Sources */,
+				4FA3DBD225B5A18B00DECDDD /* SKFetchProduct.swift in Sources */,
 				4FC970DC259C8F7E003F1C84 /* SKStoreKitServiceImplementation.swift in Sources */,
 				4FC970DB259C8F7E003F1C84 /* SKCommandStore.swift in Sources */,
 			);
@@ -605,6 +609,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bitlica.SkarbSDKExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -624,6 +629,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bitlica.SkarbSDKExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

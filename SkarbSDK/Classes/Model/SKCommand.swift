@@ -14,7 +14,7 @@ struct SKCommand: Codable {
   let timestamp: Int
   private(set) var commandType: SKCommandType
   private(set) var status: SKCommandStatus
-  let data: Data
+  private(set) var data: Data
   private(set) var retryCount: Int
   
   init(timestamp: Int = Date().nowTimestampInt,
@@ -39,6 +39,10 @@ struct SKCommand: Codable {
   
   mutating func changeStatus(to status: SKCommandStatus) {
     self.status = status
+  }
+  
+  mutating func updateData(_ data: Data) {
+    self.data = data
   }
   
   func getRetryDelay() -> TimeInterval {

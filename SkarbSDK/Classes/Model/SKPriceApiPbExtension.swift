@@ -120,7 +120,7 @@ extension Priceapi_PricesRequest: SKCodableStruct {
 
 extension Priceapi_Product: SKCodableStruct {
   
-  init(product: SKProduct) {
+  init(product: SKProduct, transactionDate: Date?, transactionId: String?) {
     productID = product.productIdentifier
     if #available(iOS 12.0, *) {
       groupID = product.subscriptionGroupIdentifier ?? ""
@@ -140,6 +140,12 @@ extension Priceapi_Product: SKCodableStruct {
     } else {
       discounts = []
     }
+    if let transactionDate = transactionDate {
+      date = Int64(transactionDate.timeIntervalSince1970)
+    } else {
+      date = 0
+    }
+    transaction = transactionId ?? ""
   }
   
   init(from decoder: Decoder) throws {
@@ -150,6 +156,8 @@ extension Priceapi_Product: SKCodableStruct {
     let price = try container.decode(Double.self, forKey: .price)
     let intro = try container.decode(Priceapi_Discount.self, forKey: .intro)
     let discounts = try container.decode(Array<Priceapi_Discount>.self, forKey: .discounts)
+    let date = try container.decode(Int64.self, forKey: .date)
+    let transaction = try container.decode(String.self, forKey: .transaction)
     
     self = Priceapi_Product.with({
       $0.productID = productID
@@ -158,6 +166,8 @@ extension Priceapi_Product: SKCodableStruct {
       $0.price = price
       $0.intro = intro
       $0.discounts = discounts
+      $0.date = date
+      $0.transaction = transaction
     })
   }
   
@@ -169,6 +179,8 @@ extension Priceapi_Product: SKCodableStruct {
     try container.encode(price, forKey: .price)
     try container.encode(intro, forKey: .intro)
     try container.encode(discounts, forKey: .discounts)
+    try container.encode(date, forKey: .date)
+    try container.encode(transaction, forKey: .transaction)
   }
   
   func getData() -> Data? {
@@ -187,6 +199,8 @@ extension Priceapi_Product: SKCodableStruct {
     case price
     case intro
     case discounts
+    case date
+    case transaction
   }
 }
 

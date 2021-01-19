@@ -139,6 +139,10 @@ struct Priceapi_Product {
 
   var discounts: [Priceapi_Discount] = []
 
+  var date: Int64 = 0
+
+  var transaction: String = String()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -385,6 +389,8 @@ extension Priceapi_Product: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     4: .same(proto: "price"),
     5: .same(proto: "intro"),
     6: .same(proto: "discounts"),
+    7: .same(proto: "date"),
+    8: .same(proto: "transaction"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -396,6 +402,8 @@ extension Priceapi_Product: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
       case 4: try decoder.decodeSingularDoubleField(value: &self.price)
       case 5: try decoder.decodeSingularMessageField(value: &self._intro)
       case 6: try decoder.decodeRepeatedMessageField(value: &self.discounts)
+      case 7: try decoder.decodeSingularInt64Field(value: &self.date)
+      case 8: try decoder.decodeSingularStringField(value: &self.transaction)
       default: break
       }
     }
@@ -420,6 +428,12 @@ extension Priceapi_Product: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     if !self.discounts.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.discounts, fieldNumber: 6)
     }
+    if self.date != 0 {
+      try visitor.visitSingularInt64Field(value: self.date, fieldNumber: 7)
+    }
+    if !self.transaction.isEmpty {
+      try visitor.visitSingularStringField(value: self.transaction, fieldNumber: 8)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -430,6 +444,8 @@ extension Priceapi_Product: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
     if lhs.price != rhs.price {return false}
     if lhs._intro != rhs._intro {return false}
     if lhs.discounts != rhs.discounts {return false}
+    if lhs.date != rhs.date {return false}
+    if lhs.transaction != rhs.transaction {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

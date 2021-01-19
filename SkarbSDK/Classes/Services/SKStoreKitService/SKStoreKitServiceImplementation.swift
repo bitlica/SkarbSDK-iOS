@@ -140,16 +140,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
         return
       }
       let transactionIds: [String] = transactions.compactMap { $0.transactionIdentifier }
-      if SKServiceRegistry.commandStore.hasPurhcaseV4Command {
-        let newTransactions = SKServiceRegistry.commandStore.getNewTransactionIds(transactionIds)
-        if !newTransactions.isEmpty {
-          let transactionDataV4 = Purchaseapi_TransactionsRequest(newTransactions: newTransactions)
-          let transactionV4Command = SKCommand(commandType: .transactionV4,
-                                               status: .pending,
-                                               data: transactionDataV4.getData())
-          SKServiceRegistry.commandStore.saveCommand(transactionV4Command)
-        }
-      } else {
+      if !SKServiceRegistry.commandStore.hasPurhcaseV4Command {
         var countryCode: String? = nil
         if #available(iOS 13.0, *) {
           countryCode = SKPaymentQueue.default().storefront?.countryCode
@@ -162,6 +153,17 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
                                           status: .pending,
                                           data: purchaseDataV4.getData())
         SKServiceRegistry.commandStore.saveCommand(purchaseV4Command)
+      }
+      
+      // Always sends transactions even in case if it was the first purchase
+      // and transactions are included into purchase command
+      let newTransactions = SKServiceRegistry.commandStore.getNewTransactionIds(transactionIds)
+      if !newTransactions.isEmpty {
+        let transactionDataV4 = Purchaseapi_TransactionsRequest(newTransactions: newTransactions)
+        let transactionV4Command = SKCommand(commandType: .transactionV4,
+                                             status: .pending,
+                                             data: transactionDataV4.getData())
+        SKServiceRegistry.commandStore.saveCommand(transactionV4Command)
       }
     }
   }

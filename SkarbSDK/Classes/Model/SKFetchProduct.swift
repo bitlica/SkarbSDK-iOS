@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct SKFetchProduct: SKCodableStruct {
+struct SKFetchProduct: SKCodableStruct, Equatable, Hashable {
   let productId: String
   let transactionDate: Date?
   let transactionId: String?

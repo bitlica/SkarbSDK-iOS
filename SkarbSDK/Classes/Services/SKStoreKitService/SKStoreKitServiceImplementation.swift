@@ -121,8 +121,9 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       }
       
       if !purchasedTransactions.isEmpty {
-        let purchasedProductIds = Array(Set(purchasedTransactions.map { $0.payment.productIdentifier })).joined(separator: ",")
-        if let productData = purchasedProductIds.data(using: .utf8) {
+        let fetchProducts = Array(Set(purchasedTransactions.map { SKFetchProduct(productId: $0.payment.productIdentifier, transactionDate: $0.transactionDate, transactionId: $0.transactionIdentifier) }))
+        let encoder = JSONEncoder()
+        if let productData = try? encoder.encode(fetchProducts) {
           let fetchCommand = SKCommand(commandType: .fetchProducts,
                                        status: .pending,
                                        data: productData)

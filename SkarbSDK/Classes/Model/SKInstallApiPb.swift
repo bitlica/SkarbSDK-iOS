@@ -71,11 +71,31 @@ struct Installapi_DeviceRequest {
 
   var receiptLen: String = String()
 
+  var docDate: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {return _docDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_docDate = newValue}
+  }
+  /// Returns true if `docDate` has been explicitly set.
+  var hasDocDate: Bool {return self._docDate != nil}
+  /// Clears the value of `docDate`. Subsequent reads from it will return its default value.
+  mutating func clearDocDate() {self._docDate = nil}
+
+  var buildDate: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {return _buildDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_buildDate = newValue}
+  }
+  /// Returns true if `buildDate` has been explicitly set.
+  var hasBuildDate: Bool {return self._buildDate != nil}
+  /// Clears the value of `buildDate`. Subsequent reads from it will return its default value.
+  mutating func clearBuildDate() {self._buildDate = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
   fileprivate var _auth: Installapi_Auth? = nil
+  fileprivate var _docDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+  fileprivate var _buildDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
 struct Installapi_AttribRequest {
@@ -197,6 +217,8 @@ extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     8: .standard(proto: "os_ver"),
     9: .standard(proto: "receipt_url"),
     10: .standard(proto: "receipt_len"),
+    11: .standard(proto: "doc_date"),
+    12: .standard(proto: "build_date"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -212,6 +234,8 @@ extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
       case 8: try decoder.decodeSingularStringField(value: &self.osVer)
       case 9: try decoder.decodeSingularStringField(value: &self.receiptURL)
       case 10: try decoder.decodeSingularStringField(value: &self.receiptLen)
+      case 11: try decoder.decodeSingularMessageField(value: &self._docDate)
+      case 12: try decoder.decodeSingularMessageField(value: &self._buildDate)
       default: break
       }
     }
@@ -248,6 +272,12 @@ extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if !self.receiptLen.isEmpty {
       try visitor.visitSingularStringField(value: self.receiptLen, fieldNumber: 10)
     }
+    if let v = self._docDate {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
+    }
+    if let v = self._buildDate {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -262,6 +292,8 @@ extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if lhs.osVer != rhs.osVer {return false}
     if lhs.receiptURL != rhs.receiptURL {return false}
     if lhs.receiptLen != rhs.receiptLen {return false}
+    if lhs._docDate != rhs._docDate {return false}
+    if lhs._buildDate != rhs._buildDate {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

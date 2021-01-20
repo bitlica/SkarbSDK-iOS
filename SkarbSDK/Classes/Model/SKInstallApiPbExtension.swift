@@ -9,10 +9,11 @@
 import Foundation
 import UIKit
 import AdSupport
+import SwiftProtobuf
 
 extension Installapi_Auth: SKCodableStruct {
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let key = try container.decode(String.self, forKey: .key)
     let bundleID = try container.decode(String.self, forKey: .bundleID)
@@ -93,9 +94,12 @@ extension Installapi_DeviceRequest: SKCodableStruct {
       dataCount = recieptData.count
     }
     receiptLen = "\(dataCount)"
+    
+    docDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: appInstallDate.timeIntervalSince1970)
+    buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: appBuildDate.timeIntervalSince1970)
   }
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let auth = try container.decode(Installapi_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
@@ -107,6 +111,10 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     let osVer = try container.decode(String.self, forKey: .osVer)
     let receiptURL = try container.decode(String.self, forKey: .receiptURL)
     let receiptLen = try container.decode(String.self, forKey: .receiptLen)
+    let docDateSec = try container.decode(Int64.self, forKey: .docDateSec)
+    let docDateNanosec = try container.decode(Int32.self, forKey: .docDateNanosec)
+    let buildDateSec = try container.decode(Int64.self, forKey: .buildDateSec)
+    let buildDateNanosec = try container.decode(Int32.self, forKey: .buildDateNanosec)
     
     self = Installapi_DeviceRequest.with({
       $0.auth = auth
@@ -119,6 +127,10 @@ extension Installapi_DeviceRequest: SKCodableStruct {
       $0.osVer = osVer
       $0.receiptURL = receiptURL
       $0.receiptLen = receiptLen
+      $0.docDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: docDateSec,
+                                                           nanos: docDateNanosec)
+      $0.buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: buildDateSec,
+                                                             nanos: buildDateNanosec)
     })
   }
   
@@ -134,6 +146,10 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     try container.encode(osVer, forKey: .osVer)
     try container.encode(receiptURL, forKey: .receiptURL)
     try container.encode(receiptLen, forKey: .receiptLen)
+    try container.encode(docDate.seconds, forKey: .docDateSec)
+    try container.encode(docDate.nanos, forKey: .docDateNanosec)
+    try container.encode(buildDate.seconds, forKey: .buildDateSec)
+    try container.encode(buildDate.nanos, forKey: .buildDateNanosec)
   }
   
   func getData() -> Data? {
@@ -156,6 +172,34 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     case osVer
     case receiptURL
     case receiptLen
+    case docDateSec
+    case docDateNanosec
+    case buildDateSec
+    case buildDateNanosec
+  }
+  
+  private var appBuildDate: Date {
+    if let path = Bundle.main.path(forResource: "Info", ofType: "plist") {
+      if let createdDate = try? FileManager.default.attributesOfItem(atPath: path)[.creationDate] as? Date {
+        return createdDate
+      }
+    }
+    SKLogger.logError("AppBuildDate is nil.",
+                      features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                 SKLoggerFeatureType.internalValue.name: "AppBuildDate is nil."])
+    return Date() // Should never execute
+  }
+
+  private var appInstallDate: Date {
+    if let documentsFolder = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last {
+      if let installDate = try? FileManager.default.attributesOfItem(atPath: documentsFolder.path)[.creationDate] as? Date {
+        return installDate
+      }
+    }
+    SKLogger.logError("AppInstallDate is nil.",
+                      features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                 SKLoggerFeatureType.internalValue.name: "AppInstallDate is nil."])
+    return Date() // Should never execute
   }
 }
 
@@ -190,7 +234,7 @@ extension Installapi_AttribRequest: SKCodableStruct {
     }
   }
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let auth = try container.decode(Installapi_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
@@ -244,9 +288,11 @@ extension Installapi_TestRequest: SKCodableStruct {
     self.installID = SkarbSDK.getDeviceId()
     self.name = name
     self.group = group
+    
+    
   }
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let auth = try container.decode(Installapi_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)

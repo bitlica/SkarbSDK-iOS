@@ -128,6 +128,24 @@ class SKCommandStore {
     return result
   }
   
+  func getDeviceRequest() -> Installapi_DeviceRequest? {
+    var result: Installapi_DeviceRequest? = nil
+    let decoder = JSONDecoder()
+    exclusionSerialQueue.sync {
+      let allSourceCommands = localAppgateCommands.filter { $0.commandType == .installV4 }
+      if allSourceCommands.count > 1 {
+        SKLogger.logError("getInstallV4Data has more than one install",
+                          features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                     SKLoggerFeatureType.internalValue.name: "getInstallV4Data has more than one install"])
+      }
+      if let installData = allSourceCommands.first?.data,
+         let deviceRequest = try? decoder.decode(Installapi_DeviceRequest.self, from: installData) {
+        result = deviceRequest
+      }
+    }
+    return result
+  }
+  
   /// when user terminate app or go to background some commands might be inProgress
   /// and there is no guarantee that command will be handled by the app
   func markAllInProgressAsPendingAndSave() {

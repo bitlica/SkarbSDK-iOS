@@ -8,10 +8,11 @@
 
 import Foundation
 import StoreKit
+import SwiftProtobuf
 
 extension Priceapi_Auth: SKCodableStruct {
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let key = try container.decode(String.self, forKey: .key)
     let bundleID = try container.decode(String.self, forKey: .bundleID)
@@ -70,7 +71,7 @@ extension Priceapi_PricesRequest: SKCodableStruct {
     self.products = products
   }
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let auth = try container.decode(Priceapi_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
@@ -141,14 +142,14 @@ extension Priceapi_Product: SKCodableStruct {
       discounts = []
     }
     if let transactionDate = transactionDate {
-      date = Int64(transactionDate.timeIntervalSince1970)
+      tranDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: transactionDate.timeIntervalSince1970)
     } else {
-      date = 0
+      tranDate = SwiftProtobuf.Google_Protobuf_Timestamp()
     }
     transaction = transactionId ?? ""
   }
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let productID = try container.decode(String.self, forKey: .productID)
     let groupID = try container.decode(String.self, forKey: .groupID)
@@ -156,7 +157,8 @@ extension Priceapi_Product: SKCodableStruct {
     let price = try container.decode(Double.self, forKey: .price)
     let intro = try container.decode(Priceapi_Discount.self, forKey: .intro)
     let discounts = try container.decode(Array<Priceapi_Discount>.self, forKey: .discounts)
-    let date = try container.decode(Int64.self, forKey: .date)
+    let tranDateSec = try container.decode(Int64.self, forKey: .buildDateSec)
+    let tranDateNanosec = try container.decode(Int32.self, forKey: .tranDateNanosec)
     let transaction = try container.decode(String.self, forKey: .transaction)
     
     self = Priceapi_Product.with({
@@ -166,7 +168,8 @@ extension Priceapi_Product: SKCodableStruct {
       $0.price = price
       $0.intro = intro
       $0.discounts = discounts
-      $0.date = date
+      $0.tranDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: tranDateSec,
+                                                            nanos: tranDateNanosec)
       $0.transaction = transaction
     })
   }
@@ -179,7 +182,8 @@ extension Priceapi_Product: SKCodableStruct {
     try container.encode(price, forKey: .price)
     try container.encode(intro, forKey: .intro)
     try container.encode(discounts, forKey: .discounts)
-    try container.encode(date, forKey: .date)
+    try container.encode(tranDate.seconds, forKey: .buildDateSec)
+    try container.encode(tranDate.nanos, forKey: .tranDateNanosec)
     try container.encode(transaction, forKey: .transaction)
   }
   
@@ -199,7 +203,8 @@ extension Priceapi_Product: SKCodableStruct {
     case price
     case intro
     case discounts
-    case date
+    case buildDateSec
+    case tranDateNanosec
     case transaction
   }
 }
@@ -211,7 +216,7 @@ extension Priceapi_Period: SKCodableStruct {
     count = Int32(productPeriod.numberOfUnits)
   }
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let unit = try container.decode(String.self, forKey: .unit)
     let count = try container.decode(Int32.self, forKey: .count)
@@ -260,7 +265,7 @@ extension Priceapi_Discount: SKCodableStruct {
     periodCount = Int32(discount.numberOfPeriods)
   }
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let price = try container.decode(Double.self, forKey: .price)
     let discountID = try container.decode(String.self, forKey: .discountID)

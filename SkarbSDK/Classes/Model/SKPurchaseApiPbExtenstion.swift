@@ -9,10 +9,11 @@
 import Foundation
 import UIKit
 import AdSupport
+import SwiftProtobuf
 
 extension Purchaseapi_Auth: SKCodableStruct {
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let key = try container.decode(String.self, forKey: .key)
     let bundleID = try container.decode(String.self, forKey: .bundleID)
@@ -53,7 +54,9 @@ extension Purchaseapi_Auth: SKCodableStruct {
 
 extension Purchaseapi_TransactionsRequest: SKCodableStruct {
   
-  init(newTransactions: [String]) {
+  init(newTransactions: [String],
+       docFolderDate: SwiftProtobuf.Google_Protobuf_Timestamp?,
+       appBuildDate: SwiftProtobuf.Google_Protobuf_Timestamp?) {
     let authData = Purchaseapi_Auth.with {
       $0.key = SkarbSDK.clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
@@ -63,18 +66,28 @@ extension Purchaseapi_TransactionsRequest: SKCodableStruct {
     auth = authData
     installID = SkarbSDK.getDeviceId()
     transactions = newTransactions
+    docDate = docFolderDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()
+    buildDate = appBuildDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()
   }
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let auth = try container.decode(Purchaseapi_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let transactions = try container.decode(Array<String>.self, forKey: .transactions)
+    let docDateSec = try container.decode(Int64.self, forKey: .docDateSec)
+    let docDateNanosec = try container.decode(Int32.self, forKey: .docDateNanosec)
+    let buildDateSec = try container.decode(Int64.self, forKey: .buildDateSec)
+    let buildDateNanosec = try container.decode(Int32.self, forKey: .buildDateNanosec)
     
     self = Purchaseapi_TransactionsRequest.with({
       $0.auth = auth
       $0.installID = installID
       $0.transactions = transactions
+      $0.docDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: docDateSec,
+                                                           nanos: docDateNanosec)
+      $0.buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: buildDateSec,
+                                                             nanos: buildDateNanosec)
     })
   }
   
@@ -83,6 +96,10 @@ extension Purchaseapi_TransactionsRequest: SKCodableStruct {
     try container.encode(auth, forKey: .auth)
     try container.encode(installID, forKey: .installID)
     try container.encode(transactions, forKey: .transactions)
+    try container.encode(docDate.seconds, forKey: .docDateSec)
+    try container.encode(docDate.nanos, forKey: .docDateNanosec)
+    try container.encode(buildDate.seconds, forKey: .buildDateSec)
+    try container.encode(buildDate.nanos, forKey: .buildDateNanosec)
   }
   
   func getData() -> Data? {
@@ -98,6 +115,10 @@ extension Purchaseapi_TransactionsRequest: SKCodableStruct {
     case auth
     case installID
     case transactions
+    case docDateSec
+    case docDateNanosec
+    case buildDateSec
+    case buildDateNanosec
   }
 }
 
@@ -106,7 +127,9 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
   init(storefront: String?,
        region: String?,
        currency: String?,
-       newTransactions: [String]) {
+       newTransactions: [String],
+       docFolderDate: SwiftProtobuf.Google_Protobuf_Timestamp?,
+       appBuildDate: SwiftProtobuf.Google_Protobuf_Timestamp?) {
     let authData = Purchaseapi_Auth.with {
       $0.key = SkarbSDK.clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
@@ -143,9 +166,11 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
     self.storefront = storefront ?? ""
     self.region = region ?? ""
     self.currency = currency ?? ""
+    docDate = docFolderDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()
+    buildDate = appBuildDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()
   }
   
-  init(from decoder: Decoder) throws {
+  init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let auth = try container.decode(Purchaseapi_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
@@ -158,6 +183,10 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
     let storefront = try container.decode(String.self, forKey: .storefront)
     let region = try container.decode(String.self, forKey: .region)
     let currency = try container.decode(String.self, forKey: .currency)
+    let docDateSec = try container.decode(Int64.self, forKey: .docDateSec)
+    let docDateNanosec = try container.decode(Int32.self, forKey: .docDateNanosec)
+    let buildDateSec = try container.decode(Int64.self, forKey: .buildDateSec)
+    let buildDateNanosec = try container.decode(Int32.self, forKey: .buildDateNanosec)
     
     self = Purchaseapi_ReceiptRequest.with({
       $0.auth = auth
@@ -171,6 +200,10 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
       $0.storefront = storefront
       $0.region = region
       $0.currency = currency
+      $0.docDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: docDateSec,
+                                                           nanos: docDateNanosec)
+      $0.buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: buildDateSec,
+                                                             nanos: buildDateNanosec)
     })
   }
   
@@ -187,6 +220,10 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
     try container.encode(storefront, forKey: .storefront)
     try container.encode(region, forKey: .region)
     try container.encode(currency, forKey: .currency)
+    try container.encode(docDate.seconds, forKey: .docDateSec)
+    try container.encode(docDate.nanos, forKey: .docDateNanosec)
+    try container.encode(buildDate.seconds, forKey: .buildDateSec)
+    try container.encode(buildDate.nanos, forKey: .buildDateNanosec)
   }
   
   func getData() -> Data? {
@@ -210,5 +247,9 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
     case storefront
     case region
     case currency
+    case docDateSec
+    case docDateNanosec
+    case buildDateSec
+    case buildDateNanosec
   }
 }

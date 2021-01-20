@@ -145,10 +145,13 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
         if #available(iOS 13.0, *) {
           countryCode = SKPaymentQueue.default().storefront?.countryCode
         }
+        let installData = SKServiceRegistry.commandStore.getDeviceRequest()
         let purchaseDataV4 = Purchaseapi_ReceiptRequest(storefront: countryCode,
                                                         region: self.allProducts?.first?.priceLocale.regionCode,
                                                         currency: self.allProducts?.first?.priceLocale.currencyCode,
-                                                        newTransactions: transactionIds)
+                                                        newTransactions: transactionIds,
+                                                        docFolderDate: installData?.docDate,
+                                                        appBuildDate: installData?.buildDate)
         let purchaseV4Command = SKCommand(commandType: .purchaseV4,
                                           status: .pending,
                                           data: purchaseDataV4.getData())
@@ -159,7 +162,10 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       // and transactions are included into purchase command
       let newTransactions = SKServiceRegistry.commandStore.getNewTransactionIds(transactionIds)
       if !newTransactions.isEmpty {
-        let transactionDataV4 = Purchaseapi_TransactionsRequest(newTransactions: newTransactions)
+        let installData = SKServiceRegistry.commandStore.getDeviceRequest()
+        let transactionDataV4 = Purchaseapi_TransactionsRequest(newTransactions: newTransactions,
+                                                                docFolderDate: installData?.docDate,
+                                                                appBuildDate: installData?.buildDate)
         let transactionV4Command = SKCommand(commandType: .transactionV4,
                                              status: .pending,
                                              data: transactionDataV4.getData())

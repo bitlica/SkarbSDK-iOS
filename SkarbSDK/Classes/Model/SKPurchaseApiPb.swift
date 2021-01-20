@@ -55,13 +55,36 @@ struct Purchaseapi_TransactionsRequest {
   /// random unique value, e.g. timestamp+rand(int64)
   var installID: String = String()
 
+  /// array of transaction ids
   var transactions: [String] = []
+
+  /// the same value sent in SetDevice
+  var docDate: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {return _docDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_docDate = newValue}
+  }
+  /// Returns true if `docDate` has been explicitly set.
+  var hasDocDate: Bool {return self._docDate != nil}
+  /// Clears the value of `docDate`. Subsequent reads from it will return its default value.
+  mutating func clearDocDate() {self._docDate = nil}
+
+  /// the same value sent in SetDevice
+  var buildDate: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {return _buildDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_buildDate = newValue}
+  }
+  /// Returns true if `buildDate` has been explicitly set.
+  var hasBuildDate: Bool {return self._buildDate != nil}
+  /// Clears the value of `buildDate`. Subsequent reads from it will return its default value.
+  mutating func clearBuildDate() {self._buildDate = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
   fileprivate var _auth: Purchaseapi_Auth? = nil
+  fileprivate var _docDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+  fileprivate var _buildDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
 struct Purchaseapi_ReceiptRequest {
@@ -103,11 +126,33 @@ struct Purchaseapi_ReceiptRequest {
   /// code from priceLocale or Locale
   var currency: String = String()
 
+  /// the same value sent in SetDevice
+  var docDate: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {return _docDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_docDate = newValue}
+  }
+  /// Returns true if `docDate` has been explicitly set.
+  var hasDocDate: Bool {return self._docDate != nil}
+  /// Clears the value of `docDate`. Subsequent reads from it will return its default value.
+  mutating func clearDocDate() {self._docDate = nil}
+
+  /// the same value sent in SetDevice
+  var buildDate: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {return _buildDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_buildDate = newValue}
+  }
+  /// Returns true if `buildDate` has been explicitly set.
+  var hasBuildDate: Bool {return self._buildDate != nil}
+  /// Clears the value of `buildDate`. Subsequent reads from it will return its default value.
+  mutating func clearBuildDate() {self._buildDate = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
   fileprivate var _auth: Purchaseapi_Auth? = nil
+  fileprivate var _docDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+  fileprivate var _buildDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
 struct Purchaseapi_ReceiptResponse {
@@ -179,6 +224,8 @@ extension Purchaseapi_TransactionsRequest: SwiftProtobuf.Message, SwiftProtobuf.
     1: .same(proto: "auth"),
     2: .standard(proto: "install_id"),
     3: .same(proto: "transactions"),
+    4: .standard(proto: "doc_date"),
+    5: .standard(proto: "build_date"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -187,6 +234,8 @@ extension Purchaseapi_TransactionsRequest: SwiftProtobuf.Message, SwiftProtobuf.
       case 1: try decoder.decodeSingularMessageField(value: &self._auth)
       case 2: try decoder.decodeSingularStringField(value: &self.installID)
       case 3: try decoder.decodeRepeatedStringField(value: &self.transactions)
+      case 4: try decoder.decodeSingularMessageField(value: &self._docDate)
+      case 5: try decoder.decodeSingularMessageField(value: &self._buildDate)
       default: break
       }
     }
@@ -202,6 +251,12 @@ extension Purchaseapi_TransactionsRequest: SwiftProtobuf.Message, SwiftProtobuf.
     if !self.transactions.isEmpty {
       try visitor.visitRepeatedStringField(value: self.transactions, fieldNumber: 3)
     }
+    if let v = self._docDate {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }
+    if let v = self._buildDate {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -209,6 +264,8 @@ extension Purchaseapi_TransactionsRequest: SwiftProtobuf.Message, SwiftProtobuf.
     if lhs._auth != rhs._auth {return false}
     if lhs.installID != rhs.installID {return false}
     if lhs.transactions != rhs.transactions {return false}
+    if lhs._docDate != rhs._docDate {return false}
+    if lhs._buildDate != rhs._buildDate {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -228,6 +285,8 @@ extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
     10: .same(proto: "storefront"),
     11: .same(proto: "region"),
     12: .same(proto: "currency"),
+    13: .standard(proto: "doc_date"),
+    14: .standard(proto: "build_date"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -244,6 +303,8 @@ extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
       case 10: try decoder.decodeSingularStringField(value: &self.storefront)
       case 11: try decoder.decodeSingularStringField(value: &self.region)
       case 12: try decoder.decodeSingularStringField(value: &self.currency)
+      case 13: try decoder.decodeSingularMessageField(value: &self._docDate)
+      case 14: try decoder.decodeSingularMessageField(value: &self._buildDate)
       default: break
       }
     }
@@ -283,6 +344,12 @@ extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
     if !self.currency.isEmpty {
       try visitor.visitSingularStringField(value: self.currency, fieldNumber: 12)
     }
+    if let v = self._docDate {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 13)
+    }
+    if let v = self._buildDate {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 14)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -298,6 +365,8 @@ extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
     if lhs.storefront != rhs.storefront {return false}
     if lhs.region != rhs.region {return false}
     if lhs.currency != rhs.currency {return false}
+    if lhs._docDate != rhs._docDate {return false}
+    if lhs._buildDate != rhs._buildDate {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

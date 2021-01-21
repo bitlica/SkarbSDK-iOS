@@ -56,7 +56,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
         editedCommand.incrementRetryCount()
         editedCommand.changeStatus(to: .pending)
       }
-      SKServiceRegistry.commandStore.saveCommand(command)
+      SKServiceRegistry.commandStore.saveCommand(editedCommand)
       
       // V4. Send command for price
       var priceApiProducts: [Priceapi_Product] = []

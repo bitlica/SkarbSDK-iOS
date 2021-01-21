@@ -10,54 +10,13 @@ import Foundation
 import StoreKit
 import SwiftProtobuf
 
-extension Priceapi_Auth: SKCodableStruct {
-  
-  init(from decoder: Swift.Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    let key = try container.decode(String.self, forKey: .key)
-    let bundleID = try container.decode(String.self, forKey: .bundleID)
-    let agentName = try container.decode(String.self, forKey: .agentName)
-    let agentVer = try container.decode(String.self, forKey: .agentVer)
-    self = Priceapi_Auth.with({
-      $0.key = key
-      $0.bundleID = bundleID
-      $0.agentName = agentName
-      $0.agentVer = agentVer
-    })
-  }
-  
-  func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(key, forKey: .key)
-    try container.encode(bundleID, forKey: .bundleID)
-    try container.encode(agentName, forKey: .agentName)
-    try container.encode(agentVer, forKey: .agentVer)
-  }
-  
-  func getData() -> Data? {
-    let encoder = JSONEncoder()
-    if let encoded = try? encoder.encode(self) {
-      return encoded
-    }
-    
-    return nil
-  }
-  
-  enum CodingKeys: String, CodingKey {
-    case key
-    case bundleID
-    case agentName
-    case agentVer
-  }
-}
-
 extension Priceapi_PricesRequest: SKCodableStruct {
   
   init(storefront: String?,
        region: String?,
        currency: String?,
        products: [Priceapi_Product]) {
-    let authData = Priceapi_Auth.with {
+    let authData = Auth_Auth.with {
       $0.key = SkarbSDK.clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
       $0.agentName = SkarbSDK.agentName
@@ -73,7 +32,7 @@ extension Priceapi_PricesRequest: SKCodableStruct {
   
   init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let auth = try container.decode(Priceapi_Auth.self, forKey: .auth)
+    let auth = try container.decode(Auth_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let storefront = try container.decode(String.self, forKey: .storefront)
     let region = try container.decode(String.self, forKey: .region)

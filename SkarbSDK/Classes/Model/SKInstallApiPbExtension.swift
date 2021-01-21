@@ -11,50 +11,10 @@ import UIKit
 import AdSupport
 import SwiftProtobuf
 
-extension Installapi_Auth: SKCodableStruct {
-  
-  init(from decoder: Swift.Decoder) throws {
-    let container = try decoder.container(keyedBy: CodingKeys.self)
-    let key = try container.decode(String.self, forKey: .key)
-    let bundleID = try container.decode(String.self, forKey: .bundleID)
-    let agentName = try container.decode(String.self, forKey: .agentName)
-    let agentVer = try container.decode(String.self, forKey: .agentVer)
-    self = Installapi_Auth()
-    self.key = key
-    self.bundleID = bundleID
-    self.agentName = agentName
-    self.agentVer = agentVer
-  }
-  
-  func encode(to encoder: Encoder) throws {
-    var container = encoder.container(keyedBy: CodingKeys.self)
-    try container.encode(key, forKey: .key)
-    try container.encode(bundleID, forKey: .bundleID)
-    try container.encode(agentName, forKey: .agentName)
-    try container.encode(agentVer, forKey: .agentVer)
-  }
-  
-  func getData() -> Data? {
-    let encoder = JSONEncoder()
-    if let encoded = try? encoder.encode(self) {
-      return encoded
-    }
-    
-    return nil
-  }
-  
-  enum CodingKeys: String, CodingKey {
-    case key
-    case bundleID
-    case agentName
-    case agentVer
-  }
-}
-
 extension Installapi_DeviceRequest: SKCodableStruct {
   
   init(clientId: String, deviceId: String) {
-    let authData = Installapi_Auth.with {
+    let authData = Auth_Auth.with {
       $0.key = clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
       $0.agentName = SkarbSDK.agentName
@@ -101,7 +61,7 @@ extension Installapi_DeviceRequest: SKCodableStruct {
   
   init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let auth = try container.decode(Installapi_Auth.self, forKey: .auth)
+    let auth = try container.decode(Auth_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let idfa = try container.decode(String.self, forKey: .idfa)
     let idfv = try container.decode(String.self, forKey: .idfv)
@@ -208,7 +168,7 @@ extension Installapi_AttribRequest: SKCodableStruct {
   
   init(broker: String, features: [AnyHashable: Any]) {
     
-    let authData = Installapi_Auth.with {
+    let authData = Auth_Auth.with {
       $0.key = SkarbSDK.clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
       $0.agentName = SkarbSDK.agentName
@@ -236,7 +196,7 @@ extension Installapi_AttribRequest: SKCodableStruct {
   
   init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let auth = try container.decode(Installapi_Auth.self, forKey: .auth)
+    let auth = try container.decode(Auth_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let broker = try container.decode(String.self, forKey: .broker)
     let payload = try container.decode(Data.self, forKey: .payload)
@@ -278,7 +238,7 @@ extension Installapi_TestRequest: SKCodableStruct {
   
   init(name: String, group: String) {
     
-    let authData = Installapi_Auth.with {
+    let authData = Auth_Auth.with {
       $0.key = SkarbSDK.clientId
       $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
       $0.agentName = SkarbSDK.agentName
@@ -294,7 +254,7 @@ extension Installapi_TestRequest: SKCodableStruct {
   
   init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
-    let auth = try container.decode(Installapi_Auth.self, forKey: .auth)
+    let auth = try container.decode(Auth_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let name = try container.decode(String.self, forKey: .name)
     let group = try container.decode(String.self, forKey: .group)

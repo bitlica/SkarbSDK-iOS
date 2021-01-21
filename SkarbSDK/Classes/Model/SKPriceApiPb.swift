@@ -20,31 +20,13 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
-struct Priceapi_Auth {
-  // SwiftProtobuf.Message conformance is added in an extension below. See the
-  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-  // methods supported on all messages.
-
-  var key: String = String()
-
-  var bundleID: String = String()
-
-  var agentName: String = String()
-
-  var agentVer: String = String()
-
-  var unknownFields = SwiftProtobuf.UnknownStorage()
-
-  init() {}
-}
-
 struct Priceapi_ProductsRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var auth: Priceapi_Auth {
-    get {return _auth ?? Priceapi_Auth()}
+  var auth: Auth_Auth {
+    get {return _auth ?? Auth_Auth()}
     set {_auth = newValue}
   }
   /// Returns true if `auth` has been explicitly set.
@@ -60,7 +42,7 @@ struct Priceapi_ProductsRequest {
 
   init() {}
 
-  fileprivate var _auth: Priceapi_Auth? = nil
+  fileprivate var _auth: Auth_Auth? = nil
 }
 
 struct Priceapi_ProductsResponse {
@@ -80,8 +62,8 @@ struct Priceapi_PricesRequest {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var auth: Priceapi_Auth {
-    get {return _auth ?? Priceapi_Auth()}
+  var auth: Auth_Auth {
+    get {return _auth ?? Auth_Auth()}
     set {_auth = newValue}
   }
   /// Returns true if `auth` has been explicitly set.
@@ -105,7 +87,7 @@ struct Priceapi_PricesRequest {
 
   init() {}
 
-  fileprivate var _auth: Priceapi_Auth? = nil
+  fileprivate var _auth: Auth_Auth? = nil
 }
 
 struct Priceapi_Product {
@@ -212,53 +194,6 @@ struct Priceapi_Period {
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "priceapi"
-
-extension Priceapi_Auth: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
-  static let protoMessageName: String = _protobuf_package + ".Auth"
-  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "key"),
-    2: .standard(proto: "bundle_id"),
-    3: .standard(proto: "agent_name"),
-    4: .standard(proto: "agent_ver"),
-  ]
-
-  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      switch fieldNumber {
-      case 1: try decoder.decodeSingularStringField(value: &self.key)
-      case 2: try decoder.decodeSingularStringField(value: &self.bundleID)
-      case 3: try decoder.decodeSingularStringField(value: &self.agentName)
-      case 4: try decoder.decodeSingularStringField(value: &self.agentVer)
-      default: break
-      }
-    }
-  }
-
-  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.key.isEmpty {
-      try visitor.visitSingularStringField(value: self.key, fieldNumber: 1)
-    }
-    if !self.bundleID.isEmpty {
-      try visitor.visitSingularStringField(value: self.bundleID, fieldNumber: 2)
-    }
-    if !self.agentName.isEmpty {
-      try visitor.visitSingularStringField(value: self.agentName, fieldNumber: 3)
-    }
-    if !self.agentVer.isEmpty {
-      try visitor.visitSingularStringField(value: self.agentVer, fieldNumber: 4)
-    }
-    try unknownFields.traverse(visitor: &visitor)
-  }
-
-  static func ==(lhs: Priceapi_Auth, rhs: Priceapi_Auth) -> Bool {
-    if lhs.key != rhs.key {return false}
-    if lhs.bundleID != rhs.bundleID {return false}
-    if lhs.agentName != rhs.agentName {return false}
-    if lhs.agentVer != rhs.agentVer {return false}
-    if lhs.unknownFields != rhs.unknownFields {return false}
-    return true
-  }
-}
 
 extension Priceapi_ProductsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ProductsRequest"

@@ -15,6 +15,8 @@
 		4F735BEB23D7279500A8A537 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE923D7279500A8A537 /* LaunchScreen.storyboard */; };
 		4FA3DBD225B5A18B00DECDDD /* SKFetchProduct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FA3DBD125B5A18B00DECDDD /* SKFetchProduct.swift */; };
 		4FA3DD2125B998EB00DECDDD /* SkarbSDKTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FA3DD2025B998EB00DECDDD /* SkarbSDKTests.swift */; };
+		4FA3DD2D25BA0CB000DECDDD /* SKAuthApiPb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FA3DD2C25BA0CAF00DECDDD /* SKAuthApiPb.swift */; };
+		4FA3DD3525BA0CF000DECDDD /* SKAuthApiPbExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FA3DD3425BA0CF000DECDDD /* SKAuthApiPbExtension.swift */; };
 		4FC970C5259C8F7D003F1C84 /* SKLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC97098259C8F7D003F1C84 /* SKLogger.swift */; };
 		4FC970C6259C8F7D003F1C84 /* SkarbSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC97099259C8F7D003F1C84 /* SkarbSDK.swift */; };
 		4FC970C7259C8F7D003F1C84 /* FormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC9709B259C8F7D003F1C84 /* FormatterExtension.swift */; };
@@ -76,6 +78,8 @@
 		4FA3DD1E25B998EB00DECDDD /* SkarbSDKExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SkarbSDKExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FA3DD2025B998EB00DECDDD /* SkarbSDKTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkarbSDKTests.swift; sourceTree = "<group>"; };
 		4FA3DD2225B998EB00DECDDD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4FA3DD2C25BA0CAF00DECDDD /* SKAuthApiPb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKAuthApiPb.swift; sourceTree = "<group>"; };
+		4FA3DD3425BA0CF000DECDDD /* SKAuthApiPbExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SKAuthApiPbExtension.swift; sourceTree = "<group>"; };
 		4FC97098259C8F7D003F1C84 /* SKLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKLogger.swift; sourceTree = "<group>"; };
 		4FC97099259C8F7D003F1C84 /* SkarbSDK.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SkarbSDK.swift; sourceTree = "<group>"; };
 		4FC9709B259C8F7D003F1C84 /* FormatterExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormatterExtension.swift; sourceTree = "<group>"; };
@@ -225,14 +229,16 @@
 				4FC970A0259C8F7D003F1C84 /* SKBrokerData.swift */,
 				4FC970A1259C8F7D003F1C84 /* SKCommandType.swift */,
 				4FC970A2259C8F7D003F1C84 /* SKCommandStatus.swift */,
-				4FC970A3259C8F7D003F1C84 /* SKPriceApiPb.swift */,
 				4FC970A4259C8F7D003F1C84 /* SKInitData.swift */,
+				4FA3DD2C25BA0CAF00DECDDD /* SKAuthApiPb.swift */,
 				4FC970A5259C8F7D003F1C84 /* SKInstallApiPb.swift */,
-				4FC970A6259C8F7D003F1C84 /* SKPurchaseData.swift */,
+				4FC970A3259C8F7D003F1C84 /* SKPriceApiPb.swift */,
+				4FC970AA259C8F7D003F1C84 /* SKPurchaseApiPb.swift */,
+				4FA3DD3425BA0CF000DECDDD /* SKAuthApiPbExtension.swift */,
 				4FC970A7259C8F7D003F1C84 /* SKPriceApiPbExtension.swift */,
 				4FC970A8259C8F7D003F1C84 /* SKInstallApiPbExtension.swift */,
 				4FC970A9259C8F7D003F1C84 /* SKPurchaseApiPbExtenstion.swift */,
-				4FC970AA259C8F7D003F1C84 /* SKPurchaseApiPb.swift */,
+				4FC970A6259C8F7D003F1C84 /* SKPurchaseData.swift */,
 				4FC970AB259C8F7D003F1C84 /* SKBroker.swift */,
 				4FC970AC259C8F7D003F1C84 /* SKCommand.swift */,
 				4FC970AD259C8F7D003F1C84 /* SKTestData.swift */,
@@ -489,6 +495,7 @@
 				4F735BE323D7279400A8A537 /* ViewController.swift in Sources */,
 				4FC970E0259C8F7E003F1C84 /* SKServerAPI.swift in Sources */,
 				4FC970D4259C8F7E003F1C84 /* SKPurchaseApiPbExtenstion.swift in Sources */,
+				4FA3DD2D25BA0CB000DECDDD /* SKAuthApiPb.swift in Sources */,
 				4FC970CF259C8F7D003F1C84 /* SKInitData.swift in Sources */,
 				4FC970D2259C8F7E003F1C84 /* SKPriceApiPbExtension.swift in Sources */,
 				4FC970D7259C8F7E003F1C84 /* SKCommand.swift in Sources */,
@@ -512,6 +519,7 @@
 				4F735BE123D7279400A8A537 /* SceneDelegate.swift in Sources */,
 				4FC970E3259C8F7E003F1C84 /* SKServerAPIImplementaton.swift in Sources */,
 				4FC970C5259C8F7D003F1C84 /* SKLogger.swift in Sources */,
+				4FA3DD3525BA0CF000DECDDD /* SKAuthApiPbExtension.swift in Sources */,
 				4FC970D6259C8F7E003F1C84 /* SKBroker.swift in Sources */,
 				4FC970D8259C8F7E003F1C84 /* SKTestData.swift in Sources */,
 				4FC970DA259C8F7E003F1C84 /* SKServiceRegistry.swift in Sources */,

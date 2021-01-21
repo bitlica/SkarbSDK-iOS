@@ -58,7 +58,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
       }
       SKServiceRegistry.commandStore.saveCommand(command)
       
-      // Send command for price
+      // V4. Send command for price
       var priceApiProducts: [Priceapi_Product] = []
       for fetchProduct in fetchProducts {
         guard let product = products.first(where: { $0.productIdentifier == fetchProduct.productId }) else {
@@ -121,7 +121,20 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       }
       
       if !purchasedTransactions.isEmpty {
-        let fetchProducts = Array(Set(purchasedTransactions.map { SKFetchProduct(productId: $0.payment.productIdentifier, transactionDate: $0.transactionDate, transactionId: $0.transactionIdentifier) }))
+        // V3 and V4. Create one SKFetchProduct or each unique productId
+        // need to attach the newest transaction Date and Id
+        let productIds = Array(Set(purchasedTransactions.map { $0.payment.productIdentifier }))
+        var fetchProducts: [SKFetchProduct] = []
+        for productId in productIds {
+          let transaction = purchasedTransactions
+            .filter { $0.payment.productIdentifier == productId }
+            .sorted { $0.transactionDate ?? Date() < $1.transactionDate ?? Date() }.last
+          if let transaction = transaction {
+            fetchProducts.append(SKFetchProduct(productId: transaction.payment.productIdentifier,
+                                                transactionDate: transaction.transactionDate,
+                                                transactionId: transaction.transactionIdentifier))
+          }
+        }
         let encoder = JSONEncoder()
         if let productData = try? encoder.encode(fetchProducts) {
           let fetchCommand = SKCommand(commandType: .fetchProducts,

@@ -124,5 +124,29 @@ struct SKMigrationService {
         }
       }
     }
+    
+    // Need to delete all events if SDK version is lower than 0.4.2 or is equal
+    // Will be used compareNumeric(:) later for comparing versions
+    // current version can be parsed from Installapi_DeviceRequest.auth.agentVer
+    let decoder = JSONDecoder()
+    if let installCommand = SKServiceRegistry.commandStore.getAllCommands(by: .installV4).first,
+       (try? decoder.decode(Installapi_DeviceRequest.self, from: installCommand.data)) == nil {
+      SKServiceRegistry.commandStore.deleteAllCommand(by: .installV4)
+      SKServiceRegistry.commandStore.deleteAllCommand(by: .sourceV4)
+      SKServiceRegistry.commandStore.deleteAllCommand(by: .testV4)
+      SKServiceRegistry.commandStore.deleteAllCommand(by: .purchaseV4)
+      SKServiceRegistry.commandStore.deleteAllCommand(by: .transactionV4)
+      SKServiceRegistry.commandStore.deleteAllCommand(by: .priceV4)
+    }
+    print("installV4", SKServiceRegistry.commandStore.getAllCommands(by: .installV4).count)
+    print("sourceV4", SKServiceRegistry.commandStore.getAllCommands(by: .sourceV4).count)
+    print("testV4", SKServiceRegistry.commandStore.getAllCommands(by: .testV4).count)
+    print("purchaseV4", SKServiceRegistry.commandStore.getAllCommands(by: .purchaseV4).count)
+    print("transactionV4", SKServiceRegistry.commandStore.getAllCommands(by: .transactionV4).count)
+    print("priceV4", SKServiceRegistry.commandStore.getAllCommands(by: .priceV4).count)
+  }
+  
+  private func compareNumeric(_ version1: String, _ version2: String) -> ComparisonResult {
+    return version1.compare(version2, options: .numeric)
   }
 }

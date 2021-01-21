@@ -119,6 +119,17 @@ class SKCommandStore {
     saveState()
   }
   
+  func deleteAllCommand(by commandType: SKCommandType) {
+    SKLogger.logInfo("delete all commands: commandType = \(commandType)")
+    let deleteCommands = getAllCommands(by: commandType)
+    exclusionSerialQueue.sync {
+      for command in deleteCommands {
+        localAppgateCommands.removeAll { $0 == command }
+      }
+    }
+    saveState()
+  }
+  
   func saveState() {
     SKLogger.logInfo("SKCommandStore saveState: called")
     exclusionSerialQueue.sync {
@@ -135,10 +146,10 @@ class SKCommandStore {
     return result
   }
   
-  func getAllCommands(by comandType: SKCommandType) -> [SKCommand] {
+  func getAllCommands(by commandType: SKCommandType) -> [SKCommand] {
     var result: [SKCommand] = []
     exclusionSerialQueue.sync {
-      result = localAppgateCommands.filter({ $0.commandType == comandType })
+      result = localAppgateCommands.filter({ $0.commandType == commandType })
     }
     return result
   }

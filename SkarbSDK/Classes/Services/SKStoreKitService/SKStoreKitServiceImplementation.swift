@@ -149,8 +149,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       
       // V4 part
       
-      guard !purchasedTransactions.isEmpty,
-            SKServiceRegistry.commandStore.hasInstallV4Command else {
+      guard !purchasedTransactions.isEmpty else {
         return
       }
       let transactionIds: [String] = transactions.compactMap { $0.transactionIdentifier }

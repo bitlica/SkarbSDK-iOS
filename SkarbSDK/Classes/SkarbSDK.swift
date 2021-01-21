@@ -21,7 +21,7 @@ public class SkarbSDK {
                                 deviceId: String? = nil) {
     
     SkarbSDK.clientId = clientId
-    let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+    let deviceId = deviceId ?? getDeviceId()
     
     // Order is matter:
     // needs to be sure that install command data exists always
@@ -33,50 +33,48 @@ public class SkarbSDK {
   
   public static func sendTest(name: String,
                               group: String) {
-    let testData = SKTestData(name: name, group: group)
-    SKServiceRegistry.userDefaultsService.setValue(testData.getData(), forKey: .testData)
-    
-    let testCommand = SKCommand(commandType: .test,
-                                status: .pending,
-                                data: SKCommand.prepareAppgateData())
-    SKServiceRegistry.commandStore.saveCommand(testCommand)
+    //    V3
+    if !SKServiceRegistry.commandStore.hasTestCommand {
+      let testData = SKTestData(name: name, group: group)
+      SKServiceRegistry.userDefaultsService.setValue(testData.getData(), forKey: .testData)
+      
+      let testCommand = SKCommand(commandType: .test,
+                                  status: .pending,
+                                  data: SKCommand.prepareAppgateData())
+      SKServiceRegistry.commandStore.saveCommand(testCommand)
+    }
     
     // V4
-    guard SKServiceRegistry.commandStore.hasInstallV4Command else {
-      return
+    if !SKServiceRegistry.commandStore.hasTestV4Command {
+      let testRequest = Installapi_TestRequest(name: name, group: group)
+      let testV4Command = SKCommand(commandType: .testV4,
+                                    status: .pending,
+                                    data: testRequest.getData())
+      SKServiceRegistry.commandStore.saveCommand(testV4Command)
     }
-    let testRequest = Installapi_TestRequest(name: name, group: group)
-    let testV4Command = SKCommand(commandType: .testV4,
-                                  status: .pending,
-                                  data: testRequest.getData())
-    SKServiceRegistry.commandStore.saveCommand(testV4Command)
   }
   
   public static func sendSource(broker: SKBroker,
-                                features: [AnyHashable: Any],
-                                once: Bool = true) {
-    
-    if once && SKServiceRegistry.commandStore.hasSendSourceCommand {
-      return
+                                features: [AnyHashable: Any]) {
+    //    V3
+    if !SKServiceRegistry.commandStore.hasSendSourceCommand {
+      let broberData = SKBrokerData(broker: broker.name, features: features)
+      SKServiceRegistry.userDefaultsService.setValue(broberData.getData(), forKey: .brokerData)
+      
+      let sourceCommand = SKCommand(commandType: .source,
+                                    status: .pending,
+                                    data: SKCommand.prepareAppgateData())
+      SKServiceRegistry.commandStore.saveCommand(sourceCommand)
     }
-    
-    let broberData = SKBrokerData(broker: broker.name, features: features)
-    SKServiceRegistry.userDefaultsService.setValue(broberData.getData(), forKey: .brokerData)
-    
-    let sourceCommand = SKCommand(commandType: .source,
-                                  status: .pending,
-                                  data: SKCommand.prepareAppgateData())
-    SKServiceRegistry.commandStore.saveCommand(sourceCommand)
     
     // V4
-    guard SKServiceRegistry.commandStore.hasInstallV4Command else {
-      return
+    if !SKServiceRegistry.commandStore.hasSendSourceV4Command(broker: broker) {
+      let attributionRequest = Installapi_AttribRequest(broker: broker.name, features: features)
+      let sourceV4Command = SKCommand(commandType: .sourceV4,
+                                      status: .pending,
+                                      data: attributionRequest.getData())
+      SKServiceRegistry.commandStore.saveCommand(sourceV4Command)
     }
-    let attributionRequest = Installapi_AttribRequest(broker: broker.name, features: features)
-    let sourceV4Command = SKCommand(commandType: .sourceV4,
-                                    status: .pending,
-                                    data: attributionRequest.getData())
-    SKServiceRegistry.commandStore.saveCommand(sourceV4Command)
   }
   
   public static func sendPurchase(productId: String,
@@ -103,7 +101,7 @@ public class SkarbSDK {
       SKLogger.logError("SkarbSDK: getDeviceId() - deviceId is nil",
                         features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                    SKLoggerFeatureType.internalValue.name: "deviceId is nil"])
-      return UUID().uuidString
+      return UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
     }
     return deviceId
   }

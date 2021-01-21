@@ -66,7 +66,6 @@ class SKCommandStore {
     return result
   }
   
-//  TODO: Add to sendSource() after removing V3
   func hasSendSourceV4Command(broker: SKBroker) -> Bool {
     var result = false
     let decoder = JSONDecoder()
@@ -79,6 +78,22 @@ class SKCommandStore {
           break
         }
       }
+    }
+    return result
+  }
+  
+  var hasTestCommand: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .test }) != nil
+    }
+    return result
+  }
+  
+  var hasTestV4Command: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .testV4 }) != nil
     }
     return result
   }
@@ -189,11 +204,9 @@ class SKCommandStore {
   
   func createInstallCommandIfNeeded(clientId: String, deviceId: String) {
     
-    guard !SKServiceRegistry.commandStore.hasInstallCommand else {
-      return
-    }
-    
-    if SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) == nil {
+//    V3
+    if !SKServiceRegistry.commandStore.hasInstallCommand,
+       SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) == nil {
       let installDate = Formatter.iso8601.string(from: Date())
       let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
       var dataCount: Int = 0
@@ -213,10 +226,10 @@ class SKCommandStore {
                                      status: .pending,
                                      data: SKCommand.prepareAppgateData())
       SKServiceRegistry.commandStore.saveCommand(installCommand)
-      
-      // Logic for V4 - if user has v3 then v4 install command will not be created and executed
-      // Need to create v4 install command only for new users for clean tests.
-      // V4
+    }
+    
+//    V4
+    if !SKServiceRegistry.commandStore.hasInstallV4Command {
       let initDataV4 = Installapi_DeviceRequest(clientId: clientId, deviceId: deviceId)
       let installCommandV4 = SKCommand(commandType: .installV4,
                                        status: .pending,

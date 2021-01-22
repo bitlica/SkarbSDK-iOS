@@ -128,19 +128,17 @@ struct SKMigrationService {
     // Need to delete all events if SDK version is lower than 0.4.2 or is equal
     // Will be used compareNumeric(:) later for comparing versions
     // current version can be parsed from Installapi_DeviceRequest.auth.agentVer
+    let needToMigrateVer = "0.4.2"
     let decoder = JSONDecoder()
     if let installCommand = SKServiceRegistry.commandStore.getAllCommands(by: .installV4).first,
-       (try? decoder.decode(Installapi_DeviceRequest.self, from: installCommand.data)) == nil {
+       let device = try? decoder.decode(Installapi_DeviceRequest.self, from: installCommand.data),
+       compareNumeric(device.auth.agentVer, needToMigrateVer) == .orderedAscending {
       SKServiceRegistry.commandStore.deleteAllCommand(by: .installV4)
       SKServiceRegistry.commandStore.deleteAllCommand(by: .sourceV4)
       SKServiceRegistry.commandStore.deleteAllCommand(by: .testV4)
       SKServiceRegistry.commandStore.deleteAllCommand(by: .purchaseV4)
       SKServiceRegistry.commandStore.deleteAllCommand(by: .transactionV4)
       SKServiceRegistry.commandStore.deleteAllCommand(by: .priceV4)
-    }
-    if let installCommand = SKServiceRegistry.commandStore.getAllCommands(by: .installV4).first,
-       let device = try? decoder.decode(Installapi_DeviceRequest.self, from: installCommand.data) {
-      print(device.auth)
     }
     print("installV4", SKServiceRegistry.commandStore.getAllCommands(by: .installV4).count)
     print("sourceV4", SKServiceRegistry.commandStore.getAllCommands(by: .sourceV4).count)

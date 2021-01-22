@@ -101,7 +101,9 @@ public class SkarbSDK {
       SKLogger.logError("SkarbSDK: getDeviceId() - deviceId is nil",
                         features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                    SKLoggerFeatureType.internalValue.name: "deviceId is nil"])
-      return UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+      let deviceId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+      SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
+      return deviceId
     }
     return deviceId
   }

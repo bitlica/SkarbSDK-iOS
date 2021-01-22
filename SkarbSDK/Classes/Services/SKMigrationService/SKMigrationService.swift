@@ -125,7 +125,7 @@ struct SKMigrationService {
       }
     }
     
-    // Need to delete all events if SDK version is lower than 0.4.2 or is equal
+    // Need to delete all events if SDK version is lower than 0.4.2
     // Will be used compareNumeric(:) later for comparing versions
     // current version can be parsed from Installapi_DeviceRequest.auth.agentVer
     let needToMigrateVer = "0.4.2"
@@ -140,12 +140,6 @@ struct SKMigrationService {
       SKServiceRegistry.commandStore.deleteAllCommand(by: .transactionV4)
       SKServiceRegistry.commandStore.deleteAllCommand(by: .priceV4)
     }
-    print("installV4", SKServiceRegistry.commandStore.getAllCommands(by: .installV4).count)
-    print("sourceV4", SKServiceRegistry.commandStore.getAllCommands(by: .sourceV4).count)
-    print("testV4", SKServiceRegistry.commandStore.getAllCommands(by: .testV4).count)
-    print("purchaseV4", SKServiceRegistry.commandStore.getAllCommands(by: .purchaseV4).count)
-    print("transactionV4", SKServiceRegistry.commandStore.getAllCommands(by: .transactionV4).count)
-    print("priceV4", SKServiceRegistry.commandStore.getAllCommands(by: .priceV4).count)
   }
   
   private func compareNumeric(_ version1: String, _ version2: String) -> ComparisonResult {

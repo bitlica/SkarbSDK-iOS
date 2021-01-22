@@ -84,17 +84,13 @@ struct SKCommand: Codable {
     }
     var data: Data = Data()
     guard JSONSerialization.isValidJSONObject(params) else {
-      SKLogger.logError("SKCommand prepareAppgateData: json isValidJSONObject",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
-                                   SKLoggerFeatureType.internalValue.name: params.description])
+      SKLogger.logError("SKCommand prepareAppgateData: json isValidJSONObject", features: nil)
       return data
     }
     do {
       data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
     } catch {
-      SKLogger.logError("SKCommand prepareAppgateData: can't json serialization to Data",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
-                                   SKLoggerFeatureType.internalValue.name: params.description])
+      SKLogger.logError("SKCommand prepareAppgateData: can't json serialization to Data", features: nil)
     }
     
     return data
@@ -103,23 +99,18 @@ struct SKCommand: Codable {
   static func prepareApplogData(message: String, features: [String: Any]?) -> Data {
     var params: [String: Any] = [:]
     params["client"] = prepareClientData()
-    params["application"] = prepareApplicationData()
     params["message"] = message
     params["context"] = features
     
     var data: Data = Data()
     guard JSONSerialization.isValidJSONObject(params) else {
-      SKLogger.logError("SKCommand prepareApplogData: json isValidJSONObject",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
-                                   SKLoggerFeatureType.internalValue.name: params.description])
+      SKLogger.logInfo("SKCommand prepareApplogData: json isValidJSONObject")
       return data
     }
     do {
       data = try JSONSerialization.data(withJSONObject: params, options: [])
     } catch {
-      SKLogger.logError("SKCommand prepareApplogData: can't json serialization to Data",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
-                                   SKLoggerFeatureType.internalValue.name: params.description])
+      SKLogger.logInfo("SKCommand prepareApplogData: can't json serialization to Data")
     }
     
     return data
@@ -137,8 +128,14 @@ struct SKCommand: Codable {
   private static func prepareApplicationData() -> [String: Any] {
     
     guard let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) else {
-      SKLogger.logError("SKCommand prepareApplicationData: called and initData is nil",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+      var features: [String: Any] = [:]
+      features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
+      features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
+      let message = "SKCommand prepareApplicationData: called and initData is nil"
+      let command = SKCommand(commandType: .logging,
+                              status: .pending,
+                              data: SKCommand.prepareApplogData(message: message, features: features))
+      SKServiceRegistry.commandStore.saveCommand(command)
       return [:]
     }
     

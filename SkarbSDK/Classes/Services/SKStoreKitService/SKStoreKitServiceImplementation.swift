@@ -143,7 +143,8 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
           SKServiceRegistry.commandStore.saveCommand(fetchCommand)
         } else {
           SKLogger.logError("paymentQueue updatedTransactions: called. Need to fetch products but purchasedProductId.data(using: .utf8) == nil",
-                            features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+                            features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                       SKLoggerFeatureType.internalValue.name: fetchProducts.description])
         }
       }
       

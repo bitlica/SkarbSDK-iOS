@@ -57,6 +57,8 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     
     docDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: appInstallDate.timeIntervalSince1970)
     buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: appBuildDate.timeIntervalSince1970)
+    currency = Locale.current.currencyCode ?? ""
+    region = Locale.current.regionCode ?? ""
   }
   
   init(from decoder: Swift.Decoder) throws {
@@ -75,6 +77,8 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     let docDateNanosec = try container.decode(Int32.self, forKey: .docDateNanosec)
     let buildDateSec = try container.decode(Int64.self, forKey: .buildDateSec)
     let buildDateNanosec = try container.decode(Int32.self, forKey: .buildDateNanosec)
+    let currency = try? container.decode(String.self, forKey: .currency)
+    let region = try? container.decode(String.self, forKey: .region)
     
     self = Installapi_DeviceRequest.with({
       $0.auth = auth
@@ -91,6 +95,8 @@ extension Installapi_DeviceRequest: SKCodableStruct {
                                                            nanos: docDateNanosec)
       $0.buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: buildDateSec,
                                                              nanos: buildDateNanosec)
+      $0.currency = currency ?? ""
+      $0.region = region ?? ""
     })
   }
   
@@ -110,6 +116,8 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     try container.encode(docDate.nanos, forKey: .docDateNanosec)
     try container.encode(buildDate.seconds, forKey: .buildDateSec)
     try container.encode(buildDate.nanos, forKey: .buildDateNanosec)
+    try container.encode(currency, forKey: .currency)
+    try container.encode(region, forKey: .region)
   }
   
   func getData() -> Data? {
@@ -136,6 +144,8 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     case docDateNanosec
     case buildDateSec
     case buildDateNanosec
+    case currency
+    case region
   }
   
   private var appBuildDate: Date {

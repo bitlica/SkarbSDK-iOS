@@ -26,62 +26,93 @@ struct Installapi_DeviceRequest {
   // methods supported on all messages.
 
   var auth: Auth_Auth {
-    get {return _auth ?? Auth_Auth()}
-    set {_auth = newValue}
+    get {return _storage._auth ?? Auth_Auth()}
+    set {_uniqueStorage()._auth = newValue}
   }
   /// Returns true if `auth` has been explicitly set.
-  var hasAuth: Bool {return self._auth != nil}
+  var hasAuth: Bool {return _storage._auth != nil}
   /// Clears the value of `auth`. Subsequent reads from it will return its default value.
-  mutating func clearAuth() {self._auth = nil}
+  mutating func clearAuth() {_uniqueStorage()._auth = nil}
 
   /// random unique value, e.g. timestamp+rand(int64)
-  var installID: String = String()
+  var installID: String {
+    get {return _storage._installID}
+    set {_uniqueStorage()._installID = newValue}
+  }
 
-  var idfa: String = String()
+  var idfa: String {
+    get {return _storage._idfa}
+    set {_uniqueStorage()._idfa = newValue}
+  }
 
-  var idfv: String = String()
+  var idfv: String {
+    get {return _storage._idfv}
+    set {_uniqueStorage()._idfv = newValue}
+  }
 
-  var bundleVer: String = String()
+  var bundleVer: String {
+    get {return _storage._bundleVer}
+    set {_uniqueStorage()._bundleVer = newValue}
+  }
 
-  var locale: String = String()
+  var locale: String {
+    get {return _storage._locale}
+    set {_uniqueStorage()._locale = newValue}
+  }
 
-  var device: String = String()
+  var device: String {
+    get {return _storage._device}
+    set {_uniqueStorage()._device = newValue}
+  }
 
-  var osVer: String = String()
+  var osVer: String {
+    get {return _storage._osVer}
+    set {_uniqueStorage()._osVer = newValue}
+  }
 
-  var receiptURL: String = String()
+  var receiptURL: String {
+    get {return _storage._receiptURL}
+    set {_uniqueStorage()._receiptURL = newValue}
+  }
 
-  var receiptLen: String = String()
+  var receiptLen: String {
+    get {return _storage._receiptLen}
+    set {_uniqueStorage()._receiptLen = newValue}
+  }
 
   var docDate: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _docDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_docDate = newValue}
+    get {return _storage._docDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_uniqueStorage()._docDate = newValue}
   }
   /// Returns true if `docDate` has been explicitly set.
-  var hasDocDate: Bool {return self._docDate != nil}
+  var hasDocDate: Bool {return _storage._docDate != nil}
   /// Clears the value of `docDate`. Subsequent reads from it will return its default value.
-  mutating func clearDocDate() {self._docDate = nil}
+  mutating func clearDocDate() {_uniqueStorage()._docDate = nil}
 
   var buildDate: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _buildDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_buildDate = newValue}
+    get {return _storage._buildDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_uniqueStorage()._buildDate = newValue}
   }
   /// Returns true if `buildDate` has been explicitly set.
-  var hasBuildDate: Bool {return self._buildDate != nil}
+  var hasBuildDate: Bool {return _storage._buildDate != nil}
   /// Clears the value of `buildDate`. Subsequent reads from it will return its default value.
-  mutating func clearBuildDate() {self._buildDate = nil}
+  mutating func clearBuildDate() {_uniqueStorage()._buildDate = nil}
 
-  var currency: String = String()
+  var currency: String {
+    get {return _storage._currency}
+    set {_uniqueStorage()._currency = newValue}
+  }
 
-  var region: String = String()
+  var region: String {
+    get {return _storage._region}
+    set {_uniqueStorage()._region = newValue}
+  }
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
-  fileprivate var _auth: Auth_Auth? = nil
-  fileprivate var _docDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
-  fileprivate var _buildDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 struct Installapi_AttribRequest {
@@ -103,7 +134,7 @@ struct Installapi_AttribRequest {
   var broker: String = String()
 
   /// json data
-  var payload: Data = SwiftProtobuf.Internal.emptyData
+  var payload: Data = Data()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -162,89 +193,150 @@ extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     14: .same(proto: "region"),
   ]
 
+  fileprivate class _StorageClass {
+    var _auth: Auth_Auth? = nil
+    var _installID: String = String()
+    var _idfa: String = String()
+    var _idfv: String = String()
+    var _bundleVer: String = String()
+    var _locale: String = String()
+    var _device: String = String()
+    var _osVer: String = String()
+    var _receiptURL: String = String()
+    var _receiptLen: String = String()
+    var _docDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+    var _buildDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+    var _currency: String = String()
+    var _region: String = String()
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _auth = source._auth
+      _installID = source._installID
+      _idfa = source._idfa
+      _idfv = source._idfv
+      _bundleVer = source._bundleVer
+      _locale = source._locale
+      _device = source._device
+      _osVer = source._osVer
+      _receiptURL = source._receiptURL
+      _receiptLen = source._receiptLen
+      _docDate = source._docDate
+      _buildDate = source._buildDate
+      _currency = source._currency
+      _region = source._region
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      switch fieldNumber {
-      case 1: try decoder.decodeSingularMessageField(value: &self._auth)
-      case 2: try decoder.decodeSingularStringField(value: &self.installID)
-      case 3: try decoder.decodeSingularStringField(value: &self.idfa)
-      case 4: try decoder.decodeSingularStringField(value: &self.idfv)
-      case 5: try decoder.decodeSingularStringField(value: &self.bundleVer)
-      case 6: try decoder.decodeSingularStringField(value: &self.locale)
-      case 7: try decoder.decodeSingularStringField(value: &self.device)
-      case 8: try decoder.decodeSingularStringField(value: &self.osVer)
-      case 9: try decoder.decodeSingularStringField(value: &self.receiptURL)
-      case 10: try decoder.decodeSingularStringField(value: &self.receiptLen)
-      case 11: try decoder.decodeSingularMessageField(value: &self._docDate)
-      case 12: try decoder.decodeSingularMessageField(value: &self._buildDate)
-      case 13: try decoder.decodeSingularStringField(value: &self.currency)
-      case 14: try decoder.decodeSingularStringField(value: &self.region)
-      default: break
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularMessageField(value: &_storage._auth) }()
+        case 2: try { try decoder.decodeSingularStringField(value: &_storage._installID) }()
+        case 3: try { try decoder.decodeSingularStringField(value: &_storage._idfa) }()
+        case 4: try { try decoder.decodeSingularStringField(value: &_storage._idfv) }()
+        case 5: try { try decoder.decodeSingularStringField(value: &_storage._bundleVer) }()
+        case 6: try { try decoder.decodeSingularStringField(value: &_storage._locale) }()
+        case 7: try { try decoder.decodeSingularStringField(value: &_storage._device) }()
+        case 8: try { try decoder.decodeSingularStringField(value: &_storage._osVer) }()
+        case 9: try { try decoder.decodeSingularStringField(value: &_storage._receiptURL) }()
+        case 10: try { try decoder.decodeSingularStringField(value: &_storage._receiptLen) }()
+        case 11: try { try decoder.decodeSingularMessageField(value: &_storage._docDate) }()
+        case 12: try { try decoder.decodeSingularMessageField(value: &_storage._buildDate) }()
+        case 13: try { try decoder.decodeSingularStringField(value: &_storage._currency) }()
+        case 14: try { try decoder.decodeSingularStringField(value: &_storage._region) }()
+        default: break
+        }
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if let v = self._auth {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    }
-    if !self.installID.isEmpty {
-      try visitor.visitSingularStringField(value: self.installID, fieldNumber: 2)
-    }
-    if !self.idfa.isEmpty {
-      try visitor.visitSingularStringField(value: self.idfa, fieldNumber: 3)
-    }
-    if !self.idfv.isEmpty {
-      try visitor.visitSingularStringField(value: self.idfv, fieldNumber: 4)
-    }
-    if !self.bundleVer.isEmpty {
-      try visitor.visitSingularStringField(value: self.bundleVer, fieldNumber: 5)
-    }
-    if !self.locale.isEmpty {
-      try visitor.visitSingularStringField(value: self.locale, fieldNumber: 6)
-    }
-    if !self.device.isEmpty {
-      try visitor.visitSingularStringField(value: self.device, fieldNumber: 7)
-    }
-    if !self.osVer.isEmpty {
-      try visitor.visitSingularStringField(value: self.osVer, fieldNumber: 8)
-    }
-    if !self.receiptURL.isEmpty {
-      try visitor.visitSingularStringField(value: self.receiptURL, fieldNumber: 9)
-    }
-    if !self.receiptLen.isEmpty {
-      try visitor.visitSingularStringField(value: self.receiptLen, fieldNumber: 10)
-    }
-    if let v = self._docDate {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
-    }
-    if let v = self._buildDate {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
-    }
-    if !self.currency.isEmpty {
-      try visitor.visitSingularStringField(value: self.currency, fieldNumber: 13)
-    }
-    if !self.region.isEmpty {
-      try visitor.visitSingularStringField(value: self.region, fieldNumber: 14)
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      if let v = _storage._auth {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+      }
+      if !_storage._installID.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._installID, fieldNumber: 2)
+      }
+      if !_storage._idfa.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._idfa, fieldNumber: 3)
+      }
+      if !_storage._idfv.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._idfv, fieldNumber: 4)
+      }
+      if !_storage._bundleVer.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._bundleVer, fieldNumber: 5)
+      }
+      if !_storage._locale.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._locale, fieldNumber: 6)
+      }
+      if !_storage._device.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._device, fieldNumber: 7)
+      }
+      if !_storage._osVer.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._osVer, fieldNumber: 8)
+      }
+      if !_storage._receiptURL.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._receiptURL, fieldNumber: 9)
+      }
+      if !_storage._receiptLen.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._receiptLen, fieldNumber: 10)
+      }
+      if let v = _storage._docDate {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
+      }
+      if let v = _storage._buildDate {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
+      }
+      if !_storage._currency.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._currency, fieldNumber: 13)
+      }
+      if !_storage._region.isEmpty {
+        try visitor.visitSingularStringField(value: _storage._region, fieldNumber: 14)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Installapi_DeviceRequest, rhs: Installapi_DeviceRequest) -> Bool {
-    if lhs._auth != rhs._auth {return false}
-    if lhs.installID != rhs.installID {return false}
-    if lhs.idfa != rhs.idfa {return false}
-    if lhs.idfv != rhs.idfv {return false}
-    if lhs.bundleVer != rhs.bundleVer {return false}
-    if lhs.locale != rhs.locale {return false}
-    if lhs.device != rhs.device {return false}
-    if lhs.osVer != rhs.osVer {return false}
-    if lhs.receiptURL != rhs.receiptURL {return false}
-    if lhs.receiptLen != rhs.receiptLen {return false}
-    if lhs._docDate != rhs._docDate {return false}
-    if lhs._buildDate != rhs._buildDate {return false}
-    if lhs.currency != rhs.currency {return false}
-    if lhs.region != rhs.region {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._auth != rhs_storage._auth {return false}
+        if _storage._installID != rhs_storage._installID {return false}
+        if _storage._idfa != rhs_storage._idfa {return false}
+        if _storage._idfv != rhs_storage._idfv {return false}
+        if _storage._bundleVer != rhs_storage._bundleVer {return false}
+        if _storage._locale != rhs_storage._locale {return false}
+        if _storage._device != rhs_storage._device {return false}
+        if _storage._osVer != rhs_storage._osVer {return false}
+        if _storage._receiptURL != rhs_storage._receiptURL {return false}
+        if _storage._receiptLen != rhs_storage._receiptLen {return false}
+        if _storage._docDate != rhs_storage._docDate {return false}
+        if _storage._buildDate != rhs_storage._buildDate {return false}
+        if _storage._currency != rhs_storage._currency {return false}
+        if _storage._region != rhs_storage._region {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -261,11 +353,14 @@ extension Installapi_AttribRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try decoder.decodeSingularMessageField(value: &self._auth)
-      case 2: try decoder.decodeSingularStringField(value: &self.installID)
-      case 3: try decoder.decodeSingularStringField(value: &self.broker)
-      case 4: try decoder.decodeSingularBytesField(value: &self.payload)
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._auth) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.installID) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.broker) }()
+      case 4: try { try decoder.decodeSingularBytesField(value: &self.payload) }()
       default: break
       }
     }
@@ -308,11 +403,14 @@ extension Installapi_TestRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageI
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
     while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try decoder.decodeSingularMessageField(value: &self._auth)
-      case 2: try decoder.decodeSingularStringField(value: &self.installID)
-      case 3: try decoder.decodeSingularStringField(value: &self.name)
-      case 4: try decoder.decodeSingularStringField(value: &self.group)
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._auth) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.installID) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.name) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.group) }()
       default: break
       }
     }

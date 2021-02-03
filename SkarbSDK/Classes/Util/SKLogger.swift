@@ -19,6 +19,7 @@ enum SKLoggerFeatureType {
   case internalValue
   case agentName
   case agentVer
+  case installId
   
   var name: String {
     switch self {
@@ -42,6 +43,8 @@ enum SKLoggerFeatureType {
         return "agentName"
       case .agentVer:
         return "agentVer"
+      case .installId:
+        return "installId"
     }
   }
 }
@@ -52,6 +55,7 @@ class SKLogger {
     var features = features ?? [:]
     features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
     features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
+    features[SKLoggerFeatureType.installId.name] = SkarbSDK.getDeviceId()
     let command = SKCommand(commandType: .logging,
                             status: .pending,
                             data: SKCommand.prepareApplogData(message: message, features: features))

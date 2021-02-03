@@ -21,11 +21,11 @@ public class SkarbSDK {
                                 deviceId: String? = nil) {
     
     SkarbSDK.clientId = clientId
-    let deviceId = deviceId ?? getDeviceId()
+    let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
     
     // Order is matter:
     // needs to be sure that install command data exists always
-    // because some datas are used in other commands and should not be nil
+    // because some data are used in other commands and should not be nil
     SKServiceRegistry.migrationService.doMigrationIfNeeded()
     SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId, deviceId: deviceId)
     SKServiceRegistry.initialize(isObservable: isObservable)

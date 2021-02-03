@@ -37,8 +37,10 @@ class SKServerAPIImplementaton: SKServerAPI {
       switch command.commandType {
         case .installV4:
           guard let deviceRequest = try? decoder.decode(Installapi_DeviceRequest.self, from: command.data) else {
+            let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
             SKLogger.logError("SyncCommand called with installV4. Installapi_DeviceRequest cannt be decoded",
-                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                         SKLoggerFeatureType.internalValue.name: value])
             return
           }
           let call = installService.setDevice(deviceRequest)
@@ -53,8 +55,10 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
         case .sourceV4:
           guard let attribRequest = try? decoder.decode(Installapi_AttribRequest.self, from: command.data) else {
+            let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
             SKLogger.logError("SyncCommand called with sourceV4. Installapi_AttribRequest cannt be decoded",
-                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                         SKLoggerFeatureType.internalValue.name: value])
             return
           }
           let call = installService.setAttribution(attribRequest)
@@ -69,8 +73,10 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
         case .testV4:
           guard let testRequest = try? decoder.decode(Installapi_TestRequest.self, from: command.data) else {
+            let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
             SKLogger.logError("SyncCommand called with testV4. Installapi_TestRequest cannt be decoded",
-                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                         SKLoggerFeatureType.internalValue.name: value])
             return
           }
           let call = installService.setTest(testRequest)
@@ -85,8 +91,10 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
         case .purchaseV4:
           guard let purchaseRequest = try? decoder.decode(Purchaseapi_ReceiptRequest.self, from: command.data) else {
-            SKLogger.logError("SyncCommand called with testV4. Purchaseapi_ReceiptRequest cannt be decoded",
-                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+            let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
+            SKLogger.logError("SyncCommand called with testV4. Installapi_TestRequest cannt be decoded",
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                         SKLoggerFeatureType.internalValue.name: value])
             return
           }
           let call = purchaseService.setReceipt(purchaseRequest)
@@ -101,8 +109,10 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
         case .transactionV4:
           guard let transactionRequest = try? decoder.decode(Purchaseapi_TransactionsRequest.self, from: command.data) else {
+            let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
             SKLogger.logError("SyncCommand called with testV4. Purchaseapi_TransactionsRequest cannt be decoded",
-                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                         SKLoggerFeatureType.internalValue.name: value])
             return
           }
           let call = purchaseService.setTransactions(transactionRequest)
@@ -117,8 +127,10 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
         case .priceV4:
           guard let priceRequest = try? decoder.decode(Priceapi_PricesRequest.self, from: command.data) else {
+            let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
             SKLogger.logError("SyncCommand called with testV4. Priceapi_PricesRequest cannt be decoded",
-                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                         SKLoggerFeatureType.internalValue.name: value])
             return
           }
           let call = priceService.setPrices(priceRequest)

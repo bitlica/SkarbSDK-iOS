@@ -215,6 +215,7 @@ struct SKCommand: Codable {
 extension SKCommand: Equatable {
   public static func == (lhs: Self, rhs: Self) -> Bool {
     return lhs.timestamp == rhs.timestamp &&
-           lhs.commandType == rhs.commandType
+           lhs.commandType == rhs.commandType &&
+           lhs.data == rhs.data
   }
 }

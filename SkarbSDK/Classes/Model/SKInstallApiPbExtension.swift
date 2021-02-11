@@ -73,10 +73,10 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     let osVer = try container.decode(String.self, forKey: .osVer)
     let receiptURL = try container.decode(String.self, forKey: .receiptURL)
     let receiptLen = try container.decode(String.self, forKey: .receiptLen)
-    let docDateSec = try container.decode(Int64.self, forKey: .docDateSec)
-    let docDateNanosec = try container.decode(Int32.self, forKey: .docDateNanosec)
-    let buildDateSec = try container.decode(Int64.self, forKey: .buildDateSec)
-    let buildDateNanosec = try container.decode(Int32.self, forKey: .buildDateNanosec)
+    let docDateSec = try? container.decode(Int64.self, forKey: .docDateSec)
+    let docDateNanosec = try? container.decode(Int32.self, forKey: .docDateNanosec)
+    let buildDateSec = try? container.decode(Int64.self, forKey: .buildDateSec)
+    let buildDateNanosec = try? container.decode(Int32.self, forKey: .buildDateNanosec)
     let currency = try? container.decode(String.self, forKey: .currency)
     let region = try? container.decode(String.self, forKey: .region)
     
@@ -91,10 +91,21 @@ extension Installapi_DeviceRequest: SKCodableStruct {
       $0.osVer = osVer
       $0.receiptURL = receiptURL
       $0.receiptLen = receiptLen
-      $0.docDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: docDateSec,
-                                                           nanos: docDateNanosec)
-      $0.buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: buildDateSec,
-                                                             nanos: buildDateNanosec)
+      if let docDateSec = docDateSec,
+         let docDateNanosec = docDateNanosec {
+        $0.docDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: docDateSec,
+                                                             nanos: docDateNanosec)
+      } else {
+        $0.docDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: appInstallDate.timeIntervalSince1970)
+      }
+      if let buildDateSec = buildDateSec,
+         let buildDateNanosec = buildDateNanosec {
+        $0.buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: buildDateSec,
+                                                               nanos: buildDateNanosec)
+      } else {
+        $0.buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: appBuildDate.timeIntervalSince1970)
+      }
+      
       $0.currency = currency ?? ""
       $0.region = region ?? ""
     })

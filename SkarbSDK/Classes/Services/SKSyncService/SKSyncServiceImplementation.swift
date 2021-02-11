@@ -77,28 +77,17 @@ class SKSyncServiceImplementation: SKSyncService {
                 features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
                 features[SKLoggerFeatureType.retryCount.name] = command.retryCount
                 features[SKLoggerFeatureType.responseStatus.name] = error.errorCode
-                let firstPurchaseFail = command.commandType == .purchase && command.retryCount == 0
-                if firstPurchaseFail {
-                  features[SKLoggerFeatureType.purchase.name] = "false"
-                }
                 
                 command.incrementRetryCount()
                 command.changeStatus(to: .pending)
                 
-                if error.isInternetCode && !firstPurchaseFail {
+                if error.isInternetCode {
                   SKLogger.logInfo("Sync command finished \(command.commandType) with code = \(error.errorCode), message = \(error.message)")
                 } else {
                   //send error to server
                   SKLogger.logError("Sync command finished \(command.commandType) with code = \(error.errorCode), message = \(error.message)", features: features)
                 }
               } else {
-                if command.commandType == .purchase && command.retryCount != 0 {
-                  var features: [String: Any] = [:]
-                  features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
-                  features[SKLoggerFeatureType.retryCount.name] = command.retryCount
-                  features[SKLoggerFeatureType.purchase.name] = "true"
-                  SKLogger.logError("Sync purchase command \(command.commandType) was finished after retry", features: features)
-                }
                 command.changeStatus(to: .done)
               }
               SKServiceRegistry.commandStore.saveCommand(command)

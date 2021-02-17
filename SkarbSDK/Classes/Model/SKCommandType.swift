@@ -82,6 +82,12 @@ extension SKCommandType: Codable {
         self = .sourceV4
       case 9:
         self = .testV4
+      case 10:
+        self = .purchaseV4
+      case 11:
+        self = .transactionV4
+      case 12:
+        self = .priceV4
       default:
         throw CodingError.unknownValue
     }

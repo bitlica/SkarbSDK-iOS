@@ -20,7 +20,6 @@
 		4FC970C5259C8F7D003F1C84 /* SKLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC97098259C8F7D003F1C84 /* SKLogger.swift */; };
 		4FC970C6259C8F7D003F1C84 /* SkarbSDK.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC97099259C8F7D003F1C84 /* SkarbSDK.swift */; };
 		4FC970C7259C8F7D003F1C84 /* FormatterExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC9709B259C8F7D003F1C84 /* FormatterExtension.swift */; };
-		4FC970C8259C8F7D003F1C84 /* LocaleExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC9709C259C8F7D003F1C84 /* LocaleExtension.swift */; };
 		4FC970C9259C8F7D003F1C84 /* DateExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC9709D259C8F7D003F1C84 /* DateExtension.swift */; };
 		4FC970CA259C8F7D003F1C84 /* SKCodableStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC9709F259C8F7D003F1C84 /* SKCodableStruct.swift */; };
 		4FC970CB259C8F7D003F1C84 /* SKBrokerData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FC970A0259C8F7D003F1C84 /* SKBrokerData.swift */; };
@@ -83,7 +82,6 @@
 		4FC97098259C8F7D003F1C84 /* SKLogger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKLogger.swift; sourceTree = "<group>"; };
 		4FC97099259C8F7D003F1C84 /* SkarbSDK.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SkarbSDK.swift; sourceTree = "<group>"; };
 		4FC9709B259C8F7D003F1C84 /* FormatterExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormatterExtension.swift; sourceTree = "<group>"; };
-		4FC9709C259C8F7D003F1C84 /* LocaleExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocaleExtension.swift; sourceTree = "<group>"; };
 		4FC9709D259C8F7D003F1C84 /* DateExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateExtension.swift; sourceTree = "<group>"; };
 		4FC9709F259C8F7D003F1C84 /* SKCodableStruct.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKCodableStruct.swift; sourceTree = "<group>"; };
 		4FC970A0259C8F7D003F1C84 /* SKBrokerData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SKBrokerData.swift; sourceTree = "<group>"; };
@@ -216,7 +214,6 @@
 			isa = PBXGroup;
 			children = (
 				4FC9709B259C8F7D003F1C84 /* FormatterExtension.swift */,
-				4FC9709C259C8F7D003F1C84 /* LocaleExtension.swift */,
 				4FC9709D259C8F7D003F1C84 /* DateExtension.swift */,
 			);
 			path = Extensions;
@@ -487,7 +484,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4FC970C8259C8F7D003F1C84 /* LocaleExtension.swift in Sources */,
 				4FC970C9259C8F7D003F1C84 /* DateExtension.swift in Sources */,
 				4FC970D1259C8F7E003F1C84 /* SKPurchaseData.swift in Sources */,
 				4FC970CC259C8F7D003F1C84 /* SKCommandType.swift in Sources */,

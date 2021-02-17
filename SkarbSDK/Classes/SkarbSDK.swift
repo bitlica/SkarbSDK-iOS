@@ -33,18 +33,6 @@ public class SkarbSDK {
   
   public static func sendTest(name: String,
                               group: String) {
-    //    V3
-    if !SKServiceRegistry.commandStore.hasTestCommand {
-      let testData = SKTestData(name: name, group: group)
-      SKServiceRegistry.userDefaultsService.setValue(testData.getData(), forKey: .testData)
-      
-      let testCommand = SKCommand(commandType: .test,
-                                  status: .pending,
-                                  data: SKCommand.prepareAppgateData())
-      SKServiceRegistry.commandStore.saveCommand(testCommand)
-    }
-    
-    // V4
     if !SKServiceRegistry.commandStore.hasTestV4Command {
       let testRequest = Installapi_TestRequest(name: name, group: group)
       let testV4Command = SKCommand(commandType: .testV4,
@@ -56,18 +44,6 @@ public class SkarbSDK {
   
   public static func sendSource(broker: SKBroker,
                                 features: [AnyHashable: Any]) {
-    //    V3
-    if !SKServiceRegistry.commandStore.hasSendSourceCommand {
-      let broberData = SKBrokerData(broker: broker.name, features: features)
-      SKServiceRegistry.userDefaultsService.setValue(broberData.getData(), forKey: .brokerData)
-      
-      let sourceCommand = SKCommand(commandType: .source,
-                                    status: .pending,
-                                    data: SKCommand.prepareAppgateData())
-      SKServiceRegistry.commandStore.saveCommand(sourceCommand)
-    }
-    
-    // V4
     if !SKServiceRegistry.commandStore.hasSendSourceV4Command(broker: broker) {
       let attributionRequest = Installapi_AttribRequest(broker: broker.name, features: features)
       let sourceV4Command = SKCommand(commandType: .sourceV4,
@@ -77,24 +53,12 @@ public class SkarbSDK {
     }
   }
   
-  public static func sendPurchase(productId: String,
-                                  price: Float,
-                                  currency: String) {
-    
-    guard !SKServiceRegistry.commandStore.hasPurhcaseCommand else {
-      return
-    }
-    
-    let purchaseData = SKPurchaseData(productId: productId,
-                                      price: price,
-                                      currency: currency)
-    SKServiceRegistry.userDefaultsService.setValue(purchaseData.getData(), forKey: .purchaseData)
-    
-    let purchaseCommand = SKCommand(commandType: .purchase,
-                                    status: .pending,
-                                    data: SKCommand.prepareAppgateData())
-    SKServiceRegistry.commandStore.saveCommand(purchaseCommand)
-  }
+  // TODO: Need to add for v4
+//  public static func sendPurchase(productId: String,
+//                                  price: Float,
+//                                  currency: String) {
+//    
+//  }
   
   public static func getDeviceId() -> String {
     guard let deviceId = SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) else {

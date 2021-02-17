@@ -17,7 +17,7 @@ struct SKCommand: Codable {
   private(set) var data: Data
   private(set) var retryCount: Int
   
-  init(timestamp: Int = Date().nowTimestampInt,
+  init(timestamp: Int = Date().nowTimestampMicroSec,
        commandType: SKCommandType,
        status: SKCommandStatus,
        data: Data?,

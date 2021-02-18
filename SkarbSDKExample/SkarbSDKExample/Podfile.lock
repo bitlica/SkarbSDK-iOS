@@ -1,5 +1,5 @@
 PODS:
-  - CGRPCZlib (1.0.0-alpha.24)
+  - CGRPCZlib (1.0.0)
   - CNIOAtomics (2.25.1)
   - CNIOBoringSSL (2.10.2)
   - CNIOBoringSSLShims (2.10.2):
@@ -9,8 +9,8 @@ PODS:
   - CNIOLinux (2.25.1)
   - CNIOSHA1 (2.25.1)
   - CNIOWindows (2.25.1)
-  - gRPC-Swift (1.0.0-alpha.24):
-    - CGRPCZlib (= 1.0.0-alpha.24)
+  - gRPC-Swift (1.0.0):
+    - CGRPCZlib (= 1.0.0)
     - Logging (< 2.0.0, >= 1.4.0)
     - SwiftNIO (< 3.0.0, >= 2.22.0)
     - SwiftNIOExtras (< 2.0.0, >= 1.4.0)
@@ -62,7 +62,7 @@ PODS:
   - SwiftProtobuf (1.15.0)
 
 DEPENDENCIES:
-  - gRPC-Swift (= 1.0.0-alpha.24)
+  - gRPC-Swift (= 1.0.0)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -90,7 +90,7 @@ SPEC REPOS:
     - SwiftProtobuf
 
 SPEC CHECKSUMS:
-  CGRPCZlib: cc0bc60dbf3937d8d93c3f9295d2799d178c6fe9
+  CGRPCZlib: b0c9d704a12fa667f1824ffff20688f191945989
   CNIOAtomics: 2ae668942b9e7ac71e0fe286d11ac9b4fe329024
   CNIOBoringSSL: 3d59b923c8ec524308685664ae6388179c678ac7
   CNIOBoringSSLShims: 18b267690ba0d57b22e4e69dff2904a6b1d030b8
@@ -99,7 +99,7 @@ SPEC CHECKSUMS:
   CNIOLinux: e6394d7fd56d36ff43ada5796e9d96c14fcb3546
   CNIOSHA1: 43c4a0cfdea5e8be20927d9d2237ebe4233071f8
   CNIOWindows: 89048520e4a1484bcd5e20c252edf4089913aa7d
-  gRPC-Swift: dce5702396a370061aa8ee56dfed47a00fe5ef5e
+  gRPC-Swift: 77154009a019e97f8c4bd8f2bb75fe9726801157
   Logging: beeb016c9c80cf77042d62e83495816847ef108b
   SwiftNIO: 3f9a197581f6dfebf65a5c85099f25197d892c8c
   SwiftNIOConcurrencyHelpers: 3670690a0fb8d8a0a4759804d07aaf89c9599839
@@ -113,6 +113,6 @@ SPEC CHECKSUMS:
   SwiftNIOTransportServices: a8a17a43695a09bfdd5a56426f6e515120d5dbf3
   SwiftProtobuf: 3320217e9d8fb75f36b40282e78c482640fd75dd
 
-PODFILE CHECKSUM: 7ea2649afd80ff5606b62de3ee69931364166e07
+PODFILE CHECKSUM: b5f264522826907277b820057dc54bbd125ef260
 
-COCOAPODS: 1.9.3
+COCOAPODS: 1.10.1

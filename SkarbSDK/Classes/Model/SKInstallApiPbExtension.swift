@@ -14,14 +14,7 @@ import SwiftProtobuf
 extension Installapi_DeviceRequest: SKCodableStruct {
   
   init(clientId: String, deviceId: String) {
-    let authData = Auth_Auth.with {
-      $0.key = clientId
-      $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
-      $0.agentName = SkarbSDK.agentName
-      $0.agentVer = SkarbSDK.version
-    }
-    
-    auth = authData
+    auth = Auth_Auth.createDefault()
     installID = deviceId
     idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
     idfv = UIDevice.current.identifierForVendor?.uuidString ?? ""
@@ -55,8 +48,8 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     }
     receiptLen = "\(dataCount)"
     
-    docDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: appInstallDate.timeIntervalSince1970)
-    buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: appBuildDate.timeIntervalSince1970)
+    docDate = SwiftProtobuf.Google_Protobuf_Timestamp(date: appInstallDate)
+    buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(date: appBuildDate)
     currency = Locale.current.currencyCode ?? ""
     region = Locale.current.regionCode ?? ""
   }
@@ -96,14 +89,14 @@ extension Installapi_DeviceRequest: SKCodableStruct {
         $0.docDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: docDateSec,
                                                              nanos: docDateNanosec)
       } else {
-        $0.docDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: appInstallDate.timeIntervalSince1970)
+        $0.docDate = SwiftProtobuf.Google_Protobuf_Timestamp(date: appInstallDate)
       }
       if let buildDateSec = buildDateSec,
          let buildDateNanosec = buildDateNanosec {
         $0.buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(seconds: buildDateSec,
                                                                nanos: buildDateNanosec)
       } else {
-        $0.buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: appBuildDate.timeIntervalSince1970)
+        $0.buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(date: appBuildDate)
       }
       
       $0.currency = currency ?? ""
@@ -188,14 +181,7 @@ extension Installapi_DeviceRequest: SKCodableStruct {
 extension Installapi_AttribRequest: SKCodableStruct {
   
   init(broker: String, features: [AnyHashable: Any]) {
-    
-    let authData = Auth_Auth.with {
-      $0.key = SkarbSDK.clientId
-      $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
-      $0.agentName = SkarbSDK.agentName
-      $0.agentVer = SkarbSDK.version
-    }
-    self.auth = authData
+    self.auth = Auth_Auth.createDefault()
     self.installID = SkarbSDK.getDeviceId()
     self.broker = broker
     
@@ -258,14 +244,7 @@ extension Installapi_AttribRequest: SKCodableStruct {
 extension Installapi_TestRequest: SKCodableStruct {
   
   init(name: String, group: String) {
-    
-    let authData = Auth_Auth.with {
-      $0.key = SkarbSDK.clientId
-      $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
-      $0.agentName = SkarbSDK.agentName
-      $0.agentVer = SkarbSDK.version
-    }
-    self.auth = authData
+    self.auth = Auth_Auth.createDefault()
     self.installID = SkarbSDK.getDeviceId()
     self.name = name
     self.group = group

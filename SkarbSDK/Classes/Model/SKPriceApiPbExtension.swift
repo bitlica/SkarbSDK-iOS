@@ -16,13 +16,7 @@ extension Priceapi_PricesRequest: SKCodableStruct {
        region: String?,
        currency: String?,
        products: [Priceapi_Product]) {
-    let authData = Auth_Auth.with {
-      $0.key = SkarbSDK.clientId
-      $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
-      $0.agentName = SkarbSDK.agentName
-      $0.agentVer = SkarbSDK.version
-    }
-    self.auth = authData
+    self.auth = Auth_Auth.createDefault()
     self.installID = SkarbSDK.getDeviceId()
     self.storefront = storefront ?? ""
     self.region = region ?? ""
@@ -101,7 +95,7 @@ extension Priceapi_Product: SKCodableStruct {
       discounts = []
     }
     if let transactionDate = transactionDate {
-      tranDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: transactionDate.timeIntervalSince1970)
+      tranDate = SwiftProtobuf.Google_Protobuf_Timestamp(date: transactionDate)
     } else {
       tranDate = SwiftProtobuf.Google_Protobuf_Timestamp()
     }

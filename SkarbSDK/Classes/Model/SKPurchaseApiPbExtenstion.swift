@@ -16,13 +16,7 @@ extension Purchaseapi_TransactionsRequest: SKCodableStruct {
   init(newTransactions: [String],
        docFolderDate: SwiftProtobuf.Google_Protobuf_Timestamp?,
        appBuildDate: SwiftProtobuf.Google_Protobuf_Timestamp?) {
-    let authData = Auth_Auth.with {
-      $0.key = SkarbSDK.clientId
-      $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
-      $0.agentName = SkarbSDK.agentName
-      $0.agentVer = SkarbSDK.version
-    }
-    auth = authData
+    auth = Auth_Auth.createDefault()
     installID = SkarbSDK.getDeviceId()
     transactions = newTransactions
     docDate = docFolderDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()
@@ -89,12 +83,7 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
        newTransactions: [String],
        docFolderDate: SwiftProtobuf.Google_Protobuf_Timestamp?,
        appBuildDate: SwiftProtobuf.Google_Protobuf_Timestamp?) {
-    let authData = Auth_Auth.with {
-      $0.key = SkarbSDK.clientId
-      $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
-      $0.agentName = SkarbSDK.agentName
-      $0.agentVer = SkarbSDK.version
-    }
+    let authData = Auth_Auth.createDefault()
     auth = authData
     installID = SkarbSDK.getDeviceId()
     transactions = newTransactions

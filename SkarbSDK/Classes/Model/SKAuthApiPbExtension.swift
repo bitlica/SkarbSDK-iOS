@@ -10,6 +10,18 @@ import SwiftProtobuf
 
 extension Auth_Auth: SKCodableStruct {
   
+  static func createDefault() -> Auth_Auth {
+    let authData = Auth_Auth.with {
+      $0.key = SkarbSDK.clientId
+      $0.bundleID = Bundle.main.bundleIdentifier ?? "unknown"
+      $0.agentName = SkarbSDK.agentName
+      $0.agentVer = SkarbSDK.version
+      $0.timestamp = SwiftProtobuf.Google_Protobuf_Timestamp(date: Date())
+    }
+    
+    return authData
+  }
+  
   init(from decoder: Swift.Decoder) throws {
     let container = try decoder.container(keyedBy: CodingKeys.self)
     let key = try container.decode(String.self, forKey: .key)
@@ -21,6 +33,7 @@ extension Auth_Auth: SKCodableStruct {
       $0.bundleID = bundleID
       $0.agentName = agentName
       $0.agentVer = agentVer
+      $0.timestamp = SwiftProtobuf.Google_Protobuf_Timestamp(date: Date())
     })
   }
   
@@ -30,6 +43,8 @@ extension Auth_Auth: SKCodableStruct {
     try container.encode(bundleID, forKey: .bundleID)
     try container.encode(agentName, forKey: .agentName)
     try container.encode(agentVer, forKey: .agentVer)
+    // no need to encode timestamp because we need to have always is now
+    // when sends request to the server 
   }
   
   func getData() -> Data? {

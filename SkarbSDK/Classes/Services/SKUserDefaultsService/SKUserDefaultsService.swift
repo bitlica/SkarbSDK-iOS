@@ -11,9 +11,6 @@ import Foundation
 class SKUserDefaultsService {
   enum SKKey {
     case initData
-    case brokerData
-    case testData
-    case purchaseData
     case appgateComands
     case deviceId
     
@@ -21,12 +18,6 @@ class SKUserDefaultsService {
       switch self {
         case .initData:
           return "sk_init_data_key"
-        case .brokerData:
-          return "sk_broker_data_key"
-        case .testData:
-          return "sk_test_data_key"
-        case .purchaseData:
-          return "sk_purchase_data"
         case .appgateComands:
           return "sk_appgate_commands"
         case .deviceId:

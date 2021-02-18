@@ -9,6 +9,7 @@
 import Foundation
 
 enum SKCommandType: Int {
+//  v3. Out of dated
 //  case install = 0
 //  case source = 1
 //  case test = 2
@@ -29,9 +30,8 @@ enum SKCommandType: Int {
     switch self {
       case .logging:
         return"/applog"
-      case .fetchProducts, .automaticSearchAds:
-        return ""
-      case .installV4, .sourceV4, .testV4, .purchaseV4, .transactionV4, .priceV4:
+      case .fetchProducts, .automaticSearchAds, .installV4, .sourceV4, .testV4,
+           .purchaseV4, .transactionV4, .priceV4:
         return ""
     }
   }

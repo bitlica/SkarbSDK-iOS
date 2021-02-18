@@ -148,7 +148,6 @@ class SKServerAPIImplementaton: SKServerAPI {
                             features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
         break
       }
-      
     } else {
       let urlString = prepareBaseURLString(command: command)
       guard let url = URL(string: urlString) else { return }

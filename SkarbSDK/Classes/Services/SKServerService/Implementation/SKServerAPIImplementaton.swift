@@ -50,7 +50,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
             }
           }
         case .sourceV4:
@@ -68,7 +68,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code,  message: error.localizedDescription))
+                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
             }
           }
         case .testV4:
@@ -86,7 +86,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
             }
           }
         case .purchaseV4:
@@ -104,7 +104,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
             }
           }
         case .transactionV4:
@@ -122,7 +122,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
             }
           }
         case .priceV4:
@@ -140,7 +140,7 @@ class SKServerAPIImplementaton: SKServerAPI {
               case .success:
                 completion?(nil)
               case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription))
+                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
             }
           }
         default:

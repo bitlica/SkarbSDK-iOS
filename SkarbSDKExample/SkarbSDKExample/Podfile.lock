@@ -1,122 +1,16 @@
 PODS:
-  - CGRPCZlib (1.0.0-alpha.11)
-  - CNIOAtomics (2.15.0)
-  - CNIOBoringSSL (2.7.1)
-  - CNIOBoringSSLShims (2.7.1):
-    - CNIOBoringSSL (= 2.7.1)
-  - CNIODarwin (2.15.0)
-  - CNIOHTTPParser (2.15.0)
-  - CNIOLinux (2.15.0)
-  - CNIOSHA1 (2.15.0)
-  - gRPC-Swift (1.0.0-alpha.11):
-    - CGRPCZlib (= 1.0.0-alpha.11)
-    - Logging (= 1.2.0)
-    - SwiftNIO (= 2.15.0)
-    - SwiftNIOHTTP2 (= 1.11.0)
-    - SwiftNIOSSL (= 2.7.1)
-    - SwiftNIOTransportServices (= 1.3.0)
-    - SwiftProtobuf (= 1.8.0)
-  - Logging (1.2.0)
-  - SkarbSDK (0.3.2):
-    - gRPC-Swift (= 1.0.0-alpha.11)
-  - SwiftNIO (2.15.0):
-    - CNIOAtomics (= 2.15.0)
-    - CNIODarwin (= 2.15.0)
-    - CNIOLinux (= 2.15.0)
-    - CNIOSHA1 (= 2.15.0)
-    - SwiftNIOConcurrencyHelpers (= 2.15.0)
-  - SwiftNIOConcurrencyHelpers (2.15.0):
-    - CNIOAtomics (= 2.15.0)
-  - SwiftNIOFoundationCompat (2.15.0):
-    - SwiftNIO (= 2.15.0)
-  - SwiftNIOHPACK (1.11.0):
-    - SwiftNIO (= 2.15.0)
-    - SwiftNIOConcurrencyHelpers (= 2.15.0)
-    - SwiftNIOHTTP1 (= 2.15.0)
-  - SwiftNIOHTTP1 (2.15.0):
-    - CNIOHTTPParser (= 2.15.0)
-    - SwiftNIO (= 2.15.0)
-    - SwiftNIOConcurrencyHelpers (= 2.15.0)
-  - SwiftNIOHTTP2 (1.11.0):
-    - SwiftNIO (= 2.15.0)
-    - SwiftNIOConcurrencyHelpers (= 2.15.0)
-    - SwiftNIOHPACK (= 1.11.0)
-    - SwiftNIOHTTP1 (= 2.15.0)
-    - SwiftNIOTLS (= 2.15.0)
-  - SwiftNIOSSL (2.7.1):
-    - CNIOBoringSSL (= 2.7.1)
-    - CNIOBoringSSLShims (= 2.7.1)
-    - SwiftNIO (= 2.15.0)
-    - SwiftNIOConcurrencyHelpers (= 2.15.0)
-    - SwiftNIOTLS (= 2.15.0)
-  - SwiftNIOTLS (2.15.0):
-    - SwiftNIO (= 2.15.0)
-  - SwiftNIOTransportServices (1.3.0):
-    - SwiftNIO (~> 2.0)
-    - SwiftNIOConcurrencyHelpers (~> 2.0)
-    - SwiftNIOFoundationCompat (~> 2.0)
-    - SwiftNIOTLS (~> 2.0)
-  - SwiftProtobuf (1.8.0)
+  - SkarbSDK (0.3.3)
 
 DEPENDENCIES:
-  - SkarbSDK (from `https://github.com/bitlica/SkarbSDK`, branch `master`)
-
-SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
-    - CGRPCZlib
-    - CNIOAtomics
-    - CNIOBoringSSL
-    - CNIOBoringSSLShims
-    - CNIODarwin
-    - CNIOHTTPParser
-    - CNIOLinux
-    - CNIOSHA1
-    - gRPC-Swift
-    - Logging
-    - SwiftNIO
-    - SwiftNIOConcurrencyHelpers
-    - SwiftNIOFoundationCompat
-    - SwiftNIOHPACK
-    - SwiftNIOHTTP1
-    - SwiftNIOHTTP2
-    - SwiftNIOSSL
-    - SwiftNIOTLS
-    - SwiftNIOTransportServices
-    - SwiftProtobuf
+  - SkarbSDK (from `../../`)
 
 EXTERNAL SOURCES:
   SkarbSDK:
-    :branch: master
-    :git: https://github.com/bitlica/SkarbSDK
-
-CHECKOUT OPTIONS:
-  SkarbSDK:
-    :commit: fddd1ed16f3766579426661a21dceeabbc91254a
-    :git: https://github.com/bitlica/SkarbSDK
+    :path: "../../"
 
 SPEC CHECKSUMS:
-  CGRPCZlib: e595387378d0601be796e858dd30c505458c4b1f
-  CNIOAtomics: ba49b1c86f281e1ecfd84c9205fbc27a81826847
-  CNIOBoringSSL: e4766830ab6d7c7fcd3618331f05fcb11638314d
-  CNIOBoringSSLShims: c3f3c6f05b7ce9b576521328a5b1b566d8f4665b
-  CNIODarwin: 2e341dd283fa3972706568b12925366145a8e2cd
-  CNIOHTTPParser: 25e1d1bc84c0612cbbbd6baedc4be05d77a17e01
-  CNIOLinux: 61598a8e49510207acb74c87f8fc11f762f76b5a
-  CNIOSHA1: 7b1dcceef9682aef4c6578b9fc67f87a03f0c48e
-  gRPC-Swift: 79f04da038f9a62005271d5b638611ce1bb31304
-  Logging: 7838d379d234d7e5ae1265fa02804a9084caf04c
-  SkarbSDK: 7f3ede663020b9406fe7e390030dc56f679f8445
-  SwiftNIO: c9889dcd8aed2655af9163b42fc11ebd4ce94252
-  SwiftNIOConcurrencyHelpers: 2357037a16e9c51880c01b896a5ac3cd41066044
-  SwiftNIOFoundationCompat: f09ee499a8a9c636ec9007f73c5a1cedc23dcad3
-  SwiftNIOHPACK: 906596511ff9d1e095b7a72a0011351591bcae03
-  SwiftNIOHTTP1: b05f4061ba18482006a264a5aa087bbcd35d153c
-  SwiftNIOHTTP2: 3a52499594c6ec073af2a2801cf3c5d3d1c8700f
-  SwiftNIOSSL: 7c82b8393a6b69a3ef9b12fe74240e92c2bd7add
-  SwiftNIOTLS: 51580e51240d1a4d51efb2d317e92cf243181042
-  SwiftNIOTransportServices: 26d40c589fc8fe667af51b06ef0aa49fbc9ae7f2
-  SwiftProtobuf: 2cbd9409689b7df170d82a92a33443c8e3e14a70
+  SkarbSDK: 575192606e09fda964c2433c1a5e4fac34bf0911
 
-PODFILE CHECKSUM: b416157291c7145ccb98260bd71bc7cff1d356d5
+PODFILE CHECKSUM: f13d87bd86f96312be8dc96cd8dbed9f0e9e3b51
 
-COCOAPODS: 1.9.1
+COCOAPODS: 1.9.3

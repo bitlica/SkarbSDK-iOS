@@ -1,11 +1,9 @@
 # Uncomment the next line to define a global platform for your project
 platform :ios, '11.0'
-# Standard cocoapods specs source
-source 'https://github.com/CocoaPods/Specs.git'
 
 target 'SkarbSDKExample' do
   use_frameworks!
 
-  pod 'SkarbSDK'
+  pod 'SkarbSDK', :path => "../../"
 
 end

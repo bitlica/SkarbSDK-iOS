@@ -25,7 +25,6 @@ let package = Package(
             linkerSettings: [
                 .linkedFramework("Foundation"),
                 .linkedFramework("AdSupport"),
-                .linkedFramework("AdSupport"),
                 .linkedFramework("UIKit"),
                 .linkedFramework("StoreKit")
             ]),

@@ -7,7 +7,26 @@ It automatically reports:
 In addition, you could enrich these events with features obtained from the traffic source by explicit call of `sendSource()` method. And if you're interesting in split testing inside an app take a look on `sendTest()` method.
 
 ## Installation
-SkarbSDK can be installed with CocoaPods. Simply add pod 'SkarbSDK' to your Podfile.
+
+### CocoaPods
+
+[CocoaPods](https://cocoapods.org) is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate SkarbSDK into your Xcode project using CocoaPods, specify it in your `Podfile`:
+
+```ruby
+pod 'SkarbSDK'
+```
+
+### Swift Package Manager
+
+The [Swift Package Manager](https://swift.org/package-manager/) is a tool for automating the distribution of Swift code and is integrated into the `swift` compiler.
+
+Once you have your Swift package set up, adding SkarbSDK as a dependency is as easy as adding it to the `dependencies` value of your `Package.swift`.
+
+```swift
+dependencies: [
+    .package(url: "https://github.com/bitlica/SkarbSDK.git", .upToNextMajor(from: "0.3.4"))
+]
+```
 
 ## Updating
 Simply use command ```pod update``` in terminal with Podfile folder.

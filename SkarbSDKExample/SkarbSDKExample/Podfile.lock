@@ -1,9 +1,9 @@
 PODS:
   - CGRPCZlib (1.0.0)
   - CNIOAtomics (2.26.0)
-  - CNIOBoringSSL (2.10.3)
-  - CNIOBoringSSLShims (2.10.3):
-    - CNIOBoringSSL (= 2.10.3)
+  - CNIOBoringSSL (2.10.4)
+  - CNIOBoringSSLShims (2.10.4):
+    - CNIOBoringSSL (= 2.10.4)
   - CNIODarwin (2.26.0)
   - CNIOHTTPParser (2.26.0)
   - CNIOLinux (2.26.0)
@@ -19,6 +19,9 @@ PODS:
     - SwiftProtobuf (< 2.0.0, >= 1.9.0)
   - Logging (1.4.0)
   - ReachabilitySwift (5.0.0)
+  - SkarbSDK (0.3.4):
+    - gRPC-Swift (= 1.0.0)
+    - ReachabilitySwift (= 5.0.0)
   - SwiftNIO (2.26.0):
     - CNIODarwin (= 2.26.0)
     - CNIOLinux (= 2.26.0)
@@ -44,9 +47,9 @@ PODS:
     - SwiftNIOHPACK (= 1.16.3)
     - SwiftNIOHTTP1 (< 3, >= 2.18.0)
     - SwiftNIOTLS (< 3, >= 2.18.0)
-  - SwiftNIOSSL (2.10.3):
-    - CNIOBoringSSL (= 2.10.3)
-    - CNIOBoringSSLShims (= 2.10.3)
+  - SwiftNIOSSL (2.10.4):
+    - CNIOBoringSSL (= 2.10.4)
+    - CNIOBoringSSLShims (= 2.10.4)
     - SwiftNIO (< 3, >= 2.15.0)
     - SwiftNIOConcurrencyHelpers (< 3, >= 2.15.0)
     - SwiftNIOTLS (< 3, >= 2.15.0)
@@ -60,8 +63,7 @@ PODS:
   - SwiftProtobuf (1.15.0)
 
 DEPENDENCIES:
-  - gRPC-Swift (= 1.0.0)
-  - ReachabilitySwift
+  - SkarbSDK (from `../../`)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -88,11 +90,15 @@ SPEC REPOS:
     - SwiftNIOTransportServices
     - SwiftProtobuf
 
+EXTERNAL SOURCES:
+  SkarbSDK:
+    :path: "../../"
+
 SPEC CHECKSUMS:
   CGRPCZlib: b0c9d704a12fa667f1824ffff20688f191945989
   CNIOAtomics: 7599e2500f637f1e043047da52efd710d6020dd3
-  CNIOBoringSSL: 8e20acf863216a6d7b75a56fe0567a36147d8ee0
-  CNIOBoringSSLShims: 72cc9d43e6f5d8a137a2699eb08a0c67865c9797
+  CNIOBoringSSL: c639a7139a3b8fffb4dcda1e4a2d2eff66ec9090
+  CNIOBoringSSLShims: defe5c479941717c1ad1e3bdc4329686b4bb6b46
   CNIODarwin: 68f6ff440e989ef43ca6eb3335f3e5484066fab7
   CNIOHTTPParser: 26678afdbc27f24d1a3498bf87413bfc3391fbc5
   CNIOLinux: 5fd92122d58b04508074371d95a1f874310fe8e3
@@ -100,6 +106,7 @@ SPEC CHECKSUMS:
   gRPC-Swift: 77154009a019e97f8c4bd8f2bb75fe9726801157
   Logging: beeb016c9c80cf77042d62e83495816847ef108b
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
+  SkarbSDK: a4329e719264aa4a09d1ec133d1b82ac853234da
   SwiftNIO: 1f309539cfe7ed42648f505a48c546e83a2f66c3
   SwiftNIOConcurrencyHelpers: ebbceb814afcd8b4fab86935855f6c8c77ae4285
   SwiftNIOExtras: aa561b71020cd6844f722cf4513fb176c577414d
@@ -107,11 +114,11 @@ SPEC CHECKSUMS:
   SwiftNIOHPACK: 38e855a72ae0c5176485ddd039b3933b99daa2b7
   SwiftNIOHTTP1: 7f7aa111d51d09a97ef1fddb50855074e5e42778
   SwiftNIOHTTP2: de7eff9d32fd347338f85b86c6fd0e13c3fbd1a0
-  SwiftNIOSSL: ac6e05adff65df9a3b518bbd27ff1f152fa82999
+  SwiftNIOSSL: ca33b5cfd872ef8261bab9c68e8634c54c14b9fb
   SwiftNIOTLS: 0faded6aff802c423ddee27828850a8ea4a818d0
   SwiftNIOTransportServices: 896c9a4ac98698d32aa2feea7657ade219ae80bb
   SwiftProtobuf: 3320217e9d8fb75f36b40282e78c482640fd75dd
 
-PODFILE CHECKSUM: f481a20abb3ae0f55471dee89c7a603437d2fa2a
+PODFILE CHECKSUM: df07b2c0afb67ef77b660b36dc62b8b40aacd9bc
 
 COCOAPODS: 1.10.1

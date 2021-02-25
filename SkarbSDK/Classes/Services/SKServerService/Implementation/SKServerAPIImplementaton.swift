@@ -14,23 +14,31 @@ class SKServerAPIImplementaton: SKServerAPI {
   
   private static let serverName = "https://track3.skarb.club"
   
+  private var clientChannel: ClientConnection = {
+    let tls = ClientConnection.Configuration.TLS.init(certificateChain: [],
+                                                      privateKey: .none,
+                                                      trustRoots: .default,
+                                                      certificateVerification: .fullVerification,
+                                                      hostnameOverride: nil)
+    
+    let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
+    let host = "ingest.skarb.work"
+    let port = 443
+    let configuration = ClientConnection.Configuration(target: .hostAndPort(host, port),
+                                                       eventLoopGroup: group,
+                                                       tls: tls)
+    let clientChannel = ClientConnection(configuration: configuration)
+    
+    return clientChannel
+  }()
+  
   func syncCommand(_ command: SKCommand, completion: ((SKResponseError?) -> Void)?) {
     
     if command.commandType.isV4 {
-      let tls = ClientConnection.Configuration.TLS.init(certificateChain: [], privateKey: .none, trustRoots: .default, certificateVerification: .fullVerification, hostnameOverride: nil)
-
-
-      let group = MultiThreadedEventLoopGroup(numberOfThreads: 1)
-      let host = "ingest.skarb.work"
-      let port = 443
-      let configuration = ClientConnection.Configuration(target: .hostAndPort(host, port),
-                                                         eventLoopGroup: group,
-                                                         tls: tls)
-      let clientConnection = ClientConnection(configuration: configuration)
-
-      let installService = Installapi_IngesterClient(channel: clientConnection)
-      let purchaseService = Purchaseapi_IngesterClient(channel: clientConnection)
-      let priceService = Priceapi_PricerClient(channel: clientConnection)
+      let callOption = CallOptions(timeLimit: .timeout(.seconds(20)))
+      let installService = Installapi_IngesterClient(channel: clientChannel, defaultCallOptions: callOption)
+      let purchaseService = Purchaseapi_IngesterClient(channel: clientChannel, defaultCallOptions: callOption)
+      let priceService = Priceapi_PricerClient(channel: clientChannel,defaultCallOptions: callOption)
       
       let decoder = JSONDecoder()
       
@@ -176,7 +184,7 @@ class SKServerAPIImplementaton: SKServerAPI {
 
 private extension SKServerAPIImplementaton {
   func executeRequest(_ skRequest: SKURLRequest) {
-    SKLogger.logNetwork("Executing request: \(String(describing: skRequest.request.url?.absoluteString)) with params: \(String(describing: String(data: skRequest.command.data, encoding: .utf8)))")
+    SKLogger.logNetwork("Executing request: \(String(describing: skRequest.request.url?.absoluteString))")
     
     let task = URLSession.shared.dataTask(with: skRequest.request, completionHandler: { [weak self] (data, response, error) in
       

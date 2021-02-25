@@ -10,31 +10,39 @@ import Foundation
 import UIKit
 import AdSupport
 
-struct SKCommand: Codable {
+struct SKCommand {
   let timestamp: Int
   private(set) var commandType: SKCommandType
   private(set) var status: SKCommandStatus
   private(set) var data: Data
   private(set) var retryCount: Int
+  private(set) var fireDate: Date
   
   init(timestamp: Int = Date().nowTimestampInt,
        commandType: SKCommandType,
        status: SKCommandStatus,
        data: Data?,
-       retryCount: Int = 0) {
+       retryCount: Int = 0,
+       fireDate: Date = Date()) {
     self.timestamp = timestamp
     self.commandType = commandType
     self.status = status
     self.data = data ?? Data()
     self.retryCount = retryCount
+    self.fireDate = fireDate
   }
   
   var description: String {
-    return "timestamp=\(timestamp), commandType=\(commandType), status=\(status), retryCount=\(retryCount), data = \(String(describing: String(data: data, encoding: .utf8)))"
+    return "timestamp=\(timestamp), commandType=\(commandType), status=\(status), retryCount=\(retryCount), fireDate=\(fireDate)"
   }
   
-  mutating func incrementRetryCount() {
+  mutating func resetRetryCount() {
+    retryCount = 0
+  }
+  
+  mutating func updateRetryCountAndFireDate() {
     retryCount += 1
+    updateFireDate(Date().addingTimeInterval(getRetryDelay()))
   }
   
   mutating func changeStatus(to status: SKCommandStatus) {
@@ -45,7 +53,11 @@ struct SKCommand: Codable {
     self.data = data
   }
   
-  func getRetryDelay() -> TimeInterval {
+  mutating func updateFireDate(_ date: Date) {
+    self.fireDate = date
+  }
+  
+  private func getRetryDelay() -> TimeInterval {
     switch retryCount {
       case 0:
         return 0
@@ -62,9 +74,9 @@ struct SKCommand: Codable {
       case 6:
         return 14
       case 7:
-        return 30
+        return 25
       default:
-        return 60
+        return 40
     }
   }
   
@@ -211,6 +223,51 @@ struct SKCommand: Codable {
   }
 }
 
+extension SKCommand: SKCodableStruct {
+  init(from decoder: Swift.Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let timestamp = try container.decode(Int.self, forKey: .timestamp)
+    let commandType = try container.decode(SKCommandType.self, forKey: .commandType)
+    let status = try container.decode(SKCommandStatus.self, forKey: .status)
+    let data = try container.decode(Data.self, forKey: .data)
+    let retryCount = try container.decode(Int.self, forKey: .retryCount)
+    let fireDate = try container.decode(Date.self, forKey: .fireDate)
+    self = SKCommand(timestamp: timestamp,
+                     commandType: commandType,
+                     status: status,
+                     data: data,
+                     retryCount: retryCount,
+                     fireDate: fireDate)
+  }
+  
+  func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(timestamp, forKey: .timestamp)
+    try container.encode(commandType, forKey: .commandType)
+    try container.encode(status, forKey: .status)
+    try container.encode(data, forKey: .data)
+    try container.encode(retryCount, forKey: .retryCount)
+    try container.encode(fireDate, forKey: .fireDate)
+  }
+  
+  func getData() -> Data? {
+    let encoder = JSONEncoder()
+    if let encoded = try? encoder.encode(self) {
+      return encoded
+    }
+    
+    return nil
+  }
+  
+  enum CodingKeys: String, CodingKey {
+    case timestamp
+    case commandType
+    case status
+    case data
+    case retryCount
+    case fireDate
+  }
+}
 
 extension SKCommand: Equatable {
   public static func == (lhs: Self, rhs: Self) -> Bool {

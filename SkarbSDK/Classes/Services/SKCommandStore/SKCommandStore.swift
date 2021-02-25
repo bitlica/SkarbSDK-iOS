@@ -99,16 +99,29 @@ class SKCommandStore {
   }
   
   func saveCommand(_ command: SKCommand) {
-    SKLogger.logInfo("saveCommand: commandType = \(command.commandType), status = \(command.status)")
+    var isNew: Bool = false
     exclusionSerialQueue.sync {
       if let existingCommand = localAppgateCommands.first(where: { $0 == command }),
          let index = localAppgateCommands.firstIndex(where: { $0 == existingCommand }) {
-        localAppgateCommands[index] = command
+        // Case might occurs when one more command was sent after timeout
+        // and the previous was successful finished with status done
+        // but the new was finished with failure and the status will be pending
+        if !(existingCommand.status == .done && command.status == .pending) {
+          localAppgateCommands[index] = command
+        }
       } else {
         localAppgateCommands.append(command)
+        isNew = true
       }
     }
+    // if new command was added we want to execute all pending
+    // commands ASAP in one transaction
+    if isNew {
+      resetFireDateAndRetryCountForPendingCommands()
+      SKServiceRegistry.syncService.syncAllCommands()
+    }
     saveState()
+    SKLogger.logInfo("Command saved: \(command.description)")
   }
   
   func deleteCommand(_ command: SKCommand) {
@@ -133,15 +146,15 @@ class SKCommandStore {
   func saveState() {
     SKLogger.logInfo("SKCommandStore saveState: called")
     exclusionSerialQueue.sync {
-      let data = localAppgateCommands.map { try? JSONEncoder().encode($0) }
+      let data = localAppgateCommands.map { $0.getData() }.compactMap { $0 }
       SKServiceRegistry.userDefaultsService.setValue(data, forKey: .appgateComands)
     }
   }
   
-  func getPendingCommands() -> [SKCommand] {
+  func getCommandsForExecuting() -> [SKCommand] {
     var result: [SKCommand] = []
     exclusionSerialQueue.sync {
-      result = localAppgateCommands.filter({ $0.status == .pending })
+      result = localAppgateCommands.filter({ $0.status == .pending && $0.fireDate <= Date() })
     }
     return result
   }
@@ -150,6 +163,14 @@ class SKCommandStore {
     var result: [SKCommand] = []
     exclusionSerialQueue.sync {
       result = localAppgateCommands.filter({ $0.commandType == commandType })
+    }
+    return result
+  }
+  
+  func getAllCommands(by status: SKCommandStatus) -> [SKCommand] {
+    var result: [SKCommand] = []
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.filter({ $0.status == status })
     }
     return result
   }
@@ -172,30 +193,12 @@ class SKCommandStore {
     return result
   }
   
-  /// when user terminate app or go to background some commands might be inProgress
-  /// and there is no guarantee that command will be handled by the app
-  func markAllInProgressAsPendingAndSave() {
-    var result: [SKCommand] = []
-    exclusionSerialQueue.sync {
-      result = localAppgateCommands.filter({ $0.status == .inProgress })
-    }
-    
-    for command in result {
-      var inProgress = command
-      inProgress.changeStatus(to: .pending)
-      saveCommand(command)
-    }
-  }
-  
   func getNewTransactionIds(_ transactions: [String]) -> [String] {
-    var result: [SKCommand] = []
-    exclusionSerialQueue.sync {
-      result = localAppgateCommands.filter({ $0.commandType == .transactionV4 })
-    }
+    let currentTransactionCommands = getAllCommands(by: .transactionV4)
     
     let decoder = JSONDecoder()
     var existing: Set<String> = []
-    for command in result {
+    for command in currentTransactionCommands {
       if let transaction = try? decoder.decode(Purchaseapi_TransactionsRequest.self, from: command.data) {
         transaction.transactions.forEach { transactionId in
           existing.insert(transactionId)
@@ -270,9 +273,31 @@ class SKCommandStore {
       return
     }
     
-    let installCommand = SKCommand(commandType: .automaticSearchAds,
+    let searchAdsCommand = SKCommand(commandType: .automaticSearchAds,
                                    status: .pending,
                                    data: Data())
-    SKServiceRegistry.commandStore.saveCommand(installCommand)
+    SKServiceRegistry.commandStore.saveCommand(searchAdsCommand)
+  }
+  
+  func resetFireDateAndRetryCountForPendingCommands() {
+    let commands: [SKCommand] = getAllCommands(by: .pending)
+    for command in commands {
+      var editedCommand = command
+      editedCommand.updateFireDate(Date())
+      editedCommand.resetRetryCount()
+      saveCommand(editedCommand)
+    }
+  }
+  
+  func checkInProgressCommandsTimeout() {
+    let requestTimeout: TimeInterval = 60
+    let commands: [SKCommand] = getAllCommands(by: .inProgress)
+      .filter { $0.fireDate.addingTimeInterval(requestTimeout) <= Date() }
+    for command in commands {
+      var editedCommand = command
+      editedCommand.updateRetryCountAndFireDate()
+      editedCommand.changeStatus(to: .pending)
+      saveCommand(editedCommand)
+    }
   }
 }

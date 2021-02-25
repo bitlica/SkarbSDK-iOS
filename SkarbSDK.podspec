@@ -17,4 +17,5 @@ Pod::Spec.new do |s|
   s.source_files  = 'SkarbSDK/Classes/**/*'
   s.frameworks = 'Foundation', 'AdSupport', 'UIKit', 'StoreKit'
   s.dependency 'gRPC-Swift', '1.0.0'
+  s.dependency 'ReachabilitySwift', '5.0.0'
 end

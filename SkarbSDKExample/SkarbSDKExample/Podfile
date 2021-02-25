@@ -8,5 +8,5 @@ target 'SkarbSDKExample' do
 
 #  pod 'SkarbSDK'
   pod 'gRPC-Swift', '1.0.0'
-
+  pod 'ReachabilitySwift'
 end

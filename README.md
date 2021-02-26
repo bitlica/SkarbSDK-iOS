@@ -28,9 +28,6 @@ dependencies: [
 ]
 ```
 
-## Updating
-Simply use command ```pod update``` in terminal with Podfile folder.
-
 ## Usage
 ### Initialization 
 

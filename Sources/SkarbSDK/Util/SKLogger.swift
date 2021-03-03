@@ -20,6 +20,7 @@ enum SKLoggerFeatureType {
   case agentName
   case agentVer
   case installId
+  case connection
   
   var name: String {
     switch self {

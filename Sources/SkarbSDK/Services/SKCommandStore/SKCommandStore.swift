@@ -298,6 +298,8 @@ class SKCommandStore {
       editedCommand.updateRetryCountAndFireDate()
       editedCommand.changeStatus(to: .pending)
       saveCommand(editedCommand)
+      SKLogger.logError("Command timeout has been reached. Need to call command one more time",
+                        features: [SKLoggerFeatureType.internalValue.name: "Command timeout has been reached. Commads = \(command.description)"])
     }
   }
 }

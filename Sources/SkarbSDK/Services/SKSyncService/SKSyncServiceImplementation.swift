@@ -82,12 +82,13 @@ class SKSyncServiceImplementation: SKSyncService {
       
       switch command.commandType {
         case .install, .source, .test, .purchase, .logging, .installV4, .sourceV4, .testV4, .purchaseV4, .transactionV4, .priceV4:
-          SKServiceRegistry.serverAPI.syncCommand(command, completion: { error in
+          SKServiceRegistry.serverAPI.syncCommand(command, completion: { [weak self] error in
             if let error = error {
               var features: [String: Any] = [:]
               features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
               features[SKLoggerFeatureType.retryCount.name] = command.retryCount
               features[SKLoggerFeatureType.responseStatus.name] = error.errorCode
+              features[SKLoggerFeatureType.connection.name] = self?.reachability?.connection.description
               
               command.updateRetryCountAndFireDate()
               command.changeStatus(to: .pending)

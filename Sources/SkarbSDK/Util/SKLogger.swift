@@ -46,6 +46,8 @@ enum SKLoggerFeatureType {
         return "agentVer"
       case .installId:
         return "installId"
+      case .connection:
+        return "connection"
     }
   }
 }

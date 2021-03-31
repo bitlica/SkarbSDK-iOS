@@ -7,7 +7,11 @@
 //
 
 import Foundation
+import Reachability
 
 protocol SKSyncService {
+  
+  var connection: Reachability.Connection? { get }
+  
   func syncAllCommands()
 }

@@ -9,6 +9,8 @@
 import Foundation
 import GRPC
 import NIO
+import NIOHPACK
+import SwiftProtobuf
 
 class SKServerAPIImplementaton: SKServerAPI {
   
@@ -52,14 +54,13 @@ class SKServerAPIImplementaton: SKServerAPI {
             return
           }
           let call = installService.setDevice(deviceRequest)
-          call.response.whenComplete { result in
-            SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
-            switch result {
-              case .success:
-                completion?(nil)
-              case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
-            }
+          call.initialMetadata.whenComplete({ [weak self] result in
+            self?.validateGrpcResponseResult(result, command: command)
+          })
+          call.response.whenComplete { [weak self] result in
+            self?.handleGrpcResponseResult(result,
+                                           commandType: command.commandType,
+                                           completion: completion)
           }
         case .sourceV4:
           guard let attribRequest = try? decoder.decode(Installapi_AttribRequest.self, from: command.data) else {
@@ -70,14 +71,13 @@ class SKServerAPIImplementaton: SKServerAPI {
             return
           }
           let call = installService.setAttribution(attribRequest)
-          call.response.whenComplete { result in
-            SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
-            switch result {
-              case .success:
-                completion?(nil)
-              case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
-            }
+          call.initialMetadata.whenComplete({ [weak self] result in
+            self?.validateGrpcResponseResult(result, command: command)
+          })
+          call.response.whenComplete { [weak self] result in
+            self?.handleGrpcResponseResult(result,
+                                           commandType: command.commandType,
+                                           completion: completion)
           }
         case .testV4:
           guard let testRequest = try? decoder.decode(Installapi_TestRequest.self, from: command.data) else {
@@ -88,14 +88,13 @@ class SKServerAPIImplementaton: SKServerAPI {
             return
           }
           let call = installService.setTest(testRequest)
-          call.response.whenComplete { result in
-            SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
-            switch result {
-              case .success:
-                completion?(nil)
-              case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
-            }
+          call.initialMetadata.whenComplete({ [weak self] result in
+            self?.validateGrpcResponseResult(result, command: command)
+          })
+          call.response.whenComplete { [weak self] result in
+            self?.handleGrpcResponseResult(result,
+                                           commandType: command.commandType,
+                                           completion: completion)
           }
         case .purchaseV4:
           guard let purchaseRequest = try? decoder.decode(Purchaseapi_ReceiptRequest.self, from: command.data) else {
@@ -106,14 +105,13 @@ class SKServerAPIImplementaton: SKServerAPI {
             return
           }
           let call = purchaseService.setReceipt(purchaseRequest)
-          call.response.whenComplete { result in
-            SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
-            switch result {
-              case .success:
-                completion?(nil)
-              case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
-            }
+          call.initialMetadata.whenComplete({ [weak self] result in
+            self?.validateGrpcResponseResult(result, command: command)
+          })
+          call.response.whenComplete { [weak self] result in
+            self?.handleGrpcPurchaseResult(result,
+                                           commandType: command.commandType,
+                                           completion: completion)
           }
         case .transactionV4:
           guard let transactionRequest = try? decoder.decode(Purchaseapi_TransactionsRequest.self, from: command.data) else {
@@ -124,14 +122,13 @@ class SKServerAPIImplementaton: SKServerAPI {
             return
           }
           let call = purchaseService.setTransactions(transactionRequest)
-          call.response.whenComplete { result in
-            SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
-            switch result {
-              case .success:
-                completion?(nil)
-              case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
-            }
+          call.initialMetadata.whenComplete({ [weak self] result in
+            self?.validateGrpcResponseResult(result, command: command)
+          })
+          call.response.whenComplete { [weak self] result in
+            self?.handleGrpcResponseResult(result,
+                                           commandType: command.commandType,
+                                           completion: completion)
           }
         case .priceV4:
           guard let priceRequest = try? decoder.decode(Priceapi_PricesRequest.self, from: command.data) else {
@@ -142,14 +139,13 @@ class SKServerAPIImplementaton: SKServerAPI {
             return
           }
           let call = priceService.setPrices(priceRequest)
-          call.response.whenComplete { result in
-            SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
-            switch result {
-              case .success:
-                completion?(nil)
-              case .failure(let error):
-                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
-            }
+          call.initialMetadata.whenComplete({ [weak self] result in
+            self?.validateGrpcResponseResult(result, command: command)
+          })
+          call.response.whenComplete { [weak self] result in
+            self?.handleGrpcResponseResult(result,
+                                           commandType: command.commandType,
+                                           completion: completion)
           }
         default:
           SKLogger.logError("SyncCommand called default. Unpredictable case",
@@ -237,10 +233,56 @@ private extension SKServerAPIImplementaton {
     }
     
     return SKResponseError(errorCode: response.statusCode,
-                           message: "Validating response general error")
+                           message: "Validating response general error. Status code = \(response.statusCode)")
   }
   
   func prepareBaseURLString(command: SKCommand) -> String {
     return SKServerAPIImplementaton.serverName + command.commandType.endpoint
+  }
+  
+  func validateGrpcResponseResult(_ result: Result<HPACKHeaders, Error>, command: SKCommand) {
+    switch result {
+      case .success(let headers):
+        guard let status = headers.first(name: ":status"),
+              status != "200" else {
+          return
+        }
+        var message = ""
+        for header in headers {
+          message.append("\(header.name): \(header.value)\n")
+        }
+        var features: [String: Any] = [:]
+        features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
+        features[SKLoggerFeatureType.retryCount.name] = command.retryCount
+        features[SKLoggerFeatureType.responseStatus.name] = status
+        features[SKLoggerFeatureType.connection.name] = SKServiceRegistry.syncService.connection?.description
+        SKLogger.logError("GRPC status validation code is not 200", features: features)
+      case .failure:
+        break
+    }
+  }
+  
+  func handleGrpcResponseResult(_ result: Result<Google_Protobuf_Empty, Error>,
+                                commandType: SKCommandType,
+                                completion: ((SKResponseError?) -> Void)?) {
+    SKLogger.logNetwork("SKResponse is \(result) for commandType = \(commandType)")
+    switch result {
+      case .success:
+        completion?(nil)
+      case .failure(let error):
+        completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
+    }
+  }
+  
+  func handleGrpcPurchaseResult(_ result: Result<Purchaseapi_ReceiptResponse, Error>,
+                                commandType: SKCommandType,
+                                completion: ((SKResponseError?) -> Void)?) {
+    SKLogger.logNetwork("SKResponse is \(result) for commandType = \(commandType)")
+    switch result {
+      case .success:
+        completion?(nil)
+      case .failure(let error):
+        completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
+    }
   }
 }

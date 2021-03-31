@@ -25,6 +25,9 @@ class SKSyncServiceImplementation: SKSyncService {
     return localIsRunning
   }
   
+  var connection: Reachability.Connection? {
+    return reachability?.connection
+  }
   private let reachability: Reachability?
   
   private var timer: Timer?
@@ -66,8 +69,8 @@ class SKSyncServiceImplementation: SKSyncService {
     
     SKServiceRegistry.commandStore.checkInProgressCommandsTimeout()
     
-    guard reachability?.connection == .cellular ||
-          reachability?.connection == .wifi else {
+    guard connection == .cellular ||
+          connection == .wifi else {
       return
     }
     
@@ -88,7 +91,7 @@ class SKSyncServiceImplementation: SKSyncService {
               features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
               features[SKLoggerFeatureType.retryCount.name] = command.retryCount
               features[SKLoggerFeatureType.responseStatus.name] = error.errorCode
-              features[SKLoggerFeatureType.connection.name] = self?.reachability?.connection.description
+              features[SKLoggerFeatureType.connection.name] = self?.connection?.description
               
               command.updateRetryCountAndFireDate()
               command.changeStatus(to: .pending)

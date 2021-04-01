@@ -62,7 +62,7 @@ class SKLogger {
     features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
     features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
     features[SKLoggerFeatureType.installId.name] = SkarbSDK.getDeviceId()
-    features[SKLoggerFeatureType.proxy.name] = QCFNetworkCopySystemProxySettings()
+    features[SKLoggerFeatureType.proxy.name] = getProxySettings()
     let command = SKCommand(commandType: .logging,
                             status: .pending,
                             data: SKCommand.prepareApplogData(message: message, features: features))
@@ -94,7 +94,7 @@ class SKLogger {
     }
   }
   
-  private static func QCFNetworkCopySystemProxySettings() -> [String:AnyObject]? {
+  private static func getProxySettings() -> [String:AnyObject]? {
     guard let proxiesSettingsUnmanaged = CFNetworkCopySystemProxySettings() else {
       return nil
     }

@@ -110,7 +110,7 @@ struct SKCommand: Codable {
     params["timestamp"] = "\(Int(Date().timeIntervalSince1970 * 1000000))"
     let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self)
     params["client_id"] = initData?.clientId
-    params["agent"] = "SkarbSDK0.3.5"
+    params["agent"] = "SkarbSDK0.3.6"
     return params
   }
   

@@ -21,6 +21,7 @@ enum SKLoggerFeatureType {
   case agentVer
   case installId
   case connection
+  case proxy
   
   var name: String {
     switch self {
@@ -48,6 +49,8 @@ enum SKLoggerFeatureType {
         return "installId"
       case .connection:
         return "connection"
+      case .proxy:
+        return "proxy"
     }
   }
 }
@@ -59,6 +62,7 @@ class SKLogger {
     features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
     features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
     features[SKLoggerFeatureType.installId.name] = SkarbSDK.getDeviceId()
+    features[SKLoggerFeatureType.proxy.name] = QCFNetworkCopySystemProxySettings()
     let command = SKCommand(commandType: .logging,
                             status: .pending,
                             data: SKCommand.prepareApplogData(message: message, features: features))
@@ -88,6 +92,13 @@ class SKLogger {
     if isDebug {
       print("\(Formatter.milliSec.string(from: Date())) [NETWORK] \(message)")
     }
+  }
+  
+  private static func QCFNetworkCopySystemProxySettings() -> [String:AnyObject]? {
+    guard let proxiesSettingsUnmanaged = CFNetworkCopySystemProxySettings() else {
+      return nil
+    }
+    return proxiesSettingsUnmanaged.takeRetainedValue() as? [String:AnyObject]
   }
 }
 

@@ -1,5 +1,5 @@
 PODS:
-  - SkarbSDK (0.3.4)
+  - SkarbSDK (0.3.5)
 
 DEPENDENCIES:
   - SkarbSDK (from `../../`)
@@ -9,7 +9,7 @@ EXTERNAL SOURCES:
     :path: "../../"
 
 SPEC CHECKSUMS:
-  SkarbSDK: 2a17a3fa01884b204332f32834d18d6564a9109c
+  SkarbSDK: f68c13a9a0c2214e8694fbd20297ff1b1db0d676
 
 PODFILE CHECKSUM: f13d87bd86f96312be8dc96cd8dbed9f0e9e3b51
 

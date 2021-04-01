@@ -93,17 +93,13 @@ struct SKCommand: Codable {
     
     var data: Data = Data()
     guard JSONSerialization.isValidJSONObject(params) else {
-      SKLogger.logError("SKCommand prepareApplogData: json isValidJSONObject",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
-                                   SKLoggerFeatureType.internalValue.name: params.description])
+      SKLogger.logInfo("SKCommand prepareApplogData: json isValidJSONObject")
       return data
     }
     do {
       data = try JSONSerialization.data(withJSONObject: params, options: [])
     } catch {
-      SKLogger.logError("SKCommand prepareApplogData: can't json serialization to Data",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
-                                   SKLoggerFeatureType.internalValue.name: params.description])
+      SKLogger.logInfo("SKCommand prepareApplogData: can't json serialization to Data")
     }
     
     return data
@@ -121,8 +117,7 @@ struct SKCommand: Codable {
   private static func prepareApplicationData() -> [String: Any] {
     
     guard let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) else {
-      SKLogger.logError("SKCommand prepareApplicationData: called and initData is nil",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+      SKLogger.logInfo("SKCommand prepareApplicationData: called and initData is nil")
       return [:]
     }
     

@@ -1,14 +1,13 @@
 PODS:
   - CGRPCZlib (1.0.0)
-  - CNIOAtomics (2.25.1)
-  - CNIOBoringSSL (2.10.2)
-  - CNIOBoringSSLShims (2.10.2):
-    - CNIOBoringSSL (= 2.10.2)
-  - CNIODarwin (2.25.1)
-  - CNIOHTTPParser (2.25.1)
-  - CNIOLinux (2.25.1)
-  - CNIOSHA1 (2.25.1)
-  - CNIOWindows (2.25.1)
+  - CNIOAtomics (2.27.0)
+  - CNIOBoringSSL (2.10.5)
+  - CNIOBoringSSLShims (2.10.5):
+    - CNIOBoringSSL (= 2.10.5)
+  - CNIODarwin (2.27.0)
+  - CNIOHTTPParser (2.27.0)
+  - CNIOLinux (2.27.0)
+  - CNIOWindows (2.27.0)
   - gRPC-Swift (1.0.0):
     - CGRPCZlib (= 1.0.0)
     - Logging (< 2.0.0, >= 1.4.0)
@@ -19,42 +18,44 @@ PODS:
     - SwiftNIOTransportServices (< 2.0.0, >= 1.6.0)
     - SwiftProtobuf (< 2.0.0, >= 1.9.0)
   - Logging (1.4.0)
-  - SwiftNIO (2.25.1):
-    - CNIOAtomics (= 2.25.1)
-    - CNIODarwin (= 2.25.1)
-    - CNIOLinux (= 2.25.1)
-    - CNIOSHA1 (= 2.25.1)
-    - CNIOWindows (= 2.25.1)
-    - SwiftNIOConcurrencyHelpers (= 2.25.1)
-  - SwiftNIOConcurrencyHelpers (2.25.1):
-    - CNIOAtomics (= 2.25.1)
-  - SwiftNIOExtras (1.7.0):
+  - ReachabilitySwift (5.0.0)
+  - SkarbSDK (0.3.4):
+    - gRPC-Swift (= 1.0.0)
+    - ReachabilitySwift (= 5.0.0)
+  - SwiftNIO (2.27.0):
+    - CNIODarwin (= 2.27.0)
+    - CNIOLinux (= 2.27.0)
+    - CNIOWindows (= 2.27.0)
+    - SwiftNIOConcurrencyHelpers (= 2.27.0)
+  - SwiftNIOConcurrencyHelpers (2.27.0):
+    - CNIOAtomics (= 2.27.0)
+  - SwiftNIOExtras (1.8.0):
     - SwiftNIO (< 3, >= 2.9.0)
-  - SwiftNIOFoundationCompat (2.25.1):
-    - SwiftNIO (= 2.25.1)
-  - SwiftNIOHPACK (1.16.2):
+  - SwiftNIOFoundationCompat (2.27.0):
+    - SwiftNIO (= 2.27.0)
+  - SwiftNIOHPACK (1.16.3):
     - SwiftNIO (< 3, >= 2.18.0)
     - SwiftNIOConcurrencyHelpers (< 3, >= 2.18.0)
     - SwiftNIOHTTP1 (< 3, >= 2.18.0)
-  - SwiftNIOHTTP1 (2.25.1):
-    - CNIOHTTPParser (= 2.25.1)
-    - SwiftNIO (= 2.25.1)
-    - SwiftNIOConcurrencyHelpers (= 2.25.1)
-  - SwiftNIOHTTP2 (1.16.2):
+  - SwiftNIOHTTP1 (2.27.0):
+    - CNIOHTTPParser (= 2.27.0)
+    - SwiftNIO (= 2.27.0)
+    - SwiftNIOConcurrencyHelpers (= 2.27.0)
+  - SwiftNIOHTTP2 (1.16.3):
     - SwiftNIO (< 3, >= 2.18.0)
     - SwiftNIOConcurrencyHelpers (< 3, >= 2.18.0)
-    - SwiftNIOHPACK (= 1.16.2)
+    - SwiftNIOHPACK (= 1.16.3)
     - SwiftNIOHTTP1 (< 3, >= 2.18.0)
     - SwiftNIOTLS (< 3, >= 2.18.0)
-  - SwiftNIOSSL (2.10.2):
-    - CNIOBoringSSL (= 2.10.2)
-    - CNIOBoringSSLShims (= 2.10.2)
+  - SwiftNIOSSL (2.10.5):
+    - CNIOBoringSSL (= 2.10.5)
+    - CNIOBoringSSLShims (= 2.10.5)
     - SwiftNIO (< 3, >= 2.15.0)
     - SwiftNIOConcurrencyHelpers (< 3, >= 2.15.0)
     - SwiftNIOTLS (< 3, >= 2.15.0)
-  - SwiftNIOTLS (2.25.1):
-    - SwiftNIO (= 2.25.1)
-  - SwiftNIOTransportServices (1.9.1):
+  - SwiftNIOTLS (2.27.0):
+    - SwiftNIO (= 2.27.0)
+  - SwiftNIOTransportServices (1.9.2):
     - SwiftNIO (< 3, >= 2.19.0)
     - SwiftNIOConcurrencyHelpers (< 3, >= 2.19.0)
     - SwiftNIOFoundationCompat (< 3, >= 2.19.0)
@@ -62,7 +63,7 @@ PODS:
   - SwiftProtobuf (1.15.0)
 
 DEPENDENCIES:
-  - gRPC-Swift (= 1.0.0)
+  - SkarbSDK (from `../../`)
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
@@ -73,10 +74,10 @@ SPEC REPOS:
     - CNIODarwin
     - CNIOHTTPParser
     - CNIOLinux
-    - CNIOSHA1
     - CNIOWindows
     - gRPC-Swift
     - Logging
+    - ReachabilitySwift
     - SwiftNIO
     - SwiftNIOConcurrencyHelpers
     - SwiftNIOExtras
@@ -89,30 +90,35 @@ SPEC REPOS:
     - SwiftNIOTransportServices
     - SwiftProtobuf
 
+EXTERNAL SOURCES:
+  SkarbSDK:
+    :path: "../../"
+
 SPEC CHECKSUMS:
   CGRPCZlib: b0c9d704a12fa667f1824ffff20688f191945989
-  CNIOAtomics: 2ae668942b9e7ac71e0fe286d11ac9b4fe329024
-  CNIOBoringSSL: 3d59b923c8ec524308685664ae6388179c678ac7
-  CNIOBoringSSLShims: 18b267690ba0d57b22e4e69dff2904a6b1d030b8
-  CNIODarwin: 3874630a0e3506c3e86f272ad436103d27055831
-  CNIOHTTPParser: 976fcf22759946c80ff74c8a2926728d88954a83
-  CNIOLinux: e6394d7fd56d36ff43ada5796e9d96c14fcb3546
-  CNIOSHA1: 43c4a0cfdea5e8be20927d9d2237ebe4233071f8
-  CNIOWindows: 89048520e4a1484bcd5e20c252edf4089913aa7d
+  CNIOAtomics: 43316aa185f4bd639aa0a9cd49741151bbe8de7f
+  CNIOBoringSSL: 7ff9c35139a115f93269915b9555044d741b2ac9
+  CNIOBoringSSLShims: 6edde63429e353ba78992b2d4d1b0627752a4a43
+  CNIODarwin: 9eb3c09e9f3fc5ed47cecdd032aad926df81e3a6
+  CNIOHTTPParser: c6051552c5f332e4ec0756581e5cbd5632ca24e6
+  CNIOLinux: 79227941d64216792c3c59238b0106b9e0df25bc
+  CNIOWindows: f2baa102255e986467578337ffa2f777cb6bdf7f
   gRPC-Swift: 77154009a019e97f8c4bd8f2bb75fe9726801157
   Logging: beeb016c9c80cf77042d62e83495816847ef108b
-  SwiftNIO: 3f9a197581f6dfebf65a5c85099f25197d892c8c
-  SwiftNIOConcurrencyHelpers: 3670690a0fb8d8a0a4759804d07aaf89c9599839
-  SwiftNIOExtras: 3a5d48aa8d09b4ad7e248bfc1fa46dbc28d56b35
-  SwiftNIOFoundationCompat: 707c223452d1606e1619c2309f089aeadbf2943e
-  SwiftNIOHPACK: a86298d347455478dcc0d0178b80bbbd38bdf299
-  SwiftNIOHTTP1: 566744e4a9b4425009b59dce9ed962591052b0d0
-  SwiftNIOHTTP2: 474925ac2ebabc5899892f7cafc0323eceb67f8c
-  SwiftNIOSSL: 39756339a7425d68b48f00c0f9a9e068b8f536d0
-  SwiftNIOTLS: 434418842a6bebc21864ec84229e5e3d2762ca0b
-  SwiftNIOTransportServices: a8a17a43695a09bfdd5a56426f6e515120d5dbf3
+  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
+  SkarbSDK: a4329e719264aa4a09d1ec133d1b82ac853234da
+  SwiftNIO: 81d33ce8c500b7e41b6cdde5f2f12330b9750219
+  SwiftNIOConcurrencyHelpers: 23fc68bac541a465162d7225d2c743edd2f1012c
+  SwiftNIOExtras: aa561b71020cd6844f722cf4513fb176c577414d
+  SwiftNIOFoundationCompat: 0e52ac0e2c9b7b60ff9141eebb64f5a82d974118
+  SwiftNIOHPACK: 38e855a72ae0c5176485ddd039b3933b99daa2b7
+  SwiftNIOHTTP1: 846277d7fc7661fba655540e529d7ba3c728ca50
+  SwiftNIOHTTP2: de7eff9d32fd347338f85b86c6fd0e13c3fbd1a0
+  SwiftNIOSSL: 6a1f0499a5319e823eae0b6f053ecb502bcce3f5
+  SwiftNIOTLS: 4f8df225f03393f08e0b47b4d876ae38167f8a27
+  SwiftNIOTransportServices: 896c9a4ac98698d32aa2feea7657ade219ae80bb
   SwiftProtobuf: 3320217e9d8fb75f36b40282e78c482640fd75dd
 
-PODFILE CHECKSUM: b5f264522826907277b820057dc54bbd125ef260
+PODFILE CHECKSUM: df07b2c0afb67ef77b660b36dc62b8b40aacd9bc
 
 COCOAPODS: 1.10.1

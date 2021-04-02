@@ -45,9 +45,9 @@ struct SKMigrationService {
       }
     }
     
-    // Need to delete all events if SDK version is lower than 0.4.3
+    // Need to delete all events if SDK version is lower than 0.4.7
     // Current version can be parsed from Installapi_DeviceRequest.auth.agentVer
-    let needToMigrateVer = "0.4.3"
+    let needToMigrateVer = "0.4.7"
     let decoder = JSONDecoder()
     if let installCommand = SKServiceRegistry.commandStore.getAllCommands(by: .installV4).first,
        let deviceRequest = try? decoder.decode(Installapi_DeviceRequest.self, from: installCommand.data),

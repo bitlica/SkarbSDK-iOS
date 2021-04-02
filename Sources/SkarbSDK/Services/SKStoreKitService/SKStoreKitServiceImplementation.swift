@@ -42,7 +42,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     guard let fetchProducts = try? decoder.decode(Array<SKFetchProduct>.self, from: command.data) else {
       SKLogger.logError("SKSyncServiceImplementation requestProductInfoAndSendPurchase: called with fetchProducts but command.data is not SKFetchProduct. Command.data == \(String(describing: String(data: command.data, encoding: .utf8)))", features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
       editedCommand.changeStatus(to: .canceled)
-      SKServiceRegistry.commandStore.saveCommand(command)
+      SKServiceRegistry.commandStore.saveCommand(editedCommand)
       return
     }
     
@@ -50,7 +50,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
       if products.first != nil {
         editedCommand.changeStatus(to: .done)
       } else {
-        editedCommand.incrementRetryCount()
+        editedCommand.updateRetryCountAndFireDate()
         editedCommand.changeStatus(to: .pending)
       }
       SKServiceRegistry.commandStore.saveCommand(editedCommand)

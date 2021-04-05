@@ -12,7 +12,7 @@ import UIKit
 public class SkarbSDK {
   
   static let agentName: String = "SkarbSDK"
-  static let version: String = "0.4.8"
+  static let version: String = "0.4.9"
   
   static var clientId: String = ""
   

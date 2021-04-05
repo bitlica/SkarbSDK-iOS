@@ -21,7 +21,7 @@ public class SkarbSDK {
                                 deviceId: String? = nil) {
     
     SkarbSDK.clientId = clientId
-    let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+    let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? "gen-" + UUID().uuidString
     
     // Order is matter:
     // needs to be sure that install command data exists always
@@ -101,7 +101,7 @@ public class SkarbSDK {
       SKLogger.logError("SkarbSDK: getDeviceId() - deviceId is nil",
                         features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                    SKLoggerFeatureType.internalValue.name: "deviceId is nil"])
-      let deviceId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+      let deviceId = UIDevice.current.identifierForVendor?.uuidString ?? "gen-" + UUID().uuidString
       SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
       return deviceId
     }

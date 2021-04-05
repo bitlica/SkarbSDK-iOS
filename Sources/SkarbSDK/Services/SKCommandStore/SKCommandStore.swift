@@ -244,8 +244,12 @@ class SKCommandStore {
     
 //    V4
     if !SKServiceRegistry.commandStore.hasInstallV4Command {
-      let initDataV4 = Installapi_DeviceRequest(clientId: clientId, deviceId: deviceId)
-      let installCommandV4 = SKCommand(commandType: .installV4,
+      let nowDate = Date()
+      let initDataV4 = Installapi_DeviceRequest(clientId: clientId,
+                                                deviceId: deviceId,
+                                                sdkInstallDate: nowDate)
+      let installCommandV4 = SKCommand(timestamp: nowDate.nowTimestampInt,
+                                       commandType: .installV4,
                                        status: .pending,
                                        data: initDataV4.getData())
       SKServiceRegistry.commandStore.saveCommand(installCommandV4)

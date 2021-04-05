@@ -15,7 +15,7 @@ class SKUserDefaultsService {
     case testData
     case purchaseData
     case appgateComands
-    case migrationVersion(Int)
+    case oldSchemaVersion
     case deviceId
     
     var keyName: String {
@@ -30,8 +30,8 @@ class SKUserDefaultsService {
           return "sk_purchase_data"
         case .appgateComands:
           return "sk_appgate_commands"
-        case .migrationVersion(let version):
-          return "sk_migration_version_\(version)"
+        case .oldSchemaVersion:
+          return "sk_old_schema_version"
         case .deviceId:
           return "sk_device_id_key"
       }

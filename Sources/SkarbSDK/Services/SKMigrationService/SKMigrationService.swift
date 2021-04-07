@@ -20,7 +20,7 @@ struct SKMigrationService {
       migrateV2ToV3()
       migrateDeviceId(deviceId: deviceId)
       migrateFetchingProducts()
-      deleteV4CommandsIfNeeded(needToMigrateVer: "0.4.7")
+      deleteV4CommandsIfNeeded(needToMigrateVer: "0.4.10")
       migrateInstallCommand()
     }
     
@@ -171,7 +171,7 @@ struct SKMigrationService {
     for command in commands {
       if let deviceRequest = try? decoder.decode(Installapi_DeviceRequest.self, from: command.data) {
         var updatedDeviceRequest = deviceRequest
-        updatedDeviceRequest.sdkInitDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: TimeInterval(command.timestamp / 1000000))
+        updatedDeviceRequest.sdkInitDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: TimeInterval(command.timestamp / 1000000)) // command.timestamp - micsoSec
         var updatedCommand = command
         if let updatedData = updatedDeviceRequest.getData() {
           updatedCommand.updateData(updatedData)

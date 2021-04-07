@@ -26,7 +26,7 @@ public class SkarbSDK {
     // Order is matter:
     // needs to be sure that install command data exists always
     // because some data are used in other commands and should not be nil
-    SKServiceRegistry.migrationService.doMigrationIfNeeded()
+    SKServiceRegistry.migrationService.doMigrationIfNeeded(deviceId: deviceId)
     SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId, deviceId: deviceId)
     SKServiceRegistry.initialize(isObservable: isObservable)
   }

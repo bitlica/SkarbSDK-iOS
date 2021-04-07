@@ -246,17 +246,12 @@ class SKCommandStore {
     if !SKServiceRegistry.commandStore.hasInstallV4Command {
       let nowDate = Date()
       let initDataV4 = Installapi_DeviceRequest(clientId: clientId,
-                                                deviceId: deviceId,
                                                 sdkInstallDate: nowDate)
       let installCommandV4 = SKCommand(timestamp: nowDate.nowTimestampInt,
                                        commandType: .installV4,
                                        status: .pending,
                                        data: initDataV4.getData())
       SKServiceRegistry.commandStore.saveCommand(installCommandV4)
-      
-      if SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) == nil {
-        SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
-      }
     }
   }
   

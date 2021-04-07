@@ -14,10 +14,9 @@ import SwiftProtobuf
 extension Installapi_DeviceRequest: SKCodableStruct {
   
   init(clientId: String,
-       deviceId: String,
        sdkInstallDate: Date) {
     auth = Auth_Auth.createDefault()
-    installID = deviceId
+    installID = SkarbSDK.getDeviceId()
     idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
     idfv = UIDevice.current.identifierForVendor?.uuidString ?? ""
     bundleVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"

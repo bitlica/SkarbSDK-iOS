@@ -13,12 +13,12 @@ struct SKMigrationService {
   
   static let schemaVersion: Int = 1
   
-  func doMigrationIfNeeded() {
+  func doMigrationIfNeeded(deviceId: String) {
     
     let oldSchemaVersion = SKServiceRegistry.userDefaultsService.int(forKey: .oldSchemaVersion)
     if oldSchemaVersion < 1 {
       migrateV2ToV3()
-      migrateDeviceId()
+      migrateDeviceId(deviceId: deviceId)
       migrateFetchingProducts()
       deleteV4CommandsIfNeeded(needToMigrateVer: "0.4.7")
       migrateInstallCommand()
@@ -108,10 +108,14 @@ struct SKMigrationService {
   
   
   /// Means that user has v3 version and need to store deviceId for V4
-  private func migrateDeviceId() {
+  private func migrateDeviceId(deviceId: String) {
     if let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self),
        SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) == nil  {
       SKServiceRegistry.userDefaultsService.setValue(initData.deviceId, forKey: .deviceId)
+    } else {
+      if SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) == nil {
+        SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
+      }
     }
   }
   
@@ -144,7 +148,7 @@ struct SKMigrationService {
     }
   }
   
-  /// Need to delete all events if SDK version is lower than 0.4.7
+  /// Need to delete all events if SDK version is lower needToMigrateVer
   /// Current version can be parsed from Installapi_DeviceRequest.auth.agentVer
   private func deleteV4CommandsIfNeeded(needToMigrateVer: String) {
     let decoder = JSONDecoder()

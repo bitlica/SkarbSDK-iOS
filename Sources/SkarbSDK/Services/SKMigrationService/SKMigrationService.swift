@@ -20,7 +20,6 @@ struct SKMigrationService {
       migrateV2ToV3()
       migrateDeviceId(deviceId: deviceId)
       migrateFetchingProducts()
-      deleteV4CommandsIfNeeded(needToMigrateVer: "0.4.10")
       migrateInstallCommand()
     }
     
@@ -148,22 +147,6 @@ struct SKMigrationService {
     }
   }
   
-  /// Need to delete all events if SDK version is lower needToMigrateVer
-  /// Current version can be parsed from Installapi_DeviceRequest.auth.agentVer
-  private func deleteV4CommandsIfNeeded(needToMigrateVer: String) {
-    let decoder = JSONDecoder()
-    if let installCommand = SKServiceRegistry.commandStore.getAllCommands(by: .installV4).first,
-       let deviceRequest = try? decoder.decode(Installapi_DeviceRequest.self, from: installCommand.data),
-       compareNumeric(deviceRequest.auth.agentVer, needToMigrateVer) == .orderedAscending {
-      SKServiceRegistry.commandStore.deleteAllCommand(by: .installV4)
-      SKServiceRegistry.commandStore.deleteAllCommand(by: .sourceV4)
-      SKServiceRegistry.commandStore.deleteAllCommand(by: .testV4)
-      SKServiceRegistry.commandStore.deleteAllCommand(by: .purchaseV4)
-      SKServiceRegistry.commandStore.deleteAllCommand(by: .transactionV4)
-      SKServiceRegistry.commandStore.deleteAllCommand(by: .priceV4)
-    }
-  }
-  
   /// Need to add sdkInitDate for old users
   private func migrateInstallCommand() {
     let commands = SKServiceRegistry.commandStore.getAllCommands(by: .installV4)
@@ -171,6 +154,7 @@ struct SKMigrationService {
     for command in commands {
       if let deviceRequest = try? decoder.decode(Installapi_DeviceRequest.self, from: command.data) {
         var updatedDeviceRequest = deviceRequest
+        updatedDeviceRequest.installID = SkarbSDK.getDeviceId()
         updatedDeviceRequest.sdkInitDate = SwiftProtobuf.Google_Protobuf_Timestamp(timeIntervalSince1970: TimeInterval(command.timestamp / 1000000)) // command.timestamp - micsoSec
         var updatedCommand = command
         if let updatedData = updatedDeviceRequest.getData() {

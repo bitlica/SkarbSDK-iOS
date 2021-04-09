@@ -108,6 +108,15 @@ struct Installapi_DeviceRequest {
     set {_uniqueStorage()._region = newValue}
   }
 
+  var sdkInitDate: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {return _storage._sdkInitDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_uniqueStorage()._sdkInitDate = newValue}
+  }
+  /// Returns true if `sdkInitDate` has been explicitly set.
+  var hasSdkInitDate: Bool {return _storage._sdkInitDate != nil}
+  /// Clears the value of `sdkInitDate`. Subsequent reads from it will return its default value.
+  mutating func clearSdkInitDate() {_uniqueStorage()._sdkInitDate = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -191,6 +200,7 @@ extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     12: .standard(proto: "build_date"),
     13: .same(proto: "currency"),
     14: .same(proto: "region"),
+    15: .standard(proto: "sdk_init_date"),
   ]
 
   fileprivate class _StorageClass {
@@ -208,6 +218,7 @@ extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     var _buildDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
     var _currency: String = String()
     var _region: String = String()
+    var _sdkInitDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 
     static let defaultInstance = _StorageClass()
 
@@ -228,6 +239,7 @@ extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
       _buildDate = source._buildDate
       _currency = source._currency
       _region = source._region
+      _sdkInitDate = source._sdkInitDate
     }
   }
 
@@ -260,6 +272,7 @@ extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
         case 12: try { try decoder.decodeSingularMessageField(value: &_storage._buildDate) }()
         case 13: try { try decoder.decodeSingularStringField(value: &_storage._currency) }()
         case 14: try { try decoder.decodeSingularStringField(value: &_storage._region) }()
+        case 15: try { try decoder.decodeSingularMessageField(value: &_storage._sdkInitDate) }()
         default: break
         }
       }
@@ -310,6 +323,9 @@ extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
       if !_storage._region.isEmpty {
         try visitor.visitSingularStringField(value: _storage._region, fieldNumber: 14)
       }
+      if let v = _storage._sdkInitDate {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 15)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -333,6 +349,7 @@ extension Installapi_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
         if _storage._buildDate != rhs_storage._buildDate {return false}
         if _storage._currency != rhs_storage._currency {return false}
         if _storage._region != rhs_storage._region {return false}
+        if _storage._sdkInitDate != rhs_storage._sdkInitDate {return false}
         return true
       }
       if !storagesAreEqual {return false}

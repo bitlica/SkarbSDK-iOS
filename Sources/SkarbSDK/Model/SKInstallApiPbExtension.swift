@@ -13,9 +13,10 @@ import SwiftProtobuf
 
 extension Installapi_DeviceRequest: SKCodableStruct {
   
-  init(clientId: String, deviceId: String) {
+  init(clientId: String,
+       sdkInstallDate: Date) {
     auth = Auth_Auth.createDefault()
-    installID = deviceId
+    installID = SkarbSDK.getDeviceId()
     idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
     idfv = UIDevice.current.identifierForVendor?.uuidString ?? ""
     bundleVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
@@ -52,6 +53,7 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     buildDate = SwiftProtobuf.Google_Protobuf_Timestamp(date: appBuildDate)
     currency = Locale.current.currencyCode ?? ""
     region = Locale.current.regionCode ?? ""
+    sdkInitDate = SwiftProtobuf.Google_Protobuf_Timestamp(date: sdkInstallDate)
   }
   
   init(from decoder: Swift.Decoder) throws {
@@ -72,6 +74,10 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     let buildDateNanosec = try? container.decode(Int32.self, forKey: .buildDateNanosec)
     let currency = try? container.decode(String.self, forKey: .currency)
     let region = try? container.decode(String.self, forKey: .region)
+    var sdkInitTimestamp: Google_Protobuf_Timestamp = SwiftProtobuf.Google_Protobuf_Timestamp()
+    if let sdkInitDate = try? container.decode(Date.self, forKey: .sdkInitDate) {
+      sdkInitTimestamp = SwiftProtobuf.Google_Protobuf_Timestamp(date: sdkInitDate)
+    }
     
     self = Installapi_DeviceRequest.with({
       $0.auth = auth
@@ -101,6 +107,7 @@ extension Installapi_DeviceRequest: SKCodableStruct {
       
       $0.currency = currency ?? ""
       $0.region = region ?? ""
+      $0.sdkInitDate = sdkInitTimestamp
     })
   }
   
@@ -122,6 +129,7 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     try container.encode(buildDate.nanos, forKey: .buildDateNanosec)
     try container.encode(currency, forKey: .currency)
     try container.encode(region, forKey: .region)
+    try container.encode(sdkInitDate.date, forKey: .sdkInitDate)
   }
   
   func getData() -> Data? {
@@ -150,6 +158,7 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     case buildDateNanosec
     case currency
     case region
+    case sdkInitDate
   }
   
   private var appBuildDate: Date {

@@ -12,7 +12,7 @@ import UIKit
 public class SkarbSDK {
   
   static let agentName: String = "SkarbSDK"
-  static let version: String = "0.4.8"
+  static let version: String = "0.4.10"
   
   static var clientId: String = ""
   
@@ -21,12 +21,12 @@ public class SkarbSDK {
                                 deviceId: String? = nil) {
     
     SkarbSDK.clientId = clientId
-    let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+    let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? "gen-" + UUID().uuidString
     
     // Order is matter:
     // needs to be sure that install command data exists always
     // because some data are used in other commands and should not be nil
-    SKServiceRegistry.migrationService.doMigrationIfNeeded()
+    SKServiceRegistry.migrationService.doMigrationIfNeeded(deviceId: deviceId)
     SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId, deviceId: deviceId)
     SKServiceRegistry.initialize(isObservable: isObservable)
   }
@@ -65,7 +65,7 @@ public class SkarbSDK {
       SKLogger.logError("SkarbSDK: getDeviceId() - deviceId is nil",
                         features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                    SKLoggerFeatureType.internalValue.name: "deviceId is nil"])
-      let deviceId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+      let deviceId = UIDevice.current.identifierForVendor?.uuidString ?? "gen-" + UUID().uuidString
       SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
       return deviceId
     }

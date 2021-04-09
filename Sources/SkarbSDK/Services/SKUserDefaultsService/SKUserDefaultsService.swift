@@ -12,6 +12,7 @@ class SKUserDefaultsService {
   enum SKKey {
     case initData
     case appgateComands
+    case oldSchemaVersion
     case deviceId
     
     var keyName: String {
@@ -20,6 +21,8 @@ class SKUserDefaultsService {
           return "sk_init_data_key"
         case .appgateComands:
           return "sk_appgate_commands"
+        case .oldSchemaVersion:
+          return "sk_old_schema_version"
         case .deviceId:
           return "sk_device_id_key"
       }

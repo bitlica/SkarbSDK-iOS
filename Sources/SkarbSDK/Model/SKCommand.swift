@@ -10,26 +10,54 @@ import Foundation
 import UIKit
 import AdSupport
 
-struct SKCommand: Codable {
+struct SKCommand {
   let timestamp: Int
   private(set) var commandType: SKCommandType
   private(set) var status: SKCommandStatus
-  let data: Data
+  private(set) var data: Data
   private(set) var retryCount: Int
+  private(set) var fireDate: Date
   
-  var description: String {
-    return "timestamp=\(timestamp), commandType=\(commandType), status=\(status), retryCount=\(retryCount), data = \(String(describing: String(data: data, encoding: .utf8)))"
+  init(timestamp: Int = Date().nowTimestampInt,
+       commandType: SKCommandType,
+       status: SKCommandStatus,
+       data: Data?,
+       retryCount: Int = 0,
+       fireDate: Date = Date()) {
+    self.timestamp = timestamp
+    self.commandType = commandType
+    self.status = status
+    self.data = data ?? Data()
+    self.retryCount = retryCount
+    self.fireDate = fireDate
   }
   
-  mutating func incrementRetryCount() {
+  var description: String {
+    return "timestamp=\(timestamp), commandType=\(commandType), status=\(status), retryCount=\(retryCount), fireDate=\(fireDate)"
+  }
+  
+  mutating func resetRetryCount() {
+    retryCount = 0
+  }
+  
+  mutating func updateRetryCountAndFireDate() {
     retryCount += 1
+    updateFireDate(Date().addingTimeInterval(getRetryDelay()))
   }
   
   mutating func changeStatus(to status: SKCommandStatus) {
     self.status = status
   }
   
-  func getRetryDelay() -> TimeInterval {
+  mutating func updateData(_ data: Data) {
+    self.data = data
+  }
+  
+  mutating func updateFireDate(_ date: Date) {
+    self.fireDate = date
+  }
+  
+  private func getRetryDelay() -> TimeInterval {
     switch retryCount {
       case 0:
         return 0
@@ -46,9 +74,9 @@ struct SKCommand: Codable {
       case 6:
         return 14
       case 7:
-        return 30
+        return 25
       default:
-        return 60
+        return 40
     }
   }
   
@@ -68,17 +96,13 @@ struct SKCommand: Codable {
     }
     var data: Data = Data()
     guard JSONSerialization.isValidJSONObject(params) else {
-      SKLogger.logError("SKCommand prepareAppgateData: json isValidJSONObject",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
-                                   SKLoggerFeatureType.internalValue.name: params.description])
+      SKLogger.logError("SKCommand prepareAppgateData: json isValidJSONObject", features: nil)
       return data
     }
     do {
       data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
     } catch {
-      SKLogger.logError("SKCommand prepareAppgateData: can't json serialization to Data",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
-                                   SKLoggerFeatureType.internalValue.name: params.description])
+      SKLogger.logError("SKCommand prepareAppgateData: can't json serialization to Data", features: nil)
     }
     
     return data
@@ -87,7 +111,6 @@ struct SKCommand: Codable {
   static func prepareApplogData(message: String, features: [String: Any]?) -> Data {
     var params: [String: Any] = [:]
     params["client"] = prepareClientData()
-    params["application"] = prepareApplicationData()
     params["message"] = message
     params["context"] = features
     
@@ -117,7 +140,14 @@ struct SKCommand: Codable {
   private static func prepareApplicationData() -> [String: Any] {
     
     guard let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) else {
-      SKLogger.logInfo("SKCommand prepareApplicationData: called and initData is nil")
+      var features: [String: Any] = [:]
+      features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
+      features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
+      let message = "SKCommand prepareApplicationData: called and initData is nil"
+      let command = SKCommand(commandType: .logging,
+                              status: .pending,
+                              data: SKCommand.prepareApplogData(message: message, features: features))
+      SKServiceRegistry.commandStore.saveCommand(command)
       return [:]
     }
     
@@ -193,10 +223,56 @@ struct SKCommand: Codable {
   }
 }
 
+extension SKCommand: SKCodableStruct {
+  init(from decoder: Swift.Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let timestamp = try container.decode(Int.self, forKey: .timestamp)
+    let commandType = try container.decode(SKCommandType.self, forKey: .commandType)
+    let status = try container.decode(SKCommandStatus.self, forKey: .status)
+    let data = try container.decode(Data.self, forKey: .data)
+    let retryCount = try container.decode(Int.self, forKey: .retryCount)
+    let fireDate = try container.decode(Date.self, forKey: .fireDate)
+    self = SKCommand(timestamp: timestamp,
+                     commandType: commandType,
+                     status: status,
+                     data: data,
+                     retryCount: retryCount,
+                     fireDate: fireDate)
+  }
+  
+  func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(timestamp, forKey: .timestamp)
+    try container.encode(commandType, forKey: .commandType)
+    try container.encode(status, forKey: .status)
+    try container.encode(data, forKey: .data)
+    try container.encode(retryCount, forKey: .retryCount)
+    try container.encode(fireDate, forKey: .fireDate)
+  }
+  
+  func getData() -> Data? {
+    let encoder = JSONEncoder()
+    if let encoded = try? encoder.encode(self) {
+      return encoded
+    }
+    
+    return nil
+  }
+  
+  enum CodingKeys: String, CodingKey {
+    case timestamp
+    case commandType
+    case status
+    case data
+    case retryCount
+    case fireDate
+  }
+}
 
 extension SKCommand: Equatable {
   public static func == (lhs: Self, rhs: Self) -> Bool {
     return lhs.timestamp == rhs.timestamp &&
-           lhs.commandType == rhs.commandType
+           lhs.commandType == rhs.commandType &&
+           lhs.data == rhs.data
   }
 }

@@ -37,26 +37,56 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   
   func requestProductInfoAndSendPurchase(command: SKCommand) {
     var editedCommand = command
-    guard let productId = String(data: command.data, encoding: .utf8) else {
-      SKLogger.logError("SKSyncServiceImplementation requestProductInfoAndSendPurchase: called with fetchProducts but command.data is not String. Command.data == \(String(describing: String(data: command.data, encoding: .utf8)))", features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+    let decoder = JSONDecoder()
+
+    guard let fetchProducts = try? decoder.decode(Array<SKFetchProduct>.self, from: command.data) else {
+      SKLogger.logError("SKSyncServiceImplementation requestProductInfoAndSendPurchase: called with fetchProducts but command.data is not SKFetchProduct. Command.data == \(String(describing: String(data: command.data, encoding: .utf8)))", features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
       editedCommand.changeStatus(to: .canceled)
-      SKServiceRegistry.commandStore.saveCommand(command)
+      SKServiceRegistry.commandStore.saveCommand(editedCommand)
       return
     }
     
-    requestProductInfo(productId: productId) { products in
-      if let product = products.filter({ $0.productIdentifier == productId }).first {
-        guard !SKServiceRegistry.commandStore.hasPurhcaseCommand else {
-          return
-        }
-        SkarbSDK.sendPurchase(productId: productId,
+    requestProductInfo(productIds: fetchProducts.map({ $0.productId })) { products in
+      if let product = products.first {
+        SkarbSDK.sendPurchase(productId: product.productIdentifier,
                               price: product.price.floatValue,
                               currency: product.priceLocale.currencyCode ?? "")
+        editedCommand.changeStatus(to: .done)
       } else {
-        editedCommand.incrementRetryCount()
+        editedCommand.updateRetryCountAndFireDate()
         editedCommand.changeStatus(to: .pending)
-        SKServiceRegistry.commandStore.saveCommand(command)
       }
+      SKServiceRegistry.commandStore.saveCommand(editedCommand)
+      
+      // V4. Send command for price
+      var priceApiProducts: [Priceapi_Product] = []
+      for fetchProduct in fetchProducts {
+        guard let product = products.first(where: { $0.productIdentifier == fetchProduct.productId }) else {
+          SKLogger.logError("SKSyncServiceImplementation. Send command for price. Product is nil. FetchProduct = \(fetchProduct.productId)", features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+          continue
+        }
+        let priceApiProduct = Priceapi_Product(product: product,
+                                               transactionDate: fetchProduct.transactionDate,
+                                               transactionId: fetchProduct.transactionId)
+        priceApiProducts.append(priceApiProduct)
+      }
+      
+      guard !priceApiProducts.isEmpty else {
+        return
+      }
+      
+      var countryCode: String? = nil
+      if #available(iOS 13.0, *) {
+        countryCode = SKPaymentQueue.default().storefront?.countryCode
+      }
+      let productRequest = Priceapi_PricesRequest(storefront: countryCode,
+                                                  region: products.first?.priceLocale.regionCode,
+                                                  currency: products.first?.priceLocale.currencyCode,
+                                                  products: priceApiProducts)
+      let priceCommand = SKCommand(commandType: .priceV4,
+                                   status: .pending,
+                                   data: productRequest.getData())
+      SKServiceRegistry.commandStore.saveCommand(priceCommand)
     }
   }
 }
@@ -67,45 +97,93 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
   /// Sent when the transaction array has changed (additions or state changes).  Client should check state of transactions and finish as appropriate.
   public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
     
-    for transaction in transactions.reversed() {
+    DispatchQueue.main.async { [weak self] in
       
-      switch transaction.transactionState {
-        case .purchased:
-          SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
-          DispatchQueue.main.async { [weak self] in
-            
-            guard let self = self,
-              self.isObservable,
-              !SKServiceRegistry.commandStore.hasPurhcaseCommand else {
-                return
-            }
-            
-            let purchasedProductId = transaction.payment.productIdentifier
-            if let allProducts = self.allProducts,
-              let product = allProducts.filter({ $0.productIdentifier == purchasedProductId }).first {
-              SkarbSDK.sendPurchase(productId: purchasedProductId,
-                                    price: product.price.floatValue,
-                                    currency: product.priceLocale.currencyCode ?? "")
-            } else {
-              guard let productData = purchasedProductId.data(using: .utf8) else {
-                SKLogger.logError("paymentQueue updatedTransactions: called. Need to fetch products but purchasedProductId.data(using: .utf8) == nil",
-                                  features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
-                return
-              }
-              let fetchCommand = SKCommand(timestamp: Date().nowTimestampInt,
-                                           commandType: .fetchProducts,
-                                           status: .pending,
-                                           data: productData,
-                                           retryCount: 0)
-              SKServiceRegistry.commandStore.saveCommand(fetchCommand)
-            }
+      guard let self = self,
+            self.isObservable else {
+        return
+      }
+      
+      let purchasedTransactions = transactions.filter { $0.transactionState == .purchased }
+      
+      for transaction in purchasedTransactions {
+        SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
+      }
+      
+      //V3
+      
+      if let allProducts = self.allProducts,
+         let purchasedTransaction = purchasedTransactions.first,
+         let product = allProducts.filter({ $0.productIdentifier == purchasedTransaction.payment.productIdentifier }).first {
+        SkarbSDK.sendPurchase(productId: purchasedTransaction.payment.productIdentifier,
+                              price: product.price.floatValue,
+                              currency: product.priceLocale.currencyCode ?? "")
+      }
+      
+      if !purchasedTransactions.isEmpty {
+        // V3 and V4. Create one SKFetchProduct or each unique productId
+        // need to attach the newest transaction Date and Id
+        let productIds = Array(Set(purchasedTransactions.map { $0.payment.productIdentifier }))
+        var fetchProducts: [SKFetchProduct] = []
+        for productId in productIds {
+          let transaction = purchasedTransactions
+            .filter { $0.payment.productIdentifier == productId }
+            .sorted { $0.transactionDate ?? Date() < $1.transactionDate ?? Date() }.last
+          if let transaction = transaction {
+            fetchProducts.append(SKFetchProduct(productId: transaction.payment.productIdentifier,
+                                                transactionDate: transaction.transactionDate,
+                                                transactionId: transaction.transactionIdentifier))
+          }
         }
-        case .failed:
-          SKLogger.logInfo("updatedTransactions: called. Transaction was failed. Date = \(String(describing: transaction.transactionDate))")
-        case .restored:
-          SKLogger.logInfo("updatedTransactions: called. Transaction was restored. Date = \(String(describing: transaction.transactionDate))")
-        default:
-          break
+        let encoder = JSONEncoder()
+        if let productData = try? encoder.encode(fetchProducts) {
+          let fetchCommand = SKCommand(commandType: .fetchProducts,
+                                       status: .pending,
+                                       data: productData)
+          SKServiceRegistry.commandStore.saveCommand(fetchCommand)
+        } else {
+          SKLogger.logError("paymentQueue updatedTransactions: called. Need to fetch products but purchasedProductId.data(using: .utf8) == nil",
+                            features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                       SKLoggerFeatureType.internalValue.name: fetchProducts.description])
+        }
+      }
+      
+      // V4 part
+      
+      guard !purchasedTransactions.isEmpty else {
+        return
+      }
+      let transactionIds: [String] = transactions.compactMap { $0.transactionIdentifier }
+      if !SKServiceRegistry.commandStore.hasPurhcaseV4Command {
+        var countryCode: String? = nil
+        if #available(iOS 13.0, *) {
+          countryCode = SKPaymentQueue.default().storefront?.countryCode
+        }
+        let installData = SKServiceRegistry.commandStore.getDeviceRequest()
+        let purchaseDataV4 = Purchaseapi_ReceiptRequest(storefront: countryCode,
+                                                        region: self.allProducts?.first?.priceLocale.regionCode,
+                                                        currency: self.allProducts?.first?.priceLocale.currencyCode,
+                                                        newTransactions: transactionIds,
+                                                        docFolderDate: installData?.docDate,
+                                                        appBuildDate: installData?.buildDate)
+        let purchaseV4Command = SKCommand(commandType: .purchaseV4,
+                                          status: .pending,
+                                          data: purchaseDataV4.getData())
+        SKServiceRegistry.commandStore.saveCommand(purchaseV4Command)
+      }
+      
+      // Always sends transactions even in case if it was the first purchase
+      // and transactions are included into purchase command
+      let newTransactions = SKServiceRegistry.commandStore.getNewTransactionIds(transactionIds)
+      if !newTransactions.isEmpty {
+        let installData = SKServiceRegistry.commandStore.getDeviceRequest()
+        let transactionDataV4 = Purchaseapi_TransactionsRequest(newTransactions: newTransactions,
+                                                                docFolderDate: installData?.docDate,
+                                                                appBuildDate: installData?.buildDate)
+        let transactionV4Command = SKCommand(commandType: .transactionV4,
+                                             status: .pending,
+                                             data: transactionDataV4.getData())
+        SKServiceRegistry.commandStore.saveCommand(transactionV4Command)
       }
     }
   }
@@ -134,7 +212,7 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
     }
     SKLogger.logInfo("SKRequestDelegate fetched products successful")
     
-    productInfoCompletion?(response.products)
+    productInfoCompletion?(allProducts ?? [])
   }
   
   func request(_ request: SKRequest, didFailWithError error: Error) {
@@ -146,12 +224,12 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
 }
 
 private extension SKStoreKitServiceImplementation {
-  func requestProductInfo(productId: String, completion: @escaping ([SKProduct]) -> Void) {
+  func requestProductInfo(productIds: [String], completion: @escaping ([SKProduct]) -> Void) {
     dispatchPrecondition(condition: .onQueue(.main))
     
     productInfoCompletion = completion
     
-    let request = SKProductsRequest(productIdentifiers: Set([productId]))
+    let request = SKProductsRequest(productIdentifiers: Set(productIds))
     request.delegate = self
     
     request.start()

@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import iAd
+import Reachability
 
 class SKSyncServiceImplementation: SKSyncService {
   
@@ -23,111 +24,113 @@ class SKSyncServiceImplementation: SKSyncService {
     }
     return localIsRunning
   }
-  private var cachedIsFirstSync: Bool
-  private var isFirstSync: Bool {
-    var localIsFirstSync = false
-    stateSerialQueue.sync {
-      localIsFirstSync = cachedIsFirstSync
-    }
-    return localIsFirstSync
+  
+  var connection: Reachability.Connection? {
+    return reachability?.connection
   }
+  private let reachability: Reachability?
   
   private var timer: Timer?
   
   init() {
     cachedIsRunning = false
-    cachedIsFirstSync = true
-    timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: { [weak self] _ in
-      self?.actionSerialQueue.async {
-        self?.syncAllCommands()
-      }
-    })
+    reachability = try? Reachability()
+    reachability?.whenReachable = { [weak self] _ in
+      SKLogger.logInfo("Reachability changed to ON")
+      SKServiceRegistry.commandStore.resetFireDateAndRetryCountForPendingCommands()
+      self?.startSync()
+    }
+    reachability?.whenUnreachable = { [weak self] _ in
+      SKLogger.logInfo("Reachability changed to OFF")
+      self?.stopSync()
+    }
+    try? reachability?.startNotifier()
+    
+    startSync()
+    
+    // Need to reset firedate because user just launched the app
+    // and need to try execute all pending commands ASAP
+    SKServiceRegistry.commandStore.resetFireDateAndRetryCountForPendingCommands()
     
     let notificationCenter = NotificationCenter.default
     notificationCenter.addObserver(self, selector: #selector(willResignActiveNotification), name: UIApplication.willResignActiveNotification, object: nil)
     notificationCenter.addObserver(self, selector: #selector(willEnterForegroundNotification), name: UIApplication.willEnterForegroundNotification, object: nil)
-    notificationCenter.addObserver(self, selector: #selector(willTerminateNotification), name: UIApplication.willTerminateNotification, object: nil)
     notificationCenter.addObserver(self, selector: #selector(didBecomeActiveNotification), name: UIApplication.didBecomeActiveNotification, object: nil)
   }
   
   func syncAllCommands() {
+    actionSerialQueue.async { [weak self] in
+      self?.startSyncAllCommands()
+    }
+  }
+  
+  private func startSyncAllCommands() {
     dispatchPrecondition(condition: .notOnQueue(DispatchQueue.main))
     
-    let pendingCommands = SKServiceRegistry.commandStore.getPendingCommands()
-    for pendingCommand in pendingCommands {
-      var command = pendingCommand
+    SKServiceRegistry.commandStore.checkInProgressCommandsTimeout()
+    
+    guard connection == .cellular ||
+          connection == .wifi else {
+      return
+    }
+    
+    let executeCommands = SKServiceRegistry.commandStore.getCommandsForExecuting()
+    for executeCommand in executeCommands {
+      var command = executeCommand
       command.changeStatus(to: .inProgress)
+      command.updateFireDate(Date())
       SKServiceRegistry.commandStore.saveCommand(command)
-      var delay: TimeInterval = command.getRetryDelay()
-      if isFirstSync {
-        delay = 0
-        stateSerialQueue.sync {
-          cachedIsFirstSync = false
-        }
-      }
-      DispatchQueue.global(qos: .utility).asyncAfter(deadline: .now() + delay, execute: {
-        
-        SKLogger.logInfo("Command start executing: \(command.description)")
-        
-        switch command.commandType {
-          case .install, .source, .test, .purchase, .logging:
-            SKServiceRegistry.serverAPI.syncCommand(command, completion: { error in
-              if let error = error {
-                var features: [String: Any] = [:]
-                features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
-                features[SKLoggerFeatureType.retryCount.name] = command.retryCount
-                features[SKLoggerFeatureType.responseHeaders.name] = error.headerFields
-                features[SKLoggerFeatureType.responseBody.name] = error.body
-                features[SKLoggerFeatureType.responseStatus.name] = error.errorCode
-                let firstPurchaseFail = command.commandType == .purchase && command.retryCount == 0
-                if firstPurchaseFail {
-                  features[SKLoggerFeatureType.purchase.name] = "false"
-                }
-                
-                command.incrementRetryCount()
-                command.changeStatus(to: .pending)
-                
-                if error.isInternetCode && !firstPurchaseFail {
-                  SKLogger.logInfo("Sync command finished \(command.commandType) with code = \(error.errorCode), message = \(error.message)")
-                } else {
-                  //send error to server
-                  SKLogger.logError("Sync command finished \(command.commandType) with code = \(error.errorCode), message = \(error.message)", features: features)
-                }
+      
+      SKLogger.logInfo("Command start executing: \(command.description)")
+      
+      switch command.commandType {
+        case .install, .source, .test, .purchase, .logging, .installV4, .sourceV4, .testV4, .purchaseV4, .transactionV4, .priceV4:
+          SKServiceRegistry.serverAPI.syncCommand(command, completion: { [weak self] error in
+            if let error = error {
+              var features: [String: Any] = [:]
+              features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
+              features[SKLoggerFeatureType.retryCount.name] = command.retryCount
+              features[SKLoggerFeatureType.responseStatus.name] = error.errorCode
+              features[SKLoggerFeatureType.connection.name] = self?.connection?.description
+              
+              command.updateRetryCountAndFireDate()
+              command.changeStatus(to: .pending)
+              
+              // code < 0 means that it's internal error and
+              // we don't want to log it to aws
+              if error.isInternetCode || error.code < 0 {
+                SKLogger.logInfo("Sync command finished \(command.commandType) with code = \(error.errorCode), message = \(error.message)")
               } else {
-                if command.commandType == .purchase && command.retryCount != 0 {
-                  var features: [String: Any] = [:]
-                  features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
-                  features[SKLoggerFeatureType.retryCount.name] = command.retryCount
-                  features[SKLoggerFeatureType.purchase.name] = "true"
-                  SKLogger.logError("Sync purchase command \(command.commandType) was finished after retry", features: features)
-                }
-                command.changeStatus(to: .done)
+                //send error to server
+                SKLogger.logError("Sync command finished \(command.commandType) with code = \(error.errorCode), message = \(error.message)", features: features)
               }
+            } else {
+              command.changeStatus(to: .done)
+            }
+            SKServiceRegistry.commandStore.saveCommand(command)
+          })
+        case .fetchProducts:
+          DispatchQueue.main.async {
+            SKServiceRegistry.storeKitService.requestProductInfoAndSendPurchase(command: command)
+          }
+        case .automaticSearchAds:
+          DispatchQueue.main.async {
+            ADClient.shared().requestAttributionDetails({ (attributionJSON, error) in
+              guard error == nil else {
+                command.updateRetryCountAndFireDate()
+                command.changeStatus(to: .pending)
+                SKServiceRegistry.commandStore.saveCommand(command)
+                return
+              }
+              
+              if let attributionJSON = attributionJSON {
+                SkarbSDK.sendSource(broker: .searchads, features: attributionJSON)
+              }
+              command.changeStatus(to: .done)
               SKServiceRegistry.commandStore.saveCommand(command)
             })
-          case .fetchProducts:
-            DispatchQueue.main.async {
-              SKServiceRegistry.storeKitService.requestProductInfoAndSendPurchase(command: command)
           }
-          case .automaticSearchAds:
-            DispatchQueue.main.async {
-              ADClient.shared().requestAttributionDetails({ (attributionJSON, error) in
-                guard error == nil else {
-                  command.incrementRetryCount()
-                  command.changeStatus(to: .pending)
-                  SKServiceRegistry.commandStore.saveCommand(command)
-                  return
-                }
-                
-                if let attributionJSON = attributionJSON {
-                  SkarbSDK.sendSource(broker: .searchads, features: attributionJSON)
-                }
-                command.changeStatus(to: .done)
-                SKServiceRegistry.commandStore.saveCommand(command)
-              })
-          }
-        }
-      })
+      }
     }
   }
 }
@@ -135,12 +138,7 @@ class SKSyncServiceImplementation: SKSyncService {
 private extension SKSyncServiceImplementation {
   @objc func willResignActiveNotification() {
     SKLogger.logInfo("SKSyncService is stoppted because app willResignActiveNotification")
-    timer?.invalidate()
-    timer = nil
-    SKServiceRegistry.commandStore.markAllInProgressAsPendingAndSave()
-    stateSerialQueue.sync {
-      cachedIsRunning = false
-    }
+    stopSync()
   }
   
   @objc func willEnterForegroundNotification() {
@@ -153,14 +151,6 @@ private extension SKSyncServiceImplementation {
     startSync()
   }
   
-  @objc func willTerminateNotification() {
-    SKLogger.logInfo("SKSyncService app willTerminateNotification")
-    SKServiceRegistry.commandStore.markAllInProgressAsPendingAndSave()
-    stateSerialQueue.sync {
-      cachedIsRunning = false
-    }
-  }
-  
   private func startSync() {
     guard !isRunning else {
       return
@@ -171,9 +161,15 @@ private extension SKSyncServiceImplementation {
     timer?.invalidate()
     timer = nil
     timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true, block: { [weak self] _ in
-      self?.actionSerialQueue.async {
-        self?.syncAllCommands()
-      }
+      self?.syncAllCommands()
     })
+  }
+  
+  private func stopSync() {
+    timer?.invalidate()
+    timer = nil
+    stateSerialQueue.sync {
+      cachedIsRunning = false
+    }
   }
 }

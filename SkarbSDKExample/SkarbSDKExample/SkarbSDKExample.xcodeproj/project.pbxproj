@@ -13,8 +13,19 @@
 		4F735BE623D7279400A8A537 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE423D7279400A8A537 /* Main.storyboard */; };
 		4F735BE823D7279500A8A537 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE723D7279500A8A537 /* Assets.xcassets */; };
 		4F735BEB23D7279500A8A537 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 4F735BE923D7279500A8A537 /* LaunchScreen.storyboard */; };
+		4FA3DD2125B998EB00DECDDD /* SkarbSDKTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FA3DD2025B998EB00DECDDD /* SkarbSDKTests.swift */; };
 		97F5B54E4D9C915F1F0408A7 /* Pods_SkarbSDKExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5313EE38F51E3FA1305834B1 /* Pods_SkarbSDKExample.framework */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		4FA3DD2325B998EB00DECDDD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4F735BD323D7279400A8A537 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 4F735BDA23D7279400A8A537;
+			remoteInfo = SkarbSDKExample;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		4F735BDB23D7279400A8A537 /* SkarbSDKExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SkarbSDKExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -25,6 +36,9 @@
 		4F735BE723D7279500A8A537 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		4F735BEA23D7279500A8A537 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		4F735BEC23D7279500A8A537 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		4FA3DD1E25B998EB00DECDDD /* SkarbSDKExampleTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SkarbSDKExampleTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FA3DD2025B998EB00DECDDD /* SkarbSDKTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkarbSDKTests.swift; sourceTree = "<group>"; };
+		4FA3DD2225B998EB00DECDDD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		5313EE38F51E3FA1305834B1 /* Pods_SkarbSDKExample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SkarbSDKExample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5DF303FD11171F762CC3F8D0 /* Pods-SkarbSDKExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SkarbSDKExample.debug.xcconfig"; path = "Target Support Files/Pods-SkarbSDKExample/Pods-SkarbSDKExample.debug.xcconfig"; sourceTree = "<group>"; };
 		E28BEF55D1AAAAC247DEE6DA /* Pods-SkarbSDKExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SkarbSDKExample.release.xcconfig"; path = "Target Support Files/Pods-SkarbSDKExample/Pods-SkarbSDKExample.release.xcconfig"; sourceTree = "<group>"; };
@@ -39,6 +53,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4FA3DD1B25B998EB00DECDDD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -46,6 +67,7 @@
 			isa = PBXGroup;
 			children = (
 				4F735BDD23D7279400A8A537 /* SkarbSDKExample */,
+				4FA3DD1F25B998EB00DECDDD /* SkarbSDKExampleTests */,
 				4F735BDC23D7279400A8A537 /* Products */,
 				FC45110F7E7B54E25BDAC0F9 /* Pods */,
 				6018733A755B6D07782FA9FA /* Frameworks */,
@@ -56,6 +78,7 @@
 			isa = PBXGroup;
 			children = (
 				4F735BDB23D7279400A8A537 /* SkarbSDKExample.app */,
+				4FA3DD1E25B998EB00DECDDD /* SkarbSDKExampleTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -72,6 +95,15 @@
 				4F735BEC23D7279500A8A537 /* Info.plist */,
 			);
 			path = SkarbSDKExample;
+			sourceTree = "<group>";
+		};
+		4FA3DD1F25B998EB00DECDDD /* SkarbSDKExampleTests */ = {
+			isa = PBXGroup;
+			children = (
+				4FA3DD2025B998EB00DECDDD /* SkarbSDKTests.swift */,
+				4FA3DD2225B998EB00DECDDD /* Info.plist */,
+			);
+			path = SkarbSDKExampleTests;
 			sourceTree = "<group>";
 		};
 		6018733A755B6D07782FA9FA /* Frameworks */ = {
@@ -113,18 +145,40 @@
 			productReference = 4F735BDB23D7279400A8A537 /* SkarbSDKExample.app */;
 			productType = "com.apple.product-type.application";
 		};
+		4FA3DD1D25B998EB00DECDDD /* SkarbSDKExampleTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4FA3DD2525B998EB00DECDDD /* Build configuration list for PBXNativeTarget "SkarbSDKExampleTests" */;
+			buildPhases = (
+				4FA3DD1A25B998EB00DECDDD /* Sources */,
+				4FA3DD1B25B998EB00DECDDD /* Frameworks */,
+				4FA3DD1C25B998EB00DECDDD /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4FA3DD2425B998EB00DECDDD /* PBXTargetDependency */,
+			);
+			name = SkarbSDKExampleTests;
+			productName = SkarbSDKExampleTests;
+			productReference = 4FA3DD1E25B998EB00DECDDD /* SkarbSDKExampleTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		4F735BD323D7279400A8A537 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1130;
+				LastSwiftUpdateCheck = 1220;
 				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = Prodinfire;
 				TargetAttributes = {
 					4F735BDA23D7279400A8A537 = {
 						CreatedOnToolsVersion = 11.3;
+					};
+					4FA3DD1D25B998EB00DECDDD = {
+						CreatedOnToolsVersion = 12.2;
+						TestTargetID = 4F735BDA23D7279400A8A537;
 					};
 				};
 			};
@@ -142,6 +196,7 @@
 			projectRoot = "";
 			targets = (
 				4F735BDA23D7279400A8A537 /* SkarbSDKExample */,
+				4FA3DD1D25B998EB00DECDDD /* SkarbSDKExampleTests */,
 			);
 		};
 /* End PBXProject section */
@@ -154,6 +209,13 @@
 				4F735BEB23D7279500A8A537 /* LaunchScreen.storyboard in Resources */,
 				4F735BE823D7279500A8A537 /* Assets.xcassets in Resources */,
 				4F735BE623D7279400A8A537 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4FA3DD1C25B998EB00DECDDD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -212,7 +274,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		4FA3DD1A25B998EB00DECDDD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4FA3DD2125B998EB00DECDDD /* SkarbSDKTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		4FA3DD2425B998EB00DECDDD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 4F735BDA23D7279400A8A537 /* SkarbSDKExample */;
+			targetProxy = 4FA3DD2325B998EB00DECDDD /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		4F735BE423D7279400A8A537 /* Main.storyboard */ = {
@@ -284,7 +362,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -338,7 +416,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -356,11 +434,12 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9W667Q75FZ;
 				INFOPLIST_FILE = SkarbSDKExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bitlica.SkarbSDKExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -376,15 +455,58 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 9W667Q75FZ;
 				INFOPLIST_FILE = SkarbSDKExample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1;
+				MARKETING_VERSION = 0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.bitlica.SkarbSDKExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		4FA3DD2625B998EB00DECDDD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = SkarbSDKExampleTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.bitlica.SkarbSDKExampleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SkarbSDKExample.app/SkarbSDKExample";
+			};
+			name = Debug;
+		};
+		4FA3DD2725B998EB00DECDDD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CODE_SIGN_STYLE = Automatic;
+				INFOPLIST_FILE = SkarbSDKExampleTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.bitlica.SkarbSDKExampleTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/SkarbSDKExample.app/SkarbSDKExample";
 			};
 			name = Release;
 		};
@@ -405,6 +527,15 @@
 			buildConfigurations = (
 				4F735BF023D7279500A8A537 /* Debug */,
 				4F735BF123D7279500A8A537 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4FA3DD2525B998EB00DECDDD /* Build configuration list for PBXNativeTarget "SkarbSDKExampleTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4FA3DD2625B998EB00DECDDD /* Debug */,
+				4FA3DD2725B998EB00DECDDD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

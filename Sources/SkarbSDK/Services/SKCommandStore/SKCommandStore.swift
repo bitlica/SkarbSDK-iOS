@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import UIKit
 
 class SKCommandStore {
   
@@ -26,11 +25,27 @@ class SKCommandStore {
     }
     return result
   }
+
+  var hasInstallV4Command: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .installV4 }) != nil
+    }
+    return result
+  }
   
   var hasPurhcaseCommand: Bool {
     var result = false
     exclusionSerialQueue.sync {
       result = localAppgateCommands.first(where: { $0.commandType == .purchase }) != nil
+    }
+    return result
+  }
+  
+  var hasPurhcaseV4Command: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .purchaseV4 }) != nil
     }
     return result
   }
@@ -51,17 +66,62 @@ class SKCommandStore {
     return result
   }
   
+  func hasSendSourceV4Command(broker: SKBroker) -> Bool {
+    var result = false
+    let decoder = JSONDecoder()
+    exclusionSerialQueue.sync {
+      let allSourceCommands = localAppgateCommands.filter { $0.commandType == .sourceV4 }
+      for sourceCommand in allSourceCommands {
+        if let attribRequest = try? decoder.decode(Installapi_AttribRequest.self, from: sourceCommand.data),
+           attribRequest.broker == broker.name {
+          result = true
+          break
+        }
+      }
+    }
+    return result
+  }
+  
+  var hasTestCommand: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .test }) != nil
+    }
+    return result
+  }
+  
+  var hasTestV4Command: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .testV4 }) != nil
+    }
+    return result
+  }
+  
   func saveCommand(_ command: SKCommand) {
-    SKLogger.logInfo("saveCommand: commandType = \(command.commandType), status = \(command.status)")
+    var isNew: Bool = false
     exclusionSerialQueue.sync {
       if let existingCommand = localAppgateCommands.first(where: { $0 == command }),
          let index = localAppgateCommands.firstIndex(where: { $0 == existingCommand }) {
-        localAppgateCommands[index] = command
+        // Case might occurs when one more command was sent after timeout
+        // and the previous was successful finished with status done
+        // but the new was finished with failure and the status will be pending
+        if !(existingCommand.status == .done && command.status == .pending) {
+          localAppgateCommands[index] = command
+        }
       } else {
         localAppgateCommands.append(command)
+        isNew = true
       }
     }
+    // if new command was added we want to execute all pending
+    // commands ASAP in one transaction
+    if isNew {
+      resetFireDateAndRetryCountForPendingCommands()
+      SKServiceRegistry.syncService.syncAllCommands()
+    }
     saveState()
+    SKLogger.logInfo("Command saved: \(command.description)")
   }
   
   func deleteCommand(_ command: SKCommand) {
@@ -72,40 +132,95 @@ class SKCommandStore {
     saveState()
   }
   
+  func deleteAllCommand(by commandType: SKCommandType) {
+    SKLogger.logInfo("delete all commands: commandType = \(commandType)")
+    let deleteCommands = getAllCommands(by: commandType)
+    exclusionSerialQueue.sync {
+      for command in deleteCommands {
+        localAppgateCommands.removeAll { $0 == command }
+      }
+    }
+    saveState()
+  }
+  
   func saveState() {
     SKLogger.logInfo("SKCommandStore saveState: called")
     exclusionSerialQueue.sync {
-      let data = localAppgateCommands.map { try? JSONEncoder().encode($0) }
+      let data = localAppgateCommands.map { $0.getData() }.compactMap { $0 }
       SKServiceRegistry.userDefaultsService.setValue(data, forKey: .appgateComands)
     }
   }
   
-  func getPendingCommands() -> [SKCommand] {
+  func getCommandsForExecuting() -> [SKCommand] {
     var result: [SKCommand] = []
     exclusionSerialQueue.sync {
-      result = localAppgateCommands.filter({ $0.status == .pending })
+      result = localAppgateCommands.filter({ $0.status == .pending && $0.fireDate <= Date() })
     }
     return result
   }
   
-  /// when user terminate app or go to background some commands might be inProgress
-  /// and there is no guarantee that command will be handled by the app
-  func markAllInProgressAsPendingAndSave() {
+  func getAllCommands(by commandType: SKCommandType) -> [SKCommand] {
     var result: [SKCommand] = []
     exclusionSerialQueue.sync {
-      result = localAppgateCommands.filter({ $0.status == .inProgress })
+      result = localAppgateCommands.filter({ $0.commandType == commandType })
     }
-    
-    for command in result {
-      var inProgress = command
-      inProgress.changeStatus(to: .pending)
-      saveCommand(command)
-    }
+    return result
   }
   
-  func createInstallCommandIfNeeded(clientId: String, deviceId: String?) {
-    if SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) == nil {
-      let deviceId = deviceId ?? UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+  func getAllCommands(by status: SKCommandStatus) -> [SKCommand] {
+    var result: [SKCommand] = []
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.filter({ $0.status == status })
+    }
+    return result
+  }
+  
+  func getDeviceRequest() -> Installapi_DeviceRequest? {
+    var result: Installapi_DeviceRequest? = nil
+    let decoder = JSONDecoder()
+    exclusionSerialQueue.sync {
+      let allSourceCommands = localAppgateCommands.filter { $0.commandType == .installV4 }
+      if allSourceCommands.count > 1 {
+        SKLogger.logError("getInstallV4Data has more than one install",
+                          features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                     SKLoggerFeatureType.internalValue.name: "getInstallV4Data has more than one install"])
+      }
+      if let installData = allSourceCommands.first?.data,
+         let deviceRequest = try? decoder.decode(Installapi_DeviceRequest.self, from: installData) {
+        result = deviceRequest
+      }
+    }
+    return result
+  }
+  
+  func getNewTransactionIds(_ transactions: [String]) -> [String] {
+    let currentTransactionCommands = getAllCommands(by: .transactionV4)
+    
+    let decoder = JSONDecoder()
+    var existing: Set<String> = []
+    for command in currentTransactionCommands {
+      if let transaction = try? decoder.decode(Purchaseapi_TransactionsRequest.self, from: command.data) {
+        transaction.transactions.forEach { transactionId in
+          existing.insert(transactionId)
+        }
+      }
+    }
+    
+    var newTransactions: Set<String> = []
+    for transaction in transactions {
+      if !existing.contains(transaction) {
+        newTransactions.insert(transaction)
+      }
+    }
+    
+    return Array(newTransactions)
+  }
+  
+  func createInstallCommandIfNeeded(clientId: String, deviceId: String) {
+    
+//    V3
+    if !SKServiceRegistry.commandStore.hasInstallCommand,
+       SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) == nil {
       let installDate = Formatter.iso8601.string(from: Date())
       let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
       var dataCount: Int = 0
@@ -120,17 +235,24 @@ class SKCommandStore {
                                 receiptUrl: appStoreReceiptURL?.absoluteString ?? "",
                                 receiptLen: dataCount)
       SKServiceRegistry.userDefaultsService.setValue(initData.getData(), forKey: .initData)
+      
+      let installCommand = SKCommand(commandType: .install,
+                                     status: .pending,
+                                     data: SKCommand.prepareAppgateData())
+      SKServiceRegistry.commandStore.saveCommand(installCommand)
     }
     
-    guard !SKServiceRegistry.commandStore.hasInstallCommand else {
-      return
+//    V4
+    if !SKServiceRegistry.commandStore.hasInstallV4Command {
+      let nowDate = Date()
+      let initDataV4 = Installapi_DeviceRequest(clientId: clientId,
+                                                sdkInstallDate: nowDate)
+      let installCommandV4 = SKCommand(timestamp: nowDate.nowTimestampInt,
+                                       commandType: .installV4,
+                                       status: .pending,
+                                       data: initDataV4.getData())
+      SKServiceRegistry.commandStore.saveCommand(installCommandV4)
     }
-    let installCommand = SKCommand(timestamp: Date().nowTimestampInt,
-                                   commandType: .install,
-                                   status: .pending,
-                                   data: SKCommand.prepareAppgateData(),
-                                   retryCount: 0)
-    SKServiceRegistry.commandStore.saveCommand(installCommand)
   }
   
   func createAutomaticSearchAdsCommand(_ enable: Bool) {
@@ -150,11 +272,33 @@ class SKCommandStore {
       return
     }
     
-    let installCommand = SKCommand(timestamp: Date().nowTimestampInt,
-                                   commandType: .automaticSearchAds,
+    let searchAdsCommand = SKCommand(commandType: .automaticSearchAds,
                                    status: .pending,
-                                   data: Data(),
-                                   retryCount: 0)
-    SKServiceRegistry.commandStore.saveCommand(installCommand)
+                                   data: Data())
+    SKServiceRegistry.commandStore.saveCommand(searchAdsCommand)
+  }
+  
+  func resetFireDateAndRetryCountForPendingCommands() {
+    let commands: [SKCommand] = getAllCommands(by: .pending)
+    for command in commands {
+      var editedCommand = command
+      editedCommand.updateFireDate(Date())
+      editedCommand.resetRetryCount()
+      saveCommand(editedCommand)
+    }
+  }
+  
+  func checkInProgressCommandsTimeout() {
+    let requestTimeout: TimeInterval = 60
+    let commands: [SKCommand] = getAllCommands(by: .inProgress)
+      .filter { $0.fireDate.addingTimeInterval(requestTimeout) <= Date() }
+    for command in commands {
+      var editedCommand = command
+      editedCommand.updateRetryCountAndFireDate()
+      editedCommand.changeStatus(to: .pending)
+      saveCommand(editedCommand)
+      SKLogger.logError("Command timeout has been reached. Need to call command one more time",
+                        features: [SKLoggerFeatureType.internalValue.name: "Command timeout has been reached. Commads = \(command.description)"])
+    }
   }
 }

@@ -17,6 +17,11 @@ enum SKLoggerFeatureType {
   case purchase
   case internalError
   case internalValue
+  case agentName
+  case agentVer
+  case installId
+  case connection
+  case proxy
   
   var name: String {
     switch self {
@@ -36,6 +41,16 @@ enum SKLoggerFeatureType {
         return "internalError"
       case .internalValue:
         return "internalValue"
+      case .agentName:
+        return "agentName"
+      case .agentVer:
+        return "agentVer"
+      case .installId:
+        return "installId"
+      case .connection:
+        return "connection"
+      case .proxy:
+        return "proxy"
     }
   }
 }
@@ -43,11 +58,14 @@ enum SKLoggerFeatureType {
 class SKLogger {
   
   static func logError(_ message: String, features: [String: Any]?) {
-    let command = SKCommand(timestamp: Date().nowTimestampInt,
-                            commandType: .logging,
+    var features = features ?? [:]
+    features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
+    features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
+    features[SKLoggerFeatureType.installId.name] = SkarbSDK.getDeviceId()
+    features[SKLoggerFeatureType.proxy.name] = getProxySettings()
+    let command = SKCommand(commandType: .logging,
                             status: .pending,
-                            data: SKCommand.prepareApplogData(message: message, features: features),
-                            retryCount: 0)
+                            data: SKCommand.prepareApplogData(message: message, features: features))
     SKServiceRegistry.commandStore.saveCommand(command)
     if isDebug {
       print("\(Formatter.milliSec.string(from: Date())) [ERROR] \(message)")
@@ -55,11 +73,9 @@ class SKLogger {
   }
   
   static func logWarn(_ message: String, features: [String: Any]?) {
-    let command = SKCommand(timestamp: Date().nowTimestampInt,
-                            commandType: .logging,
+    let command = SKCommand(commandType: .logging,
                             status: .pending,
-                            data: SKCommand.prepareApplogData(message: message, features: features),
-                            retryCount: 0)
+                            data: SKCommand.prepareApplogData(message: message, features: features))
     SKServiceRegistry.commandStore.saveCommand(command)
     if isDebug {
       print("\(Formatter.milliSec.string(from: Date())) [WARN] \(message)")
@@ -76,6 +92,13 @@ class SKLogger {
     if isDebug {
       print("\(Formatter.milliSec.string(from: Date())) [NETWORK] \(message)")
     }
+  }
+  
+  private static func getProxySettings() -> [String:AnyObject]? {
+    guard let proxiesSettingsUnmanaged = CFNetworkCopySystemProxySettings() else {
+      return nil
+    }
+    return proxiesSettingsUnmanaged.takeRetainedValue() as? [String:AnyObject]
   }
 }
 

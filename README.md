@@ -28,9 +28,6 @@ dependencies: [
 ]
 ```
 
-## Updating
-Simply use command ```pod update``` in terminal with Podfile folder.
-
 ## Usage
 ### Initialization 
 
@@ -113,3 +110,4 @@ SkarbSDK.sendTest(name: String,
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)
+

@@ -19,7 +19,7 @@ PODS:
     - SwiftProtobuf (< 2.0.0, >= 1.9.0)
   - Logging (1.4.0)
   - ReachabilitySwift (5.0.0)
-  - SkarbSDK (0.3.4):
+  - SkarbSDK (0.3.6):
     - gRPC-Swift (= 1.0.0)
     - ReachabilitySwift (= 5.0.0)
   - SwiftNIO (2.27.0):
@@ -106,7 +106,7 @@ SPEC CHECKSUMS:
   gRPC-Swift: 77154009a019e97f8c4bd8f2bb75fe9726801157
   Logging: beeb016c9c80cf77042d62e83495816847ef108b
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
-  SkarbSDK: a4329e719264aa4a09d1ec133d1b82ac853234da
+  SkarbSDK: 6ac9d3a8d1a80f4a8c16e687ec5ce38d51a04fab
   SwiftNIO: 81d33ce8c500b7e41b6cdde5f2f12330b9750219
   SwiftNIOConcurrencyHelpers: 23fc68bac541a465162d7225d2c743edd2f1012c
   SwiftNIOExtras: aa561b71020cd6844f722cf4513fb176c577414d

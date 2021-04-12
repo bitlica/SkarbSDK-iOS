@@ -21,7 +21,10 @@ let package = Package(
   targets: [
     .target(
       name: "SkarbSDK",
-      dependencies: [],
+      dependencies: [
+        .product(name: "GRPC", package: "grpc-swift"),
+//        .product(name: "Reachability", package: "Reachability")
+      ],
       linkerSettings: [
         .linkedFramework("Foundation"),
         .linkedFramework("AdSupport"),

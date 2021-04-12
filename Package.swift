@@ -23,6 +23,7 @@ let package = Package(
       name: "SkarbSDK",
       dependencies: [
         .product(name: "GRPC", package: "grpc-swift"),
+        .product(name: "Reachability", package: "Reachability.swift")
       ],
       linkerSettings: [
         .linkedFramework("Foundation"),

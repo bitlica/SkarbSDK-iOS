@@ -7,6 +7,7 @@
 //
 
 import SwiftProtobuf
+import Foundation
 
 extension Auth_Auth: SKCodableStruct {
   

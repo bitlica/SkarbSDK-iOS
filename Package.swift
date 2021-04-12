@@ -23,7 +23,8 @@ let package = Package(
       name: "SkarbSDK",
       dependencies: [
         .product(name: "GRPC", package: "grpc-swift"),
-        .product(name: "Reachability", package: "Reachability.swift")
+//        .product(name: "Reachability", package: "Reachability.swift")
+//        Seems that it's an issue of Reachability.swift libs
       ],
       linkerSettings: [
         .linkedFramework("Foundation"),

@@ -6,7 +6,7 @@ import PackageDescription
 let package = Package(
   name: "SkarbSDK",
   platforms: [
-    .iOS(.v11),
+    .iOS("11.2"),
   ],
   products: [
     .library(
@@ -23,7 +23,6 @@ let package = Package(
       name: "SkarbSDK",
       dependencies: [
         .product(name: "GRPC", package: "grpc-swift"),
-//        .product(name: "Reachability", package: "Reachability")
       ],
       linkerSettings: [
         .linkedFramework("Foundation"),

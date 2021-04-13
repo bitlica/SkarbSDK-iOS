@@ -16,6 +16,7 @@ let package = Package(
   dependencies: [
     // Dependencies declare other packages that this package depends on.
     .package(url: "https://github.com/grpc/grpc-swift", .upToNextMajor(from: "1.0.0")),
+    .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.9.0"),
     .package(name: "Reachability", url: "https://github.com/ashleymills/Reachability.swift", .upToNextMajor(from: "5.1.0"))
   ],
   targets: [
@@ -23,7 +24,8 @@ let package = Package(
       name: "SkarbSDK",
       dependencies: [
         .product(name: "GRPC", package: "grpc-swift"),
-        .product(name: "Reachability", package: "Reachability")
+        .product(name: "Reachability", package: "Reachability"),
+        .product(name: "SwiftProtobuf", package: "SwiftProtobuf")
       ],
       linkerSettings: [
         .linkedFramework("Foundation"),

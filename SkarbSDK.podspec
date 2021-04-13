@@ -4,7 +4,7 @@
 
 Pod::Spec.new do |s|
   s.name         = 'SkarbSDK'
-  s.version      = '0.4.12'
+  s.version      = '0.4.13'
   s.swift_version = '5.0'
   s.summary      = 'Summary'
   s.description  = 'Description'

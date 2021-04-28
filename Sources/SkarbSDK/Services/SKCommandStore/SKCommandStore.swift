@@ -247,7 +247,7 @@ class SKCommandStore {
       let nowDate = Date()
       let initDataV4 = Installapi_DeviceRequest(clientId: clientId,
                                                 sdkInstallDate: nowDate)
-      let installCommandV4 = SKCommand(timestamp: nowDate.nowTimestampInt,
+      let installCommandV4 = SKCommand(timestamp: nowDate.nowTimestampMicroSec,
                                        commandType: .installV4,
                                        status: .pending,
                                        data: initDataV4.getData())

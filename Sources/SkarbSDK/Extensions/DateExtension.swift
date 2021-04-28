@@ -9,7 +9,7 @@
 import Foundation
 
 extension Date {
-  var nowTimestampInt: Int {
+  var nowTimestampMicroSec: Int {
     return Int(self.timeIntervalSince1970 * 1000000)
   }
 }

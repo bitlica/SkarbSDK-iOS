@@ -18,7 +18,7 @@ struct SKCommand {
   private(set) var retryCount: Int
   private(set) var fireDate: Date
   
-  init(timestamp: Int = Date().nowTimestampInt,
+  init(timestamp: Int = Date().nowTimestampMicroSec,
        commandType: SKCommandType,
        status: SKCommandStatus,
        data: Data?,

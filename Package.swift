@@ -4,29 +4,35 @@
 import PackageDescription
 
 let package = Package(
-    name: "SkarbSDK",
-    platforms: [
-        .iOS(.v11),
-    ],
-    products: [
-        .library(
-            name: "SkarbSDK",
-            targets: ["SkarbSDK"]),
-    ],
-    dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // .package(url: /* package url */, from: "1.0.0"),
-    ],
-    targets: [
-        .target(
-            name: "SkarbSDK",
-            dependencies: [],
-            linkerSettings: [
-                .linkedFramework("Foundation"),
-                .linkedFramework("AdSupport"),
-                .linkedFramework("UIKit"),
-                .linkedFramework("StoreKit")
-            ]),
-        
-    ]
+  name: "SkarbSDK",
+  platforms: [
+    .iOS("11.2"),
+  ],
+  products: [
+    .library(
+      name: "SkarbSDK",
+      targets: ["SkarbSDK"]),
+  ],
+  dependencies: [
+    // Dependencies declare other packages that this package depends on.
+    .package(url: "https://github.com/grpc/grpc-swift", .upToNextMajor(from: "1.0.0")),
+    .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", from: "1.9.0"),
+    .package(name: "Reachability", url: "https://github.com/ashleymills/Reachability.swift", .upToNextMajor(from: "5.1.0"))
+  ],
+  targets: [
+    .target(
+      name: "SkarbSDK",
+      dependencies: [
+        .product(name: "GRPC", package: "grpc-swift"),
+        .product(name: "Reachability", package: "Reachability"),
+        .product(name: "SwiftProtobuf", package: "SwiftProtobuf")
+      ],
+      linkerSettings: [
+        .linkedFramework("Foundation"),
+        .linkedFramework("AdSupport"),
+        .linkedFramework("UIKit"),
+        .linkedFramework("StoreKit")
+      ]),
+    
+  ]
 )

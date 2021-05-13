@@ -59,7 +59,9 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
       SKServiceRegistry.commandStore.saveCommand(editedCommand)
       
       // V4. Send command for price
-      self?.createPriceCommand(fetchProducts: fetchProducts, products: products)
+      self?.createPriceCommand(fetchProducts: fetchProducts,
+                               products: products,
+                               command: editedCommand)
     }
   }
 }
@@ -218,11 +220,15 @@ private extension SKStoreKitServiceImplementation {
     }
   }
   
-  func createPriceCommand(fetchProducts: [SKFetchProduct], products: [SKProduct]) {
+  func createPriceCommand(fetchProducts: [SKFetchProduct],
+                          products: [SKProduct],
+                          command: SKCommand) {
     var priceApiProducts: [Priceapi_Product] = []
     for fetchProduct in fetchProducts {
       guard let product = products.first(where: { $0.productIdentifier == fetchProduct.productId }) else {
-        SKLogger.logError("SKSyncServiceImplementation. Send command for price. Product is nil. FetchProduct = \(fetchProduct.productId)", features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+        SKLogger.logError("SKSyncServiceImplementation. Send command for price. Product is nil. FetchProduct = \(fetchProduct.productId)",
+                          features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                     SKLoggerFeatureType.retryCount.name: command.retryCount])
         continue
       }
       let priceApiProduct = Priceapi_Product(product: product,

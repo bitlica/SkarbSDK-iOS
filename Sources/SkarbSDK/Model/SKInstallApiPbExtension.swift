@@ -170,7 +170,7 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     SKLogger.logError("AppBuildDate is nil.",
                       features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                  SKLoggerFeatureType.internalValue.name: "AppBuildDate is nil."])
-    return Date() // Should never execute
+    return Date(timeIntervalSince1970: 0) // Should never execute
   }
 
   private var appInstallDate: Date {
@@ -182,7 +182,7 @@ extension Installapi_DeviceRequest: SKCodableStruct {
     SKLogger.logError("AppInstallDate is nil.",
                       features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                  SKLoggerFeatureType.internalValue.name: "AppInstallDate is nil."])
-    return Date() // Should never execute
+    return Date(timeIntervalSince1970: 0) // Should never execute
   }
 }
 

@@ -80,6 +80,10 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       }
       
       let purchasedTransactions = transactions.filter { $0.transactionState == .purchased }
+      guard !purchasedTransactions.isEmpty else {
+        return
+      }
+      
       
       for transaction in purchasedTransactions {
         SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
@@ -153,10 +157,6 @@ private extension SKStoreKitServiceImplementation {
   /// V3 and V4. Create one SKFetchProduct or each unique productId
   /// Need to attach the newest transaction Date and Id
   func createFetchProductsCommand(purchasedTransactions: [SKPaymentTransaction]) {
-    guard purchasedTransactions.isEmpty else {
-      return
-    }
-    
     let productIds = Array(Set(purchasedTransactions.map { $0.payment.productIdentifier }))
     var fetchProducts: [SKFetchProduct] = []
     for productId in productIds {
@@ -183,9 +183,6 @@ private extension SKStoreKitServiceImplementation {
   }
   
   func createPurchaseAndTransactionCommand(purchasedTransactions: [SKPaymentTransaction]) {
-    guard !purchasedTransactions.isEmpty else {
-      return
-    }
     let transactionIds: [String] = purchasedTransactions.compactMap { $0.transactionIdentifier }
     if !SKServiceRegistry.commandStore.hasPurhcaseV4Command {
       var countryCode: String? = nil

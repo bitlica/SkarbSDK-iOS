@@ -16,6 +16,18 @@ public class SkarbSDK {
   
   static var clientId: String = ""
   
+    open var isLoggingEnabled: Bool = true {
+        didSet {
+            if isLoggingEnabled {
+                SKLogger.logInfo("Logging has been enabled")
+                SKServiceRegistry.userDefaultsService.setValue(isLoggingEnabled, forKey: .isLoggingEnabled)
+            } else {
+                SKLogger.logInfo("Logging has been disabled")
+                SKServiceRegistry.userDefaultsService.setValue(isLoggingEnabled, forKey: .isLoggingEnabled)
+            }
+        }
+    }
+    
   public static func initialize(clientId: String,
                                 isObservable: Bool,
                                 deviceId: String? = nil) {

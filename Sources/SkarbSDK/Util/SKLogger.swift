@@ -109,7 +109,7 @@ private extension SKLogger {
   static var isDebug: Bool {
     var result = false
     #if DEBUG
-    result = true
+    result = SKServiceRegistry.userDefaultsService.bool(forKey: .isLoggingEnabled)
     #endif
     return result
   }

@@ -16,6 +16,7 @@ class SKUserDefaultsService {
     case purchaseData
     case appgateComands
     case oldSchemaVersion
+    case isLoggingEnabled
     case deviceId
     
     var keyName: String {
@@ -32,6 +33,8 @@ class SKUserDefaultsService {
           return "sk_appgate_commands"
         case .oldSchemaVersion:
           return "sk_old_schema_version"
+        case .isLoggingEnabled:
+          return "sk_is_logging_enabled_key"
         case .deviceId:
           return "sk_device_id_key"
       }

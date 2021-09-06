@@ -67,8 +67,8 @@ class SKLogger {
                             status: .pending,
                             data: SKCommand.prepareApplogData(message: message, features: features))
     SKServiceRegistry.commandStore.saveCommand(command)
-    if isDebug {
-      print("\(Formatter.milliSec.string(from: Date())) [ERROR] \(message)")
+    if SkarbSDK.isLoggingEnabled {
+      print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [ERROR] \(message)")
     }
   }
   
@@ -77,20 +77,20 @@ class SKLogger {
                             status: .pending,
                             data: SKCommand.prepareApplogData(message: message, features: features))
     SKServiceRegistry.commandStore.saveCommand(command)
-    if isDebug {
-      print("\(Formatter.milliSec.string(from: Date())) [WARN] \(message)")
+    if SkarbSDK.isLoggingEnabled {
+      print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [WARN] \(message)")
     }
   }
   
   static func logInfo(_ message: String) {
-    if isDebug {
-      print("\(Formatter.milliSec.string(from: Date())) [INFO] \(message)")
+    if SkarbSDK.isLoggingEnabled {
+      print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [INFO] \(message)")
     }
   }
   
   static func logNetwork(_ message: String) {
-    if isDebug {
-      print("\(Formatter.milliSec.string(from: Date())) [NETWORK] \(message)")
+    if SkarbSDK.isLoggingEnabled {
+      print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [NETWORK] \(message)")
     }
   }
   

@@ -15,6 +15,7 @@ public class SkarbSDK {
   static let version: String = "0.4.15"
   
   static var clientId: String = ""
+  public static var isLoggingEnabled: Bool = false
   
   public static func initialize(clientId: String,
                                 isObservable: Bool,

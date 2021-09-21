@@ -39,7 +39,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-      SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID", isObservable: true)
+      SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID", isObservable: true, deviceId: "YOUR_DEVICE_ID")
     }
 }
 ```
@@ -47,6 +47,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 ```clientId``` You could get it in your account dashboard.
 
 ```isObservable``` Automatically sends all events about purchases that are in your app. If you want to send a purchase event manually you should set this param to ```false``` and see ```Send purchase event``` section.
+
+```deviceId``` If you want to can use your own generated deviceId
 
 ### Send features 
 

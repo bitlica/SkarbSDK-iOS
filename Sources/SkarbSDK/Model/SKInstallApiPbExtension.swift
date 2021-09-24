@@ -257,8 +257,6 @@ extension Installapi_TestRequest: SKCodableStruct {
     self.installID = SkarbSDK.getDeviceId()
     self.name = name
     self.group = group
-    
-    
   }
   
   init(from decoder: Swift.Decoder) throws {
@@ -298,6 +296,49 @@ extension Installapi_TestRequest: SKCodableStruct {
     case installID
     case name
     case group
+  }
+}
+
+extension Installapi_IDFARequest: SKCodableStruct {
+  init(idfa: String?) {
+    self.auth = Auth_Auth.createDefault()
+    self.installID = SkarbSDK.getDeviceId()
+    self.idfa = idfa ?? ""
+  }
+  
+  init(from decoder: Swift.Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let auth = try container.decode(Auth_Auth.self, forKey: .auth)
+    let installID = try container.decode(String.self, forKey: .installID)
+    let idfa = try container.decode(String.self, forKey: .idfa)
+    
+    self = Installapi_IDFARequest.with({
+      $0.auth = auth
+      $0.installID = installID
+      $0.idfa = idfa
+    })
+  }
+  
+  func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(auth, forKey: .auth)
+    try container.encode(installID, forKey: .installID)
+    try container.encode(idfa, forKey: .idfa)
+  }
+  
+  func getData() -> Data? {
+    let encoder = JSONEncoder()
+    if let encoded = try? encoder.encode(self) {
+      return encoded
+    }
+    
+    return nil
+  }
+  
+  enum CodingKeys: String, CodingKey {
+    case auth
+    case installID
+    case idfa
   }
 }
 

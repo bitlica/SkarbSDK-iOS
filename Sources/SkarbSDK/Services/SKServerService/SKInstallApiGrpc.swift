@@ -44,6 +44,16 @@ internal protocol Installapi_IngesterClientProtocol: GRPCClient {
     _ request: Installapi_TestRequest,
     callOptions: CallOptions?
   ) -> UnaryCall<Installapi_TestRequest, SwiftProtobuf.Google_Protobuf_Empty>
+
+  func setIDFA(
+    _ request: Installapi_IDFARequest,
+    callOptions: CallOptions?
+  ) -> UnaryCall<Installapi_IDFARequest, SwiftProtobuf.Google_Protobuf_Empty>
+
+  func eraseUserData(
+    _ request: Installapi_EraseRequest,
+    callOptions: CallOptions?
+  ) -> UnaryCall<Installapi_EraseRequest, SwiftProtobuf.Google_Protobuf_Empty>
 }
 
 extension Installapi_IngesterClientProtocol {
@@ -104,6 +114,42 @@ extension Installapi_IngesterClientProtocol {
       interceptors: self.interceptors?.makeSetTestInterceptors() ?? []
     )
   }
+
+  /// Unary call to SetIDFA
+  ///
+  /// - Parameters:
+  ///   - request: Request to send to SetIDFA.
+  ///   - callOptions: Call options.
+  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+  internal func setIDFA(
+    _ request: Installapi_IDFARequest,
+    callOptions: CallOptions? = nil
+  ) -> UnaryCall<Installapi_IDFARequest, SwiftProtobuf.Google_Protobuf_Empty> {
+    return self.makeUnaryCall(
+      path: "/installapi.Ingester/SetIDFA",
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeSetIDFAInterceptors() ?? []
+    )
+  }
+
+  /// Unary call to EraseUserData
+  ///
+  /// - Parameters:
+  ///   - request: Request to send to EraseUserData.
+  ///   - callOptions: Call options.
+  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+  internal func eraseUserData(
+    _ request: Installapi_EraseRequest,
+    callOptions: CallOptions? = nil
+  ) -> UnaryCall<Installapi_EraseRequest, SwiftProtobuf.Google_Protobuf_Empty> {
+    return self.makeUnaryCall(
+      path: "/installapi.Ingester/EraseUserData",
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeEraseUserDataInterceptors() ?? []
+    )
+  }
 }
 
 internal protocol Installapi_IngesterClientInterceptorFactoryProtocol {
@@ -116,6 +162,12 @@ internal protocol Installapi_IngesterClientInterceptorFactoryProtocol {
 
   /// - Returns: Interceptors to use when invoking 'setTest'.
   func makeSetTestInterceptors() -> [ClientInterceptor<Installapi_TestRequest, SwiftProtobuf.Google_Protobuf_Empty>]
+
+  /// - Returns: Interceptors to use when invoking 'setIDFA'.
+  func makeSetIDFAInterceptors() -> [ClientInterceptor<Installapi_IDFARequest, SwiftProtobuf.Google_Protobuf_Empty>]
+
+  /// - Returns: Interceptors to use when invoking 'eraseUserData'.
+  func makeEraseUserDataInterceptors() -> [ClientInterceptor<Installapi_EraseRequest, SwiftProtobuf.Google_Protobuf_Empty>]
 }
 
 internal final class Installapi_IngesterClient: Installapi_IngesterClientProtocol {
@@ -149,6 +201,10 @@ internal protocol Installapi_IngesterProvider: CallHandlerProvider {
   func setAttribution(request: Installapi_AttribRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
 
   func setTest(request: Installapi_TestRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
+
+  func setIDFA(request: Installapi_IDFARequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
+
+  func eraseUserData(request: Installapi_EraseRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
 }
 
 extension Installapi_IngesterProvider {
@@ -188,6 +244,24 @@ extension Installapi_IngesterProvider {
         userFunction: self.setTest(request:context:)
       )
 
+    case "SetIDFA":
+      return UnaryServerHandler(
+        context: context,
+        requestDeserializer: ProtobufDeserializer<Installapi_IDFARequest>(),
+        responseSerializer: ProtobufSerializer<SwiftProtobuf.Google_Protobuf_Empty>(),
+        interceptors: self.interceptors?.makeSetIDFAInterceptors() ?? [],
+        userFunction: self.setIDFA(request:context:)
+      )
+
+    case "EraseUserData":
+      return UnaryServerHandler(
+        context: context,
+        requestDeserializer: ProtobufDeserializer<Installapi_EraseRequest>(),
+        responseSerializer: ProtobufSerializer<SwiftProtobuf.Google_Protobuf_Empty>(),
+        interceptors: self.interceptors?.makeEraseUserDataInterceptors() ?? [],
+        userFunction: self.eraseUserData(request:context:)
+      )
+
     default:
       return nil
     }
@@ -207,4 +281,12 @@ internal protocol Installapi_IngesterServerInterceptorFactoryProtocol {
   /// - Returns: Interceptors to use when handling 'setTest'.
   ///   Defaults to calling `self.makeInterceptors()`.
   func makeSetTestInterceptors() -> [ServerInterceptor<Installapi_TestRequest, SwiftProtobuf.Google_Protobuf_Empty>]
+
+  /// - Returns: Interceptors to use when handling 'setIDFA'.
+  ///   Defaults to calling `self.makeInterceptors()`.
+  func makeSetIDFAInterceptors() -> [ServerInterceptor<Installapi_IDFARequest, SwiftProtobuf.Google_Protobuf_Empty>]
+
+  /// - Returns: Interceptors to use when handling 'eraseUserData'.
+  ///   Defaults to calling `self.makeInterceptors()`.
+  func makeEraseUserDataInterceptors() -> [ServerInterceptor<Installapi_EraseRequest, SwiftProtobuf.Google_Protobuf_Empty>]
 }

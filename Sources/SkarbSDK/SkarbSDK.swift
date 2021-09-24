@@ -113,6 +113,17 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.createAutomaticSearchAdsCommand(enable)
   }
   
+  public static func sendIDFA(idfa: String?) {
+    guard !SKServiceRegistry.commandStore.hasIDFACommand else {
+      return
+    }
+    
+    let attributionRequest = Installapi_IDFARequest(idfa: idfa)
+    let idfaV4Command = SKCommand(commandType: .idfaV4,
+                                  status: .pending,
+                                  data: attributionRequest.getData())
+    SKServiceRegistry.commandStore.saveCommand(idfaV4Command)
+  }
   
   private static func generateDeviceId() -> String {
     return UIDevice.current.identifierForVendor?.uuidString ?? "gen-" + UUID().uuidString

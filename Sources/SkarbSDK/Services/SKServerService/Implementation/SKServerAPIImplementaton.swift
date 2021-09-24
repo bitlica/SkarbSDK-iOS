@@ -99,7 +99,7 @@ class SKServerAPIImplementaton: SKServerAPI {
         case .purchaseV4:
           guard let purchaseRequest = try? decoder.decode(Purchaseapi_ReceiptRequest.self, from: command.data) else {
             let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
-            SKLogger.logError("SyncCommand called with testV4. Installapi_TestRequest cannt be decoded",
+            SKLogger.logError("SyncCommand called with purchaseV4. Purchaseapi_ReceiptRequest cannt be decoded",
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                          SKLoggerFeatureType.internalValue.name: value])
             return
@@ -116,7 +116,7 @@ class SKServerAPIImplementaton: SKServerAPI {
         case .transactionV4:
           guard let transactionRequest = try? decoder.decode(Purchaseapi_TransactionsRequest.self, from: command.data) else {
             let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
-            SKLogger.logError("SyncCommand called with testV4. Purchaseapi_TransactionsRequest cannt be decoded",
+            SKLogger.logError("SyncCommand called with transactionV4. Purchaseapi_TransactionsRequest cannt be decoded",
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                          SKLoggerFeatureType.internalValue.name: value])
             return
@@ -133,7 +133,7 @@ class SKServerAPIImplementaton: SKServerAPI {
         case .priceV4:
           guard let priceRequest = try? decoder.decode(Priceapi_PricesRequest.self, from: command.data) else {
             let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
-            SKLogger.logError("SyncCommand called with testV4. Priceapi_PricesRequest cannt be decoded",
+            SKLogger.logError("SyncCommand called with priceV4. Priceapi_PricesRequest cannt be decoded",
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                          SKLoggerFeatureType.internalValue.name: value])
             return
@@ -147,12 +147,28 @@ class SKServerAPIImplementaton: SKServerAPI {
                                            commandType: command.commandType,
                                            completion: completion)
           }
+        case .idfaV4:
+          guard let idfaRequest = try? decoder.decode(Installapi_IDFARequest.self, from: command.data) else {
+            let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
+            SKLogger.logError("SyncCommand called with testV4. Installapi_IDFARequest cannt be decoded",
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                         SKLoggerFeatureType.internalValue.name: value])
+            return
+          }
+          let call = installService.setIDFA(idfaRequest)
+          call.initialMetadata.whenComplete({ [weak self] result in
+            self?.validateGrpcResponseResult(result, command: command)
+          })
+          call.response.whenComplete { [weak self] result in
+            self?.handleGrpcResponseResult(result,
+                                           commandType: command.commandType,
+                                           completion: completion)
+          }
         default:
           SKLogger.logError("SyncCommand called default. Unpredictable case",
                             features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
         break
       }
-      
     } else {
       let urlString = prepareBaseURLString(command: command)
       guard let url = URL(string: urlString) else { return }

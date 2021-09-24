@@ -66,6 +66,14 @@ class SKCommandStore {
     return result
   }
   
+  var hasIDFACommand: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .idfaV4 }) != nil
+    }
+    return result
+  }
+  
   func hasSendSourceV4Command(broker: SKBroker) -> Bool {
     var result = false
     let decoder = JSONDecoder()

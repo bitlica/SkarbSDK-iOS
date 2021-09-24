@@ -46,9 +46,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 #### Params:
 ```clientId``` You could get it in your account dashboard.
 
-```isObservable``` Automatically sends all events about purchases that are in your app. If you want to send a purchase event manually you should set this param to ```false``` and see ```Send purchase event``` section.
+```isObservable``` Automatically sends all events about purchases that are in your app. If you want to send a purchase event manually you should set this param to ```false``` and see ```Send purchase event``` section. Default value is ```true```.
 
-```deviceId``` If you want to can use your own generated deviceId
+```deviceId``` If you want to can use your own generated deviceId. Default value is ```nil```.
 
 ### Send features 
 
@@ -68,7 +68,7 @@ SkarbSDK.sendSource(broker: SKBroker,
 
 ### Send purchase event 
 
-You have to use this call if ```isObservable``` during initialization is ```false```
+You have to use this call if ```isObservable``` during initialization is ```false```.
 
 ```swift
 import SkarbSDK

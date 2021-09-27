@@ -24,7 +24,7 @@ Once you have your Swift package set up, adding SkarbSDK as a dependency is as e
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/bitlica/SkarbSDK.git", .upToNextMajor(from: "0.4.16"))
+    .package(url: "https://github.com/bitlica/SkarbSDK.git", .upToNextMajor(from: "0.5.0"))
 ]
 ```
 
@@ -109,6 +109,21 @@ SkarbSDK.sendTest(name: String,
 
 ```group``` Group name of A/B test. For example: control group, B, etc.
 
+
+### IDFA
+SkarbSDK automaticaly collects IDFA. If you want to disable it, please set ```false``` before ```SkarbSDK.initialize()``` method. The default value is ```true```
+```swift
+import SkarbSDK
+
+SkarbSDK.automaticCollectIDFA = false
+```
+### Logging
+If you want to see errors and warning from SkarbSDK , please use set ```true``` before  ```SkarbSDK.initialize()``` method.  The default value is ```false```
+```swift
+import SkarbSDK
+
+SkarbSDK.isLoggingEnabled = true
+```
 
 ## License
 [MIT](https://choosealicense.com/licenses/mit/)

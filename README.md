@@ -117,6 +117,11 @@ import SkarbSDK
 
 SkarbSDK.automaticCollectIDFA = false
 ```
+Also you can sent idfa after getting ```status``` from ```ATTrackingManager.requestTrackingAuthorization()``` and if the the ```status``` is ```.authorized``` get idfa from ```ASIdentifierManager.shared().advertisingIdentifier.uuidString``` and use this method:
+```
+SkarbSDK.sendIDFA(idfa: String?)
+```
+
 ### Logging
 If you want to see errors and warning from SkarbSDK , please use set ```true``` before  ```SkarbSDK.initialize()``` method.  The default value is ```false```
 ```swift

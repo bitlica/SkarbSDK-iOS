@@ -16,6 +16,7 @@ public class SkarbSDK {
   
   static var clientId: String = ""
   public static var isLoggingEnabled: Bool = false
+  public static var automaticCollectIDFA: Bool = true
   
   public static func initialize(clientId: String,
                                 isObservable: Bool,
@@ -29,6 +30,7 @@ public class SkarbSDK {
     // because some data are used in other commands and should not be nil
     SKServiceRegistry.migrationService.doMigrationIfNeeded(deviceId: deviceId)
     SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId, deviceId: deviceId)
+    SKServiceRegistry.commandStore.createIDFACommandIfNeeded(automaticCollectIDFA: automaticCollectIDFA)
     SKServiceRegistry.initialize(isObservable: isObservable)
   }
   

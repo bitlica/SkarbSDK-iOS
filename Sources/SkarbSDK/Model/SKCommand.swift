@@ -17,19 +17,26 @@ struct SKCommand {
   private(set) var data: Data
   private(set) var retryCount: Int
   private(set) var fireDate: Date
+  /// In some cases we want to delay command and don't want to execute them in case
+  /// when fireDate resets to Date() and execute these commands at once.
+  /// Example: when command is isNew and saves - all commands fireDate reset to now
+  /// and execute them at once if their status is pending
+  private(set) var fireDateRessetable: Bool
   
   init(timestamp: Int = Date().nowTimestampMicroSec,
        commandType: SKCommandType,
        status: SKCommandStatus,
        data: Data?,
        retryCount: Int = 0,
-       fireDate: Date = Date()) {
+       fireDate: Date = Date(),
+       fireDateRessetable: Bool = true) {
     self.timestamp = timestamp
     self.commandType = commandType
     self.status = status
     self.data = data ?? Data()
     self.retryCount = retryCount
     self.fireDate = fireDate
+    self.fireDateRessetable = fireDateRessetable
   }
   
   var description: String {

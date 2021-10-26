@@ -123,13 +123,13 @@ class SKCommandStore {
       }
     }
     // if new command was added we want to execute all pending
-    // commands ASAP in one transaction
-    if isNew {
+    // commands ASAP in one transaction, except logging command
+    if isNew && command.commandType != .logging {
       resetFireDateAndRetryCountForPendingCommands()
       SKServiceRegistry.syncService.syncAllCommands()
     }
     saveState()
-//    SKLogger.logInfo("Command saved: \(command.description)")
+    SKLogger.logInfo("Command saved: \(command.description)")
   }
   
   func deleteCommand(_ command: SKCommand) {
@@ -152,7 +152,6 @@ class SKCommandStore {
   }
   
   func saveState() {
-    SKLogger.logInfo("SKCommandStore saveState: called")
     exclusionSerialQueue.sync {
       let data = localAppgateCommands.map { $0.getData() }.compactMap { $0 }
       SKServiceRegistry.userDefaultsService.setValue(data, forKey: .appgateComands)

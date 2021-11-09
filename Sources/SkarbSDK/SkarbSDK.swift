@@ -128,6 +128,6 @@ public class SkarbSDK {
   }
   
   private static func generateDeviceId() -> String {
-    return UIDevice.current.identifierForVendor?.uuidString ?? "gen-" + UUID().uuidString
+    return UUID().uuidString
   }
 }

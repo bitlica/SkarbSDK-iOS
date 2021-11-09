@@ -16,6 +16,6 @@ Pod::Spec.new do |s|
   s.source       = { :git => "https://github.com/bitlica/SkarbSDK.git", :tag => "#{s.version}" }
   s.source_files  = 'Sources/SkarbSDK/**/*'
   s.frameworks = 'Foundation', 'AdSupport', 'UIKit', 'StoreKit', 'AppTrackingTransparency'
-  s.dependency 'gRPC-Swift', '1.0.0'
+  s.dependency 'gRPC-Swift', '1.5.0'
   s.dependency 'ReachabilitySwift', '5.0.0'
 end

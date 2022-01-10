@@ -12,6 +12,7 @@ import iAd
 import Reachability
 import AdSupport
 import AppTrackingTransparency
+import AdServices
 
 class SKSyncServiceImplementation: SKSyncService {
   
@@ -86,7 +87,8 @@ class SKSyncServiceImplementation: SKSyncService {
       SKLogger.logInfo("Command start executing: \(command.description)")
       
       switch command.commandType {
-        case .install, .source, .test, .purchase, .logging, .installV4, .sourceV4, .testV4, .purchaseV4, .transactionV4, .priceV4, .idfaV4:
+        case .install, .source, .test, .purchase, .logging, .installV4, .sourceV4,
+            .testV4, .purchaseV4, .transactionV4, .priceV4, .idfaV4:
           SKServiceRegistry.serverAPI.syncCommand(command, completion: { [weak self] error in
             if let error = error {
               var features: [String: Any] = [:]
@@ -116,21 +118,34 @@ class SKSyncServiceImplementation: SKSyncService {
             SKServiceRegistry.storeKitService.requestProductInfoAndSendPurchase(command: command)
           }
         case .automaticSearchAds:
-          DispatchQueue.main.async {
-            ADClient.shared().requestAttributionDetails({ (attributionJSON, error) in
-              guard error == nil else {
-                command.updateRetryCountAndFireDate()
-                command.changeStatus(to: .pending)
+          if #available(iOS 14.3, *) {
+            DispatchQueue.global(qos: .default).async {
+              if let token = try? AAAttribution.attributionToken() {
+                DispatchQueue.main.async {
+                  SkarbSDK.sendSource(broker: .saaapi, features: ["saatoken": token])
+                }
+                command.changeStatus(to: .done)
                 SKServiceRegistry.commandStore.saveCommand(command)
-                return
               }
-              
-              if let attributionJSON = attributionJSON {
-                SkarbSDK.sendSource(broker: .searchads, features: attributionJSON)
-              }
-              command.changeStatus(to: .done)
-              SKServiceRegistry.commandStore.saveCommand(command)
-            })
+            }
+          }
+          else {
+            DispatchQueue.main.async {
+              ADClient.shared().requestAttributionDetails ({ (attributionJSON, error) in
+                guard error == nil else {
+                  command.updateRetryCountAndFireDate()
+                  command.changeStatus(to: .pending)
+                  SKServiceRegistry.commandStore.saveCommand(command)
+                  return
+                }
+                
+                if let attributionJSON = attributionJSON {
+                  SkarbSDK.sendSource(broker: .searchads, features: attributionJSON)
+                }
+                command.changeStatus(to: .done)
+                SKServiceRegistry.commandStore.saveCommand(command)
+              })
+            }
           }
         case .fetchIdfa:
           command.changeStatus(to: .done)

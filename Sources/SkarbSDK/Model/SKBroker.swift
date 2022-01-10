@@ -11,6 +11,7 @@ import Foundation
 public enum SKBroker {
   case facebook
   case searchads
+  case saaapi
   case appsflyer
   case adjust
   case branch
@@ -22,6 +23,8 @@ public enum SKBroker {
         return "facebook"
       case .searchads:
         return "searchads"
+      case .saaapi:
+        return "saaapi"
       case .appsflyer:
         return "appsflyer"
       case .adjust:

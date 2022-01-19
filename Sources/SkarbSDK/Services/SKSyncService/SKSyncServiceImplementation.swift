@@ -120,13 +120,18 @@ class SKSyncServiceImplementation: SKSyncService {
         case .automaticSearchAds:
           if #available(iOS 14.3, *) {
             DispatchQueue.global(qos: .default).async {
-              if let token = try? AAAttribution.attributionToken() {
+              do {
+                let token = try AAAttribution.attributionToken()
                 DispatchQueue.main.async {
                   SkarbSDK.sendSource(broker: .saaapi, features: ["saatoken": token])
                 }
                 command.changeStatus(to: .done)
-                SKServiceRegistry.commandStore.saveCommand(command)
               }
+              catch {
+                command.updateRetryCountAndFireDate()
+                command.changeStatus(to: .pending)
+              }
+              SKServiceRegistry.commandStore.saveCommand(command)
             }
           }
           else {

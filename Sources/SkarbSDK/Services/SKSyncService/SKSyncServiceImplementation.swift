@@ -88,7 +88,7 @@ class SKSyncServiceImplementation: SKSyncService {
       
       switch command.commandType {
         case .install, .source, .test, .purchase, .logging, .installV4, .sourceV4,
-            .testV4, .purchaseV4, .transactionV4, .priceV4, .idfaV4:
+            .testV4, .purchaseV4, .transactionV4, .priceV4, .idfaV4, .asa:
           SKServiceRegistry.serverAPI.syncCommand(command, completion: { [weak self] error in
             if let error = error {
               var features: [String: Any] = [:]

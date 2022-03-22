@@ -150,12 +150,29 @@ class SKServerAPIImplementaton: SKServerAPI {
         case .idfaV4:
           guard let idfaRequest = try? decoder.decode(Installapi_IDFARequest.self, from: command.data) else {
             let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
-            SKLogger.logError("SyncCommand called with testV4. Installapi_IDFARequest cannt be decoded",
+            SKLogger.logError("SyncCommand called with idfaV4. Installapi_IDFARequest cannt be decoded",
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                          SKLoggerFeatureType.internalValue.name: value])
             return
           }
           let call = installService.setIDFA(idfaRequest)
+          call.initialMetadata.whenComplete({ [weak self] result in
+            self?.validateGrpcResponseResult(result, command: command)
+          })
+          call.response.whenComplete { [weak self] result in
+            self?.handleGrpcResponseResult(result,
+                                           commandType: command.commandType,
+                                           completion: completion)
+          }
+        case .asa:
+          guard let asaRequest = try? decoder.decode(Installapi_ASARequest.self, from: command.data) else {
+            let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
+            SKLogger.logError("SyncCommand called with asa. Installapi_ASARequest cannt be decoded",
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                         SKLoggerFeatureType.internalValue.name: value])
+            return
+          }
+          let call = installService.setASA(asaRequest)
           call.initialMetadata.whenComplete({ [weak self] result in
             self?.validateGrpcResponseResult(result, command: command)
           })

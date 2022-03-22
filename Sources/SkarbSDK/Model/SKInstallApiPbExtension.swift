@@ -342,3 +342,51 @@ extension Installapi_IDFARequest: SKCodableStruct {
   }
 }
 
+extension Installapi_ASARequest: SKCodableStruct {
+  init(asaToken: String, payload: Data?) {
+    self.auth = Auth_Auth.createDefault()
+    self.installID = SkarbSDK.getDeviceId()
+    self.asaToken = asaToken
+    self.payload = payload ?? Data()
+  }
+  
+  init(from decoder: Swift.Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let auth = try container.decode(Auth_Auth.self, forKey: .auth)
+    let installID = try container.decode(String.self, forKey: .installID)
+    let asaToken = try container.decode(String.self, forKey: .asaToken)
+    let payload = try container.decode(Data.self, forKey: .payload)
+    
+    self = Installapi_ASARequest.with({
+      $0.auth = auth
+      $0.installID = installID
+      $0.asaToken = asaToken
+      $0.payload = payload
+    })
+  }
+  
+  func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(auth, forKey: .auth)
+    try container.encode(installID, forKey: .installID)
+    try container.encode(asaToken, forKey: .asaToken)
+    try container.encode(payload, forKey: .payload)
+  }
+  
+  func getData() -> Data? {
+    let encoder = JSONEncoder()
+    if let encoded = try? encoder.encode(self) {
+      return encoded
+    }
+    
+    return nil
+  }
+  
+  enum CodingKeys: String, CodingKey {
+    case auth
+    case installID
+    case asaToken
+    case payload
+  }
+}
+

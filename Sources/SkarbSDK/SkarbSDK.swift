@@ -127,6 +127,14 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.saveCommand(idfaV4Command)
   }
   
+  public static func sendASA() {
+    let asaRequest = Installapi_ASARequest(asaToken: "Hey asa", payload: Data())
+    let asaV4Command = SKCommand(commandType: .asa,
+                                  status: .pending,
+                                  data: asaRequest.getData())
+    SKServiceRegistry.commandStore.saveCommand(asaV4Command)
+  }
+  
   private static func generateDeviceId() -> String {
     return UUID().uuidString
   }

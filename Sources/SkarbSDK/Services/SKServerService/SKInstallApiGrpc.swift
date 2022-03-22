@@ -50,6 +50,11 @@ internal protocol Installapi_IngesterClientProtocol: GRPCClient {
     callOptions: CallOptions?
   ) -> UnaryCall<Installapi_IDFARequest, SwiftProtobuf.Google_Protobuf_Empty>
 
+  func setASA(
+    _ request: Installapi_ASARequest,
+    callOptions: CallOptions?
+  ) -> UnaryCall<Installapi_ASARequest, SwiftProtobuf.Google_Protobuf_Empty>
+
   func eraseUserData(
     _ request: Installapi_EraseRequest,
     callOptions: CallOptions?
@@ -133,6 +138,24 @@ extension Installapi_IngesterClientProtocol {
     )
   }
 
+  /// Unary call to SetASA
+  ///
+  /// - Parameters:
+  ///   - request: Request to send to SetASA.
+  ///   - callOptions: Call options.
+  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+  internal func setASA(
+    _ request: Installapi_ASARequest,
+    callOptions: CallOptions? = nil
+  ) -> UnaryCall<Installapi_ASARequest, SwiftProtobuf.Google_Protobuf_Empty> {
+    return self.makeUnaryCall(
+      path: "/installapi.Ingester/SetASA",
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeSetASAInterceptors() ?? []
+    )
+  }
+
   /// Unary call to EraseUserData
   ///
   /// - Parameters:
@@ -165,6 +188,9 @@ internal protocol Installapi_IngesterClientInterceptorFactoryProtocol {
 
   /// - Returns: Interceptors to use when invoking 'setIDFA'.
   func makeSetIDFAInterceptors() -> [ClientInterceptor<Installapi_IDFARequest, SwiftProtobuf.Google_Protobuf_Empty>]
+
+  /// - Returns: Interceptors to use when invoking 'setASA'.
+  func makeSetASAInterceptors() -> [ClientInterceptor<Installapi_ASARequest, SwiftProtobuf.Google_Protobuf_Empty>]
 
   /// - Returns: Interceptors to use when invoking 'eraseUserData'.
   func makeEraseUserDataInterceptors() -> [ClientInterceptor<Installapi_EraseRequest, SwiftProtobuf.Google_Protobuf_Empty>]
@@ -203,6 +229,8 @@ internal protocol Installapi_IngesterProvider: CallHandlerProvider {
   func setTest(request: Installapi_TestRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
 
   func setIDFA(request: Installapi_IDFARequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
+
+  func setASA(request: Installapi_ASARequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
 
   func eraseUserData(request: Installapi_EraseRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
 }
@@ -253,6 +281,15 @@ extension Installapi_IngesterProvider {
         userFunction: self.setIDFA(request:context:)
       )
 
+    case "SetASA":
+      return UnaryServerHandler(
+        context: context,
+        requestDeserializer: ProtobufDeserializer<Installapi_ASARequest>(),
+        responseSerializer: ProtobufSerializer<SwiftProtobuf.Google_Protobuf_Empty>(),
+        interceptors: self.interceptors?.makeSetASAInterceptors() ?? [],
+        userFunction: self.setASA(request:context:)
+      )
+
     case "EraseUserData":
       return UnaryServerHandler(
         context: context,
@@ -285,6 +322,10 @@ internal protocol Installapi_IngesterServerInterceptorFactoryProtocol {
   /// - Returns: Interceptors to use when handling 'setIDFA'.
   ///   Defaults to calling `self.makeInterceptors()`.
   func makeSetIDFAInterceptors() -> [ServerInterceptor<Installapi_IDFARequest, SwiftProtobuf.Google_Protobuf_Empty>]
+
+  /// - Returns: Interceptors to use when handling 'setASA'.
+  ///   Defaults to calling `self.makeInterceptors()`.
+  func makeSetASAInterceptors() -> [ServerInterceptor<Installapi_ASARequest, SwiftProtobuf.Google_Protobuf_Empty>]
 
   /// - Returns: Interceptors to use when handling 'eraseUserData'.
   ///   Defaults to calling `self.makeInterceptors()`.

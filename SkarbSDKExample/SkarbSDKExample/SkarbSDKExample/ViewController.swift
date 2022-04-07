@@ -8,6 +8,9 @@
 
 import UIKit
 import SkarbSDK
+import AppTrackingTransparency
+import SwiftProtobuf
+import AdSupport
 
 class ViewController: UIViewController {
   
@@ -17,8 +20,19 @@ class ViewController: UIViewController {
     
     view.backgroundColor = .red
 
-    SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID", isObservable: true)
-    SkarbSDK.useAutomaticAppleSearchAdsAttributionCollection(false)
-  } 
+    SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID",
+                        isObservable: true)
+    SkarbSDK.useAutomaticAppleSearchAdsAttributionCollection(true)
+  }
+  
+  private func requestIDFA() {
+    if #available(iOS 14, *) {
+      ATTrackingManager.requestTrackingAuthorization { status in
+        if case ATTrackingManager.AuthorizationStatus.authorized = status {
+          SkarbSDK.sendIDFA(idfa: ASIdentifierManager.shared().advertisingIdentifier.uuidString)
+        }
+      }
+    }
+  }
 }
 

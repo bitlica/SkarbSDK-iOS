@@ -12,7 +12,7 @@ import UIKit
 public class SkarbSDK {
   
   static let agentName: String = "SkarbSDK-iOS"
-  static let version: String = "0.5.4"
+  static let version: String = "0.5.5"
   
   static var clientId: String = ""
   public static var isLoggingEnabled: Bool = false
@@ -102,11 +102,11 @@ public class SkarbSDK {
   
   public static func getDeviceId() -> String {
     guard let deviceId = SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) else {
+      let deviceId = generateDeviceId()
+      SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
       SKLogger.logError("SkarbSDK: getDeviceId() - deviceId is nil",
                         features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                    SKLoggerFeatureType.internalValue.name: "deviceId is nil"])
-      let deviceId = generateDeviceId()
-      SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
       return deviceId
     }
     return deviceId

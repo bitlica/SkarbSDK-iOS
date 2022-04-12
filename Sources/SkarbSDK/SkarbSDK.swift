@@ -101,11 +101,11 @@ public class SkarbSDK {
   
   public static func getDeviceId() -> String {
     guard let deviceId = SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) else {
+      let deviceId = generateDeviceId()
+      SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
       SKLogger.logError("SkarbSDK: getDeviceId() - deviceId is nil",
                         features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                    SKLoggerFeatureType.internalValue.name: "deviceId is nil"])
-      let deviceId = generateDeviceId()
-      SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
       return deviceId
     }
     return deviceId

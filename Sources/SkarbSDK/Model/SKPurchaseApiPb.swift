@@ -40,7 +40,7 @@ struct Purchaseapi_TransactionsRequest {
   /// array of transaction ids
   var transactions: [String] = []
 
-  /// the same value sent in SetDevice
+  /// next 2 fields were added for a special idea but not used for now
   var docDate: SwiftProtobuf.Google_Protobuf_Timestamp {
     get {return _docDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
     set {_docDate = newValue}
@@ -177,6 +177,12 @@ struct Purchaseapi_ReceiptResponse {
   init() {}
 }
 
+#if swift(>=5.5) && canImport(_Concurrency)
+extension Purchaseapi_TransactionsRequest: @unchecked Sendable {}
+extension Purchaseapi_ReceiptRequest: @unchecked Sendable {}
+extension Purchaseapi_ReceiptResponse: @unchecked Sendable {}
+#endif  // swift(>=5.5) && canImport(_Concurrency)
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "purchaseapi"
@@ -208,21 +214,25 @@ extension Purchaseapi_TransactionsRequest: SwiftProtobuf.Message, SwiftProtobuf.
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if let v = self._auth {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._auth {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    }
+    } }()
     if !self.installID.isEmpty {
       try visitor.visitSingularStringField(value: self.installID, fieldNumber: 2)
     }
     if !self.transactions.isEmpty {
       try visitor.visitRepeatedStringField(value: self.transactions, fieldNumber: 3)
     }
-    if let v = self._docDate {
+    try { if let v = self._docDate {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
-    }
-    if let v = self._buildDate {
+    } }()
+    try { if let v = self._buildDate {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
-    }
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -327,9 +337,13 @@ extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
     try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
-      if let v = _storage._auth {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._auth {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-      }
+      } }()
       if !_storage._installID.isEmpty {
         try visitor.visitSingularStringField(value: _storage._installID, fieldNumber: 2)
       }
@@ -360,12 +374,12 @@ extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
       if !_storage._currency.isEmpty {
         try visitor.visitSingularStringField(value: _storage._currency, fieldNumber: 12)
       }
-      if let v = _storage._docDate {
+      try { if let v = _storage._docDate {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 13)
-      }
-      if let v = _storage._buildDate {
+      } }()
+      try { if let v = _storage._buildDate {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 14)
-      }
+      } }()
     }
     try unknownFields.traverse(visitor: &visitor)
   }

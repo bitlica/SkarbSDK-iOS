@@ -342,3 +342,57 @@ extension Installapi_IDFARequest: SKCodableStruct {
   }
 }
 
+extension Installapi_SkanRequest: SKCodableStruct {
+  static func create() -> Installapi_SkanRequest {
+    return Installapi_SkanRequest.with({
+      $0.auth = Auth_Auth.createDefault()
+      $0.bundleVer = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "unknown"
+      if let preferredLanguage = Locale.preferredLanguages.first {
+        $0.locale = preferredLanguage
+      } else {
+        $0.locale = "unknown"
+      }
+      $0.osVer = UIDevice.current.systemVersion
+    })
+  }
+  
+  init(from decoder: Swift.Decoder) throws {
+    let container = try decoder.container(keyedBy: CodingKeys.self)
+    let auth = try container.decode(Auth_Auth.self, forKey: .auth)
+    let bundleVer = try container.decode(String.self, forKey: .bundleVer)
+    let locale = try container.decode(String.self, forKey: .locale)
+    let osVer = try container.decode(String.self, forKey: .osVer)
+    
+    self = Installapi_SkanRequest.with({
+      $0.auth = auth
+      $0.bundleVer = bundleVer
+      $0.locale = locale
+      $0.osVer = osVer
+    })
+  }
+  
+  func encode(to encoder: Encoder) throws {
+    var container = encoder.container(keyedBy: CodingKeys.self)
+    try container.encode(auth, forKey: .auth)
+    try container.encode(bundleVer, forKey: .bundleVer)
+    try container.encode(locale, forKey: .locale)
+    try container.encode(osVer, forKey: .osVer)
+  }
+  
+  func getData() -> Data? {
+    let encoder = JSONEncoder()
+    if let encoded = try? encoder.encode(self) {
+      return encoded
+    }
+    
+    return nil
+  }
+  
+  enum CodingKeys: String, CodingKey {
+    case auth
+    case bundleVer
+    case locale
+    case osVer
+  }
+}
+

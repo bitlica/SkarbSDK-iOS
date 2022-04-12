@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import StoreKit
 
 class SKCommandStore {
   
@@ -70,6 +71,14 @@ class SKCommandStore {
     var result = false
     exclusionSerialQueue.sync {
       result = localAppgateCommands.first(where: { $0.commandType == .idfaV4 }) != nil
+    }
+    return result
+  }
+  
+  var hasSKANCommand: Bool {
+    var result = false
+    exclusionSerialQueue.sync {
+      result = localAppgateCommands.first(where: { $0.commandType == .skanV4 }) != nil
     }
     return result
   }
@@ -331,6 +340,20 @@ class SKCommandStore {
                                                   fireDateRessetable: false)
       saveCommand(fetchIdfaCommand)
     }
+  }
+  
+  func createSKANCommandIfNeeded() {
+    guard !SKServiceRegistry.commandStore.hasSKANCommand else {
+      return
+    }
+    SKAdNetwork.registerAppForAdNetworkAttribution()
+    let nowDate = Date()
+    let skanDataV4 = Installapi_SkanRequest.create()
+    let skanCommandV4 = SKCommand(timestamp: nowDate.nowTimestampMicroSec,
+                                  commandType: .skanV4,
+                                  status: .pending,
+                                  data: skanDataV4.getData())
+    SKServiceRegistry.commandStore.saveCommand(skanCommandV4)
   }
   
   func resetFireDateAndRetryCountForPendingCommands() {

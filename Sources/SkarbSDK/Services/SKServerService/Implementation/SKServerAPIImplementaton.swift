@@ -11,6 +11,7 @@ import GRPC
 import NIO
 import NIOHPACK
 import SwiftProtobuf
+import StoreKit
 
 class SKServerAPIImplementaton: SKServerAPI {
   
@@ -163,6 +164,32 @@ class SKServerAPIImplementaton: SKServerAPI {
             self?.handleGrpcResponseResult(result,
                                            commandType: command.commandType,
                                            completion: completion)
+          }
+        case .skanV4:
+          guard let skanRequest = try? decoder.decode(Installapi_SkanRequest.self, from: command.data) else {
+            let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
+            SKLogger.logError("SyncCommand called with scanV4. Installapi_SkanRequest cannt be decoded",
+                              features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                         SKLoggerFeatureType.internalValue.name: value])
+            return
+          }
+          let call = installService.getSkanSetup(skanRequest)
+          call.initialMetadata.whenComplete({ [weak self] result in
+            self?.validateGrpcResponseResult(result, command: command)
+          })
+          call.response.whenComplete { result in
+            SKLogger.logNetwork("SKResponse is \(result) for commandType = \(command.commandType)")
+            switch result {
+              case .success(let skanResponse):
+                if #available(iOS 14.0, *) {
+                  if let value = skanResponse.scheme.filter({ $0.event == "install" }).first?.level {
+                    SKAdNetwork.updateConversionValue(Int(value))
+                  }
+                }
+                completion?(nil)
+              case .failure(let error):
+                completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
+            }
           }
         default:
           SKLogger.logError("SyncCommand called default. Unpredictable case",

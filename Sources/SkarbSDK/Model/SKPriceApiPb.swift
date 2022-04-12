@@ -191,6 +191,15 @@ struct Priceapi_Period {
   init() {}
 }
 
+#if swift(>=5.5) && canImport(_Concurrency)
+extension Priceapi_ProductsRequest: @unchecked Sendable {}
+extension Priceapi_ProductsResponse: @unchecked Sendable {}
+extension Priceapi_PricesRequest: @unchecked Sendable {}
+extension Priceapi_Product: @unchecked Sendable {}
+extension Priceapi_Discount: @unchecked Sendable {}
+extension Priceapi_Period: @unchecked Sendable {}
+#endif  // swift(>=5.5) && canImport(_Concurrency)
+
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "priceapi"
@@ -218,9 +227,13 @@ extension Priceapi_ProductsRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if let v = self._auth {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._auth {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    }
+    } }()
     if !self.installID.isEmpty {
       try visitor.visitSingularStringField(value: self.installID, fieldNumber: 2)
     }
@@ -300,9 +313,13 @@ extension Priceapi_PricesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageI
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if let v = self._auth {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._auth {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    }
+    } }()
     if !self.installID.isEmpty {
       try visitor.visitSingularStringField(value: self.installID, fieldNumber: 2)
     }
@@ -366,27 +383,31 @@ extension Priceapi_Product: SwiftProtobuf.Message, SwiftProtobuf._MessageImpleme
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.productID.isEmpty {
       try visitor.visitSingularStringField(value: self.productID, fieldNumber: 1)
     }
     if !self.groupID.isEmpty {
       try visitor.visitSingularStringField(value: self.groupID, fieldNumber: 2)
     }
-    if let v = self._period {
+    try { if let v = self._period {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
-    }
+    } }()
     if self.price != 0 {
       try visitor.visitSingularDoubleField(value: self.price, fieldNumber: 4)
     }
-    if let v = self._intro {
+    try { if let v = self._intro {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
-    }
+    } }()
     if !self.discounts.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.discounts, fieldNumber: 6)
     }
-    if let v = self._tranDate {
+    try { if let v = self._tranDate {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
-    }
+    } }()
     if !self.transaction.isEmpty {
       try visitor.visitSingularStringField(value: self.transaction, fieldNumber: 8)
     }
@@ -436,6 +457,10 @@ extension Priceapi_Discount: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if self.price != 0 {
       try visitor.visitSingularDoubleField(value: self.price, fieldNumber: 1)
     }
@@ -448,9 +473,9 @@ extension Priceapi_Discount: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if self.mode != 0 {
       try visitor.visitSingularInt32Field(value: self.mode, fieldNumber: 4)
     }
-    if let v = self._period {
+    try { if let v = self._period {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
-    }
+    } }()
     if self.periodCount != 0 {
       try visitor.visitSingularInt32Field(value: self.periodCount, fieldNumber: 6)
     }

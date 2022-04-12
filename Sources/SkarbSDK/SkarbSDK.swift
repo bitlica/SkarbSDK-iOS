@@ -31,6 +31,7 @@ public class SkarbSDK {
     SKServiceRegistry.migrationService.doMigrationIfNeeded(deviceId: deviceId)
     SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId, deviceId: deviceId)
     SKServiceRegistry.commandStore.createIDFACommandIfNeeded(automaticCollectIDFA: automaticCollectIDFA)
+    SKServiceRegistry.commandStore.createSKANCommandIfNeeded()
     SKServiceRegistry.initialize(isObservable: isObservable)
   }
   
@@ -127,6 +128,7 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.saveCommand(idfaV4Command)
   }
   
+//  MARK: Private
   private static func generateDeviceId() -> String {
     return UUID().uuidString
   }

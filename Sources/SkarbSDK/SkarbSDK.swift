@@ -32,6 +32,7 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId, deviceId: deviceId)
     SKServiceRegistry.commandStore.createIDFACommandIfNeeded(automaticCollectIDFA: automaticCollectIDFA)
     SKServiceRegistry.initialize(isObservable: isObservable)
+    useAutomaticAppleSearchAdsAttributionCollection(true)
   }
   
   public static func sendTest(name: String,

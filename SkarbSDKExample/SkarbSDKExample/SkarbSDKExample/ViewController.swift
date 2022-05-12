@@ -23,6 +23,7 @@ class ViewController: UIViewController {
     SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID",
                         isObservable: true)
     SkarbSDK.useAutomaticAppleSearchAdsAttributionCollection(true)
+    requestIDFA()
   }
   
   private func requestIDFA() {

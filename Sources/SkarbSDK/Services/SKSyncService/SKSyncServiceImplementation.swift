@@ -123,7 +123,9 @@ class SKSyncServiceImplementation: SKSyncService {
               do {
                 let token = try AAAttribution.attributionToken()
                 DispatchQueue.main.async {
-                  SkarbSDK.sendSource(broker: .saaapi, features: ["saatoken": token])
+                  SkarbSDK.sendSource(broker: .saaapi,
+                                      features: ["saatoken": token],
+                                      brokerUserID: nil)
                 }
                 command.changeStatus(to: .done)
               }
@@ -145,7 +147,9 @@ class SKSyncServiceImplementation: SKSyncService {
                 }
                 
                 if let attributionJSON = attributionJSON {
-                  SkarbSDK.sendSource(broker: .searchads, features: attributionJSON)
+                  SkarbSDK.sendSource(broker: .searchads,
+                                      features: attributionJSON,
+                                      brokerUserID: nil)
                 }
                 command.changeStatus(to: .done)
                 SKServiceRegistry.commandStore.saveCommand(command)

@@ -189,10 +189,13 @@ extension Installapi_DeviceRequest: SKCodableStruct {
 
 extension Installapi_AttribRequest: SKCodableStruct {
   
-  init(broker: String, features: [AnyHashable: Any]) {
+  init(broker: String,
+       features: [AnyHashable: Any],
+       brokerUserID: String?) {
     self.auth = Auth_Auth.createDefault()
     self.installID = SkarbSDK.getDeviceId()
     self.broker = broker
+    self.brokerUserID = brokerUserID ?? ""
     
     guard JSONSerialization.isValidJSONObject(features) else {
       SKLogger.logError("Api_AttribRequest init: json isValidJSONObject",
@@ -216,12 +219,14 @@ extension Installapi_AttribRequest: SKCodableStruct {
     let installID = try container.decode(String.self, forKey: .installID)
     let broker = try container.decode(String.self, forKey: .broker)
     let payload = try container.decode(Data.self, forKey: .payload)
+    let brokerUserID = try? container.decode(String.self, forKey: .brokerUserID)
     
     self = Installapi_AttribRequest.with({
       $0.auth = auth
       $0.installID = installID
       $0.broker = broker
       $0.payload = payload
+      $0.brokerUserID = brokerUserID ?? ""
     })
   }
   
@@ -231,6 +236,7 @@ extension Installapi_AttribRequest: SKCodableStruct {
     try container.encode(installID, forKey: .installID)
     try container.encode(broker, forKey: .broker)
     try container.encode(payload, forKey: .payload)
+    try? container.encode(brokerUserID, forKey: .brokerUserID)
   }
   
   func getData() -> Data? {
@@ -247,6 +253,7 @@ extension Installapi_AttribRequest: SKCodableStruct {
     case installID
     case broker
     case payload
+    case brokerUserID
   }
 }
 

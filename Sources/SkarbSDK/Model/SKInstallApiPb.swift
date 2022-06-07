@@ -145,6 +145,8 @@ struct Installapi_AttribRequest {
   /// json data
   var payload: Data = Data()
 
+  var brokerUserID: String = String()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -414,6 +416,7 @@ extension Installapi_AttribRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     2: .standard(proto: "install_id"),
     3: .same(proto: "broker"),
     4: .same(proto: "payload"),
+    5: .standard(proto: "broker_user_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -426,6 +429,7 @@ extension Installapi_AttribRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
       case 2: try { try decoder.decodeSingularStringField(value: &self.installID) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self.broker) }()
       case 4: try { try decoder.decodeSingularBytesField(value: &self.payload) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.brokerUserID) }()
       default: break
       }
     }
@@ -444,6 +448,9 @@ extension Installapi_AttribRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if !self.payload.isEmpty {
       try visitor.visitSingularBytesField(value: self.payload, fieldNumber: 4)
     }
+    if !self.brokerUserID.isEmpty {
+      try visitor.visitSingularStringField(value: self.brokerUserID, fieldNumber: 5)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -452,6 +459,7 @@ extension Installapi_AttribRequest: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if lhs.installID != rhs.installID {return false}
     if lhs.broker != rhs.broker {return false}
     if lhs.payload != rhs.payload {return false}
+    if lhs.brokerUserID != rhs.brokerUserID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

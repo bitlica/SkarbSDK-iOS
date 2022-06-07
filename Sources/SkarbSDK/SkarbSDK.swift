@@ -58,8 +58,11 @@ public class SkarbSDK {
     }
   }
   
+  /// For brokerUserID use the unique userID for this SKBroker.
+  /// For example, for Appsflyer - AppsFlyerLib.shared().getAppsFlyerUID()
   public static func sendSource(broker: SKBroker,
-                                features: [AnyHashable: Any]) {
+                                features: [AnyHashable: Any],
+                                brokerUserID: String?) {
     //    V3
     if !SKServiceRegistry.commandStore.hasSendSourceCommand {
       let broberData = SKBrokerData(broker: broker.name, features: features)
@@ -73,7 +76,11 @@ public class SkarbSDK {
     
     // V4
     if !SKServiceRegistry.commandStore.hasSendSourceV4Command(broker: broker) {
-      let attributionRequest = Installapi_AttribRequest(broker: broker.name, features: features)
+      let attributionRequest = Installapi_AttribRequest(
+        broker: broker.name,
+        features: features,
+        brokerUserID: brokerUserID
+      )
       let sourceV4Command = SKCommand(commandType: .sourceV4,
                                       status: .pending,
                                       data: attributionRequest.getData())

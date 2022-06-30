@@ -93,7 +93,9 @@ In delegate mothod:
 import SkarbSDK
 
 func onConversionDataSuccess(_ conversionInfo: [AnyHashable : Any]) {
-    SkarbSDK.sendSource(broker: .appsflyer, features: conversionInfo)
+    SkarbSDK.sendSource(broker: .appsflyer,
+                        features: conversionInfo,
+                        brokerUserID: AppsFlyerLib.shared().getAppsFlyerUID())
 }
 ```
 

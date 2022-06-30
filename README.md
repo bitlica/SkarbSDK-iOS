@@ -58,13 +58,15 @@ Using for loging the attribution.
 import SkarbSDK
 
 SkarbSDK.sendSource(broker: SKBroker,
-                    features: [String: Any])
+                    features: [String: Any],
+                    brokerUserID: String?)
 ```
 #### Params:
 ```broker``` indicates what service you use for attribution. There are three predefined brokers: ```facebook```, ```searchads```, ```appsflyer```. Also might be used any value - ```SKBroker.custom(String)```.
 
 ```features```. See features paragraphe, supported features has a string type, not supported are ignored silently. 
 
+```brokerUserID```. Use the unique userID for this SKBroker if you want to use postbacks. For example, for Appsflyer - AppsFlyerLib.shared().getAppsFlyerUID()
 
 ### Send purchase event 
 

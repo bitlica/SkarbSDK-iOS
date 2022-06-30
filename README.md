@@ -68,24 +68,6 @@ SkarbSDK.sendSource(broker: SKBroker,
 
 ```brokerUserID```. Use the unique userID for this SKBroker if you want to use postbacks. For example, for Appsflyer - AppsFlyerLib.shared().getAppsFlyerUID()
 
-### Send purchase event 
-
-You have to use this call if ```isObservable``` during initialization is ```false```.
-
-```swift
-import SkarbSDK
-
-SkarbSDK.sendPurchase(productId: String,
-                      price: Float,
-                      currency: String)													 
-```
-#### Params:
-```productId``` It’s a SKProduct.productIdentifier of purchased product
-
-```price``` It’s a SKProduct.price
-
-```currency``` It’s SKProduct.priceLocale.currencyCode
-
 #### Example for Appsflyer:
 In delegate mothod:
 

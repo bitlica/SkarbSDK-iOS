@@ -135,6 +135,11 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.saveCommand(idfaV4Command)
   }
   
+  public static func validateReceipt(completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+    SKServiceRegistry.serverAPI.verifyReceipt(completion: completion)
+  }
+  
+//  MARK: Private
   private static func generateDeviceId() -> String {
     return UUID().uuidString
   }

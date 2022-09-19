@@ -150,7 +150,7 @@ class SKServerAPIImplementaton: SKServerAPI {
         case .idfaV4:
           guard let idfaRequest = try? decoder.decode(Installapi_IDFARequest.self, from: command.data) else {
             let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
-            SKLogger.logError("SyncCommand called with testV4. Installapi_IDFARequest cannt be decoded",
+            SKLogger.logError("SyncCommand called with idfaV4. Installapi_IDFARequest cannt be decoded",
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                          SKLoggerFeatureType.internalValue.name: value])
             return
@@ -190,6 +190,38 @@ class SKServerAPIImplementaton: SKServerAPI {
                                     }
       })
       executeRequest(skRequest)
+    }
+  }
+  
+  func verifyReceipt(completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+    let callOption = CallOptions(timeLimit: .timeout(.seconds(20)))
+    let purchaseService = Purchaseapi_IngesterClient(channel: clientChannel, defaultCallOptions: callOption)
+    var verifyRequest = Purchaseapi_VerifyReceiptRequest()
+    verifyRequest.auth = Auth_Auth.createDefault()
+    verifyRequest.installID = SkarbSDK.getDeviceId()
+    let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
+    if let appStoreReceiptURL = appStoreReceiptURL,
+       let recieptData = try? Data(contentsOf: appStoreReceiptURL) {
+      verifyRequest.receipt = recieptData
+    } else {
+      verifyRequest.receipt = Data()
+      SKLogger.logError("Create purchase for V4. recieptData is nil",
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+    }
+    let call = purchaseService.verifyReceipt(verifyRequest)
+    call.initialMetadata.whenComplete({ [weak self] result in
+//      self?.validateGrpcResponseResult(result, command: command) // TODO:
+    })
+    call.response.whenComplete { result in
+      SKLogger.logNetwork("SKResponse is \(result) for commandType = verifyReceipt")
+      switch result {
+        case .success(let verifyReceiptResponse):
+          completion(.success(SKVerifyReceipt(verifyReceiptResponse: verifyReceiptResponse)))
+        case .failure(let error):
+//        TODO:
+          let message = (error as? GRPCStatus)?.message ?? error.localizedDescription
+          completion(.failure(SKResponseError(errorCode: error.code, message: message)))
+      }
     }
   }
 }
@@ -293,6 +325,18 @@ private extension SKServerAPIImplementaton {
   func handleGrpcPurchaseResult(_ result: Result<Purchaseapi_ReceiptResponse, Error>,
                                 commandType: SKCommandType,
                                 completion: ((SKResponseError?) -> Void)?) {
+    SKLogger.logNetwork("SKResponse is \(result) for commandType = \(commandType)")
+    switch result {
+      case .success:
+        completion?(nil)
+      case .failure(let error):
+        completion?(SKResponseError(errorCode: error.code, message: error.localizedDescription + "\n" + "\(result)"))
+    }
+  }
+  
+  func handleGrpcVerifyReceiptResult(_ result: Result<Purchaseapi_VerifyReceiptResponse, Error>,
+                                     commandType: SKCommandType,
+                                     completion: ((SKResponseError?) -> Void)?) {
     SKLogger.logNetwork("SKResponse is \(result) for commandType = \(commandType)")
     switch result {
       case .success:

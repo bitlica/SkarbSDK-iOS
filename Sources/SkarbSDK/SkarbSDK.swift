@@ -139,6 +139,10 @@ public class SkarbSDK {
     SKServiceRegistry.serverAPI.verifyReceipt(completion: completion)
   }
   
+  public static func getOfferings(completion: @escaping (Result<SKOfferings, Error>) -> Void) {
+    SKServiceRegistry.serverAPI.getOfferings(completion: completion)
+  }
+  
 //  MARK: Private
   private static func generateDeviceId() -> String {
     return UUID().uuidString

@@ -224,6 +224,32 @@ class SKServerAPIImplementaton: SKServerAPI {
       }
     }
   }
+  
+  func getOfferings(completion: @escaping (Result<SKOfferings, Error>) -> Void) {
+    let callOption = CallOptions(timeLimit: .timeout(.seconds(20)))
+    let offeringsService = Setupsapi_SetupsClient(channel: clientChannel, defaultCallOptions: callOption)
+    
+    var offeringsRequest = Setupsapi_OfferingsRequest()
+    offeringsRequest.auth = Auth_Auth.createDefault()
+    offeringsRequest.installID = SkarbSDK.getDeviceId()
+    
+    let call = offeringsService.getOfferings(offeringsRequest)
+    call.initialMetadata.whenComplete({ [weak self] result in
+//      self?.validateGrpcResponseResult(result, command: command) // TODO:
+    })
+    call.response.whenComplete { result in
+      SKLogger.logNetwork("SKResponse is \(result) for commandType = verifyReceipt")
+      switch result {
+        case .success(let offeringsResponse):
+          print(offeringsResponse)
+          completion(.success(SKOfferings(offeringsResponse: offeringsResponse)))
+        case .failure(let error):
+//        TODO:
+          let message = (error as? GRPCStatus)?.message ?? error.localizedDescription
+          completion(.failure(SKResponseError(errorCode: error.code, message: message)))
+      }
+    }
+  }
 }
 
 private extension SKServerAPIImplementaton {

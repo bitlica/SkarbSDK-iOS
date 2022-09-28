@@ -55,7 +55,7 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
           let call = installService.setDevice(deviceRequest)
           call.initialMetadata.whenComplete({ [weak self] result in
-            self?.validateGrpcResponseResult(result, command: command)
+            self?.validateGrpcResponseResult(result, commandType: command.commandType.rawValue, retryCount: command.retryCount)
           })
           call.response.whenComplete { [weak self] result in
             self?.handleGrpcResponseResult(result,
@@ -72,7 +72,7 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
           let call = installService.setAttribution(attribRequest)
           call.initialMetadata.whenComplete({ [weak self] result in
-            self?.validateGrpcResponseResult(result, command: command)
+            self?.validateGrpcResponseResult(result, commandType: command.commandType.rawValue, retryCount: command.retryCount)
           })
           call.response.whenComplete { [weak self] result in
             self?.handleGrpcResponseResult(result,
@@ -89,7 +89,7 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
           let call = installService.setTest(testRequest)
           call.initialMetadata.whenComplete({ [weak self] result in
-            self?.validateGrpcResponseResult(result, command: command)
+            self?.validateGrpcResponseResult(result, commandType: command.commandType.rawValue, retryCount: command.retryCount)
           })
           call.response.whenComplete { [weak self] result in
             self?.handleGrpcResponseResult(result,
@@ -106,7 +106,7 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
           let call = purchaseService.setReceipt(purchaseRequest)
           call.initialMetadata.whenComplete({ [weak self] result in
-            self?.validateGrpcResponseResult(result, command: command)
+            self?.validateGrpcResponseResult(result, commandType: command.commandType.rawValue, retryCount: command.retryCount)
           })
           call.response.whenComplete { [weak self] result in
             self?.handleGrpcPurchaseResult(result,
@@ -123,7 +123,7 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
           let call = purchaseService.setTransactions(transactionRequest)
           call.initialMetadata.whenComplete({ [weak self] result in
-            self?.validateGrpcResponseResult(result, command: command)
+            self?.validateGrpcResponseResult(result, commandType: command.commandType.rawValue, retryCount: command.retryCount)
           })
           call.response.whenComplete { [weak self] result in
             self?.handleGrpcResponseResult(result,
@@ -140,7 +140,7 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
           let call = priceService.setPrices(priceRequest)
           call.initialMetadata.whenComplete({ [weak self] result in
-            self?.validateGrpcResponseResult(result, command: command)
+            self?.validateGrpcResponseResult(result, commandType: command.commandType.rawValue, retryCount: command.retryCount)
           })
           call.response.whenComplete { [weak self] result in
             self?.handleGrpcResponseResult(result,
@@ -157,7 +157,7 @@ class SKServerAPIImplementaton: SKServerAPI {
           }
           let call = installService.setIDFA(idfaRequest)
           call.initialMetadata.whenComplete({ [weak self] result in
-            self?.validateGrpcResponseResult(result, command: command)
+            self?.validateGrpcResponseResult(result, commandType: command.commandType.rawValue, retryCount: command.retryCount)
           })
           call.response.whenComplete { [weak self] result in
             self?.handleGrpcResponseResult(result,
@@ -210,17 +210,20 @@ class SKServerAPIImplementaton: SKServerAPI {
     }
     let call = purchaseService.verifyReceipt(verifyRequest)
     call.initialMetadata.whenComplete({ [weak self] result in
-//      self?.validateGrpcResponseResult(result, command: command) // TODO:
+      self?.validateGrpcResponseResult(result, commandType: 98, retryCount: 0)
     })
     call.response.whenComplete { result in
       SKLogger.logNetwork("SKResponse is \(result) for commandType = verifyReceipt")
       switch result {
         case .success(let verifyReceiptResponse):
-          completion(.success(SKVerifyReceipt(verifyReceiptResponse: verifyReceiptResponse)))
+          DispatchQueue.main.async {
+            completion(.success(SKVerifyReceipt(verifyReceiptResponse: verifyReceiptResponse)))
+          }
         case .failure(let error):
-//        TODO:
           let message = (error as? GRPCStatus)?.message ?? error.localizedDescription
-          completion(.failure(SKResponseError(errorCode: error.code, message: message)))
+          DispatchQueue.main.async {
+            completion(.failure(SKResponseError(errorCode: error.code, message: message)))
+          }
       }
     }
   }
@@ -235,18 +238,21 @@ class SKServerAPIImplementaton: SKServerAPI {
     
     let call = offeringsService.getOfferings(offeringsRequest)
     call.initialMetadata.whenComplete({ [weak self] result in
-//      self?.validateGrpcResponseResult(result, command: command) // TODO:
+      self?.validateGrpcResponseResult(result, commandType: 99, retryCount: 0)
     })
     call.response.whenComplete { result in
       SKLogger.logNetwork("SKResponse is \(result) for commandType = verifyReceipt")
       switch result {
         case .success(let offeringsResponse):
           print(offeringsResponse)
-          completion(.success(SKOfferings(offeringsResponse: offeringsResponse)))
+          DispatchQueue.main.async {
+            completion(.success(SKOfferings(offeringsResponse: offeringsResponse)))
+          }
         case .failure(let error):
-//        TODO:
           let message = (error as? GRPCStatus)?.message ?? error.localizedDescription
-          completion(.failure(SKResponseError(errorCode: error.code, message: message)))
+          DispatchQueue.main.async {
+            completion(.failure(SKResponseError(errorCode: error.code, message: message)))
+          }
       }
     }
   }
@@ -314,7 +320,9 @@ private extension SKServerAPIImplementaton {
     return SKServerAPIImplementaton.serverName + command.commandType.endpoint
   }
   
-  func validateGrpcResponseResult(_ result: Result<HPACKHeaders, Error>, command: SKCommand) {
+  func validateGrpcResponseResult(_ result: Result<HPACKHeaders, Error>,
+                                  commandType: Int,
+                                  retryCount: Int) {
     switch result {
       case .success(let headers):
         guard let status = headers.first(name: ":status"),
@@ -326,8 +334,8 @@ private extension SKServerAPIImplementaton {
           message.append("\(header.name): \(header.value)\n")
         }
         var features: [String: Any] = [:]
-        features[SKLoggerFeatureType.requestType.name] = command.commandType.rawValue
-        features[SKLoggerFeatureType.retryCount.name] = command.retryCount
+        features[SKLoggerFeatureType.requestType.name] = commandType
+        features[SKLoggerFeatureType.retryCount.name] = retryCount
         features[SKLoggerFeatureType.responseStatus.name] = status
         features[SKLoggerFeatureType.connection.name] = SKServiceRegistry.syncService.connection?.description
         SKLogger.logError("GRPC status validation code is not 200", features: features)

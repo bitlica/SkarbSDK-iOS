@@ -8,7 +8,7 @@
 import Foundation
 
 public struct SKOfferings {
-  let offerings: [SKOffering]
+  public let offerings: [SKOffering]
   
   init(offeringsResponse: Setupsapi_OfferingsResponse) {
     offerings = offeringsResponse.data.map({ SKOffering(offering: $0) })
@@ -16,9 +16,9 @@ public struct SKOfferings {
 }
 
 public struct SKOffering {
-  let id: String
-  let description: String
-  let packages: [SKOfferPackage]
+  public let id: String
+  public let description: String
+  public let packages: [SKOfferPackage]
   
   init(offering: Setupsapi_Offering) {
     id = offering.id
@@ -28,9 +28,9 @@ public struct SKOffering {
 }
 
 public struct SKOfferPackage {
-  let id: String
-  let description: String
-  let products: [String]
+  public let id: String
+  public let description: String
+  public let products: [String]
   
   init(package: Setupsapi_Package) {
     id = package.id

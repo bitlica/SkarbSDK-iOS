@@ -9,9 +9,9 @@ import Foundation
 import SwiftProtobuf
 
 public struct SKVerifyReceipt {
-  var environment: String
-  var activeSubscriptions: [SKActiveSubscription] = []
-  var nonSubscriptions: [NonSubscription] = []
+  public var environment: String
+  public var activeSubscriptions: [SKActiveSubscription] = []
+  public var nonSubscriptions: [NonSubscription] = []
   
   init(verifyReceiptResponse: Purchaseapi_VerifyReceiptResponse) {
     self.environment = verifyReceiptResponse.environment
@@ -20,14 +20,14 @@ public struct SKVerifyReceipt {
 }
 
 public struct SKActiveSubscription {
-  let transactionID: String
-  let originalTransactionID: String
-  let expiryDate: Date
-  let productID: String
-  let quantity: Int32
-  let introOfferPeriod: Bool
-  let trialPeriod: Bool
-  let renewalInfo: String
+  public let transactionID: String
+  public let originalTransactionID: String
+  public let expiryDate: Date
+  public let productID: String
+  public let quantity: Int32
+  public let introOfferPeriod: Bool
+  public let trialPeriod: Bool
+  public let renewalInfo: String
   
   init(activeSubscription: Purchaseapi_ActiveSubscription) {
     transactionID = activeSubscription.transactionID
@@ -42,11 +42,11 @@ public struct SKActiveSubscription {
 }
 
 public struct NonSubscription {
-  let transactionID: String
-  let originalTransactionID: String
-  let purchaseDate: Date
-  let productID: String
-  let quantity: Int32
+  public let transactionID: String
+  public let originalTransactionID: String
+  public let purchaseDate: Date
+  public let productID: String
+  public let quantity: Int32
   
   init(nonSubscription: Purchaseapi_NonSubscription) {
     transactionID = nonSubscription.transactionID

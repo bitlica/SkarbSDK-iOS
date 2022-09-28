@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import StoreKit
 
 public class SkarbSDK {
   
@@ -135,12 +136,67 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.saveCommand(idfaV4Command)
   }
   
+  /// Verify receipt for user purchases.
+  /// Might be called on the any thread. Callback will be on the main thread
   public static func validateReceipt(completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
     SKServiceRegistry.serverAPI.verifyReceipt(completion: completion)
   }
   
+  /// Might be called on the any thread. Callback will be on the main thread
   public static func getOfferings(completion: @escaping (Result<SKOfferings, Error>) -> Void) {
     SKServiceRegistry.serverAPI.getOfferings(completion: completion)
+  }
+  
+  /// Restore all purchases
+  /// Should be called on the main thread. Callback will be on the main thread
+  /// - Note: This may force your users to enter the App Store password so should only be performed on request of
+  /// the user. Typically with a button in settings or near your purchase UI.
+  public static func restorePurchases(compltion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+    SKServiceRegistry.storeKitService.restorePurchases(compltion: { result in
+      switch result {
+      case .success:
+        validateReceipt(completion: compltion)
+      case .failure(let error):
+        compltion(.failure(error))
+      }
+    })
+  }
+  
+  /// Should be called on the main thread. Callback will be on the main thread
+  public static func purchaseProduct(_ product: SKProduct, compltion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+    guard SKServiceRegistry.storeKitService.canMakePayments else {
+      compltion(.failure(SKResponseError(errorCode: 0, message: "You don't have permission to make payments.")))
+      return
+    }
+    SKServiceRegistry.storeKitService.purchaseProduct(product, completion: { result in
+      switch result {
+      case .success:
+        validateReceipt(completion: compltion)
+      case .failure(let error):
+        compltion(.failure(error))
+      }
+    })
+  }
+  
+  /// Should be called on the main thread. Callback will be on the main thread
+  public static func purchasePackage(_ package: SKOfferPackage, compltion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+    guard SKServiceRegistry.storeKitService.canMakePayments else {
+      compltion(.failure(SKResponseError(errorCode: 0, message: "You don't have permission to make payments.")))
+      return
+    }
+    SKServiceRegistry.storeKitService.purchasePackage(package, completion: { result in
+      switch result {
+      case .success:
+        validateReceipt(completion: compltion)
+      case .failure(let error):
+        compltion(.failure(error))
+      }
+    })
+  }
+  
+  //  Indicates whether the user is allowed to make payments.
+  public static func canMakePayments() -> Bool {
+    return SKServiceRegistry.storeKitService.canMakePayments
   }
   
 //  MARK: Private

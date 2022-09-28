@@ -13,7 +13,9 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   
   private let isObservable: Bool
   private let paymentQueue: SKPaymentQueue
-  private var productInfoCompletion: (([SKProduct]) -> Void)?
+  private var productInfoCompletion: ((Result<[SKProduct], Error>) -> Void)?
+  private var restorePurchasingCompletion: ((Result<Bool, Error>) -> Void)?
+  private var purchasingProductCompletion: ((Result<Bool, Error>) -> Void)?
   
   private let exclusionSerialQueue = DispatchQueue(label: "com.skarbSDK.skStoreKitService.exclusion")
   
@@ -35,6 +37,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     self.paymentQueue.add(self)
   }
   
+//  MARK: Public
   func requestProductInfoAndSendPurchase(command: SKCommand) {
     var editedCommand = command
     let decoder = JSONDecoder()
@@ -46,64 +49,106 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
       return
     }
     
-    requestProductInfo(productIds: fetchProducts.map({ $0.productId })) { [weak self] products in
-      if let product = products.first {
-        SkarbSDK.sendPurchase(productId: product.productIdentifier,
-                              price: product.price.floatValue,
-                              currency: product.priceLocale.currencyCode ?? "")
-        editedCommand.changeStatus(to: .done)
-      } else {
-        editedCommand.updateRetryCountAndFireDate()
-        editedCommand.changeStatus(to: .pending)
+    requestProductInfo(productIds: fetchProducts.map({ $0.productId })) { [weak self] result in
+      switch result {
+        case .success(let products):
+          if let product = products.first {
+            SkarbSDK.sendPurchase(productId: product.productIdentifier,
+                                  price: product.price.floatValue,
+                                  currency: product.priceLocale.currencyCode ?? "")
+            editedCommand.changeStatus(to: .done)
+          } else {
+            editedCommand.updateRetryCountAndFireDate()
+            editedCommand.changeStatus(to: .pending)
+          }
+          SKServiceRegistry.commandStore.saveCommand(editedCommand)
+          
+          // V4. Send command for price
+          self?.createPriceCommand(fetchProducts: fetchProducts,
+                                   products: products,
+                                   command: editedCommand)
+        case .failure(let error):
+          SKLogger.logInfo("Getting error during fetching products. Error = \(error.localizedDescription)")
       }
-      SKServiceRegistry.commandStore.saveCommand(editedCommand)
-      
-      // V4. Send command for price
-      self?.createPriceCommand(fetchProducts: fetchProducts,
-                               products: products,
-                               command: editedCommand)
     }
+  }
+  
+  func restorePurchases(compltion: @escaping (Result<Bool, Error>) -> Void) {
+    dispatchPrecondition(condition: .onQueue(.main))
+    SKLogger.logInfo("calling restorePurchases with SKPaymentQueue.restoreCompletedTransactions")
+    restorePurchasingCompletion = compltion
+    paymentQueue.restoreCompletedTransactions()
+  }
+  
+  func purchaseProduct(_ product: SKProduct, completion: @escaping (Result<Bool, Error>) -> Void) {
+    dispatchPrecondition(condition: .onQueue(.main))
+    SKLogger.logInfo("calling purchaseProduct with productId = \(product.productIdentifier)")
+    let payment = SKMutablePayment(product: product)
+    SKPaymentQueue.default().add(payment)
+    purchasingProductCompletion = completion
+  }
+  
+  func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<Bool, Error>) -> Void) {
+    guard let product = allProducts?.first(where: { $0.productIdentifier == package.products.first }) else {
+      requestProductInfo(productIds: package.products, completion: { [weak self] result in
+        switch result {
+          case .success(let products):
+            guard let product = products.first(where: { $0.productIdentifier == package.products.first }) else {
+              completion(.failure(SKResponseError(errorCode: 0, message: "Can't find productID in pacjage in [SKProducts] from App Store")))
+              return
+            }
+            self?.purchaseProduct(product, completion: completion)
+          case .failure(let error):
+            completion(.failure(error))
+        }
+      })
+      return
+    }
+    
+    purchaseProduct(product, completion: completion)
+  }
+  
+  var canMakePayments: Bool {
+    return SKPaymentQueue.canMakePayments()
   }
 }
 
+//MARK: SKPaymentTransactionObserver
 extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
   
   
   /// Sent when the transaction array has changed (additions or state changes).  Client should check state of transactions and finish as appropriate.
   public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
+    var purchasedTransactions: [SKPaymentTransaction] = []
     
-    DispatchQueue.main.async { [weak self] in
-      
-      guard let self = self,
-            self.isObservable else {
-        return
+    transactions.forEach { transaction in
+      switch transaction.transactionState {
+        case .purchased:
+          purchasedTransactions.append(transaction)
+        case .failed:
+          failed(transaction)
+        case .restored:
+          restored(transaction)
+        case .deferred, .purchasing: break
+        @unknown default: break
       }
-      
-      let purchasedTransactions = transactions.filter { $0.transactionState == .purchased }
-      guard !purchasedTransactions.isEmpty else {
-        return
-      }
-      
-      
-      for transaction in purchasedTransactions {
-        SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
-      }
-      
-      self.sendPurchase(purchasedTransactions: purchasedTransactions)
-      self.createFetchProductsCommand(purchasedTransactions: purchasedTransactions)
-      // V4 part
-      self.createPurchaseAndTransactionCommand(purchasedTransactions: purchasedTransactions)
     }
+    
+    purchased(purchasedTransactions)
   }
   
   /// Sent when all transactions from the user's purchase history have successfully been added back to the queue.
   public func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
     SKLogger.logInfo("paymentQueueRestoreCompletedTransactionsFinished was called")
+    restorePurchasingCompletion?(.success(true))
+    restorePurchasingCompletion = nil
   }
   
   /// Sent when an error is encountered while adding transactions from the user's purchase history back to the queue.
   public func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
     SKLogger.logInfo(String(format: "paymentQueueRestoreCompletedTransactionsFailedWithError was called with error %@", error.localizedDescription))
+    restorePurchasingCompletion?(.failure(error))
+    restorePurchasingCompletion = nil
   }
 }
 
@@ -120,19 +165,26 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
     }
     SKLogger.logInfo("SKRequestDelegate fetched products successful")
     
-    productInfoCompletion?(allProducts ?? [])
+    DispatchQueue.main.async {
+      self.productInfoCompletion?(.success(self.allProducts ?? []))
+    }
   }
   
   func request(_ request: SKRequest, didFailWithError error: Error) {
     
     SKLogger.logInfo("SKRequestDelegate got called with didFailWithError: \(error)")
     
-    productInfoCompletion?([])
+    DispatchQueue.main.async {
+      self.productInfoCompletion?(.success(self.allProducts ?? []))
+    }
   }
 }
 
+//MARK: Private
 private extension SKStoreKitServiceImplementation {
-  func requestProductInfo(productIds: [String], completion: @escaping ([SKProduct]) -> Void) {
+  
+  /// Mignt be called on any thread. Callback wil be on the main thread
+  func requestProductInfo(productIds: [String], completion: @escaping (Result<[SKProduct], Error>) -> Void) {
     dispatchPrecondition(condition: .onQueue(.main))
     
     productInfoCompletion = completion
@@ -141,6 +193,52 @@ private extension SKStoreKitServiceImplementation {
     request.delegate = self
     
     request.start()
+  }
+  
+  private func purchased(_ transactions: [SKPaymentTransaction]) {
+
+    guard !transactions.isEmpty else {
+      return
+    }
+    
+    // Sends success callback if purchasing was initiated by SkarbSDK.purchaseProduct(...) method
+    self.purchasingProductCompletion?(.success(true))
+    
+    for transaction in transactions {
+      SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
+    }
+    
+    self.sendPurchase(purchasedTransactions: transactions)
+    self.createFetchProductsCommand(purchasedTransactions: transactions)
+    // V4 part
+    self.createPurchaseAndTransactionCommand(purchasedTransactions: transactions)
+    
+    if !isObservable {
+      transactions.forEach { paymentQueue.finishTransaction($0) }
+    }
+  }
+  
+  private func restored(_ transaction: SKPaymentTransaction) {
+    if !isObservable {
+      SKPaymentQueue.default().finishTransaction(transaction)
+    }
+  }
+  
+  private func failed(_ transaction: SKPaymentTransaction) {
+    if !isObservable {
+      SKPaymentQueue.default().finishTransaction(transaction)
+    }
+    
+    guard let error = transaction.error as? SKError else {
+      if let error = transaction.error {
+        purchasingProductCompletion?(.failure(error))
+      } else {
+        purchasingProductCompletion?(.failure(SKResponseError(errorCode: 0, message: "Purchasing failed")))
+      }
+      return
+    }
+    
+    purchasingProductCompletion?(.failure(error))
   }
   
   ///V3

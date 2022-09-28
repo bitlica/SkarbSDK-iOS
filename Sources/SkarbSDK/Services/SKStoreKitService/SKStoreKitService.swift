@@ -11,4 +11,9 @@ import StoreKit
 
 protocol SKStoreKitService {
   func requestProductInfoAndSendPurchase(command: SKCommand)
+  func restorePurchases(compltion: @escaping (Result<Bool, Error>) -> Void)
+  func purchaseProduct(_ product: SKProduct, completion: @escaping (Result<Bool, Error>) -> Void)
+  func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<Bool, Error>) -> Void)
+  
+  var canMakePayments: Bool { get }
 }

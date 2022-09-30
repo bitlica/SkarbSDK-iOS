@@ -13,7 +13,7 @@ import StoreKit
 public class SkarbSDK {
   
   static let agentName: String = "SkarbSDK-iOS"
-  static let version: String = "0.5.7"
+  static let version: String = "0.6.1"
   
   static var clientId: String = ""
   public static var isLoggingEnabled: Bool = false

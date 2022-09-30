@@ -13,7 +13,7 @@ In addition, you could enrich these events with features obtained from the traff
 [CocoaPods](https://cocoapods.org) is a dependency manager for Cocoa projects. For usage and installation instructions, visit their website. To integrate SkarbSDK into your Xcode project using CocoaPods, specify it in your `Podfile`:
 
 ```ruby
-pod 'SkarbSDK', '~> 0.5'
+pod 'SkarbSDK', '~> 0.6'
 ```
 
 ### Swift Package Manager
@@ -24,7 +24,7 @@ Once you have your Swift package set up, adding SkarbSDK as a dependency is as e
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/bitlica/SkarbSDK.git", .upToNextMajor(from: "0.5.7"))
+    .package(url: "https://github.com/bitlica/SkarbSDK.git", .upToNextMajor(from: "0.6.1"))
 ]
 ```
 

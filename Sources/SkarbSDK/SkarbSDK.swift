@@ -24,31 +24,23 @@ public class SkarbSDK {
                                 deviceId: String? = nil) {
     
     SkarbSDK.clientId = clientId
-    let deviceId = deviceId ?? generateDeviceId()
+    if let deviceId = deviceId {
+      saveDeviceId(deviceId)
+    }
     
     // Order is matter:
     // needs to be sure that install command data exists always
     // because some data are used in other commands and should not be nil
-    SKServiceRegistry.migrationService.doMigrationIfNeeded(deviceId: deviceId)
-    SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId, deviceId: deviceId)
+    SKServiceRegistry.migrationService.doMigrationIfNeeded()
+    SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId)
     SKServiceRegistry.commandStore.createIDFACommandIfNeeded(automaticCollectIDFA: automaticCollectIDFA)
     SKServiceRegistry.initialize(isObservable: isObservable)
     useAutomaticAppleSearchAdsAttributionCollection(true)
   }
   
+  //    MARK: Public
   public static func sendTest(name: String,
                               group: String) {
-    //    V3
-    if !SKServiceRegistry.commandStore.hasTestCommand {
-      let testData = SKTestData(name: name, group: group)
-      SKServiceRegistry.userDefaultsService.setValue(testData.getData(), forKey: .testData)
-      
-      let testCommand = SKCommand(commandType: .test,
-                                  status: .pending,
-                                  data: SKCommand.prepareAppgateData())
-      SKServiceRegistry.commandStore.saveCommand(testCommand)
-    }
-    
     // V4
     if !SKServiceRegistry.commandStore.hasTestV4Command {
       let testRequest = Installapi_TestRequest(name: name, group: group)
@@ -64,17 +56,6 @@ public class SkarbSDK {
   public static func sendSource(broker: SKBroker,
                                 features: [AnyHashable: Any],
                                 brokerUserID: String?) {
-    //    V3
-    if !SKServiceRegistry.commandStore.hasSendSourceCommand {
-      let broberData = SKBrokerData(broker: broker.name, features: features)
-      SKServiceRegistry.userDefaultsService.setValue(broberData.getData(), forKey: .brokerData)
-      
-      let sourceCommand = SKCommand(commandType: .source,
-                                    status: .pending,
-                                    data: SKCommand.prepareAppgateData())
-      SKServiceRegistry.commandStore.saveCommand(sourceCommand)
-    }
-    
     // V4
     if !SKServiceRegistry.commandStore.hasSendSourceV4Command(broker: broker) {
       let attributionRequest = Installapi_AttribRequest(
@@ -89,29 +70,10 @@ public class SkarbSDK {
     }
   }
   
-  public static func sendPurchase(productId: String,
-                                  price: Float,
-                                  currency: String) {
-    
-    guard !SKServiceRegistry.commandStore.hasPurhcaseCommand else {
-      return
-    }
-    
-    let purchaseData = SKPurchaseData(productId: productId,
-                                      price: price,
-                                      currency: currency)
-    SKServiceRegistry.userDefaultsService.setValue(purchaseData.getData(), forKey: .purchaseData)
-    
-    let purchaseCommand = SKCommand(commandType: .purchase,
-                                    status: .pending,
-                                    data: SKCommand.prepareAppgateData())
-    SKServiceRegistry.commandStore.saveCommand(purchaseCommand)
-  }
-  
   public static func getDeviceId() -> String {
     guard let deviceId = SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) else {
-      let deviceId = generateDeviceId()
-      SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
+      let deviceId = UUID().uuidString
+      saveDeviceId(deviceId)
       SKLogger.logError("SkarbSDK: getDeviceId() - deviceId is nil",
                         features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                    SKLoggerFeatureType.internalValue.name: "deviceId is nil"])
@@ -147,49 +109,50 @@ public class SkarbSDK {
     SKServiceRegistry.serverAPI.getOfferings(completion: completion)
   }
   
+  //    MARK: Purchasing flow
   /// Restore all purchases
   /// Should be called on the main thread. Callback will be on the main thread
   /// - Note: This may force your users to enter the App Store password so should only be performed on request of
   /// the user. Typically with a button in settings or near your purchase UI.
-  public static func restorePurchases(compltion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+  public static func restorePurchases(completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
     SKServiceRegistry.storeKitService.restorePurchases(compltion: { result in
       switch result {
-      case .success:
-        validateReceipt(completion: compltion)
-      case .failure(let error):
-        compltion(.failure(error))
+        case .success:
+          validateReceipt(completion: completion)
+        case .failure(let error):
+          completion(.failure(error))
       }
     })
   }
   
   /// Should be called on the main thread. Callback will be on the main thread
-  public static func purchaseProduct(_ product: SKProduct, compltion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+  public static func purchaseProduct(_ product: SKProduct, completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
     guard SKServiceRegistry.storeKitService.canMakePayments else {
-      compltion(.failure(SKResponseError(errorCode: 0, message: "You don't have permission to make payments.")))
+      completion(.failure(SKResponseError(errorCode: 0, message: "You don't have permission to make payments.")))
       return
     }
     SKServiceRegistry.storeKitService.purchaseProduct(product, completion: { result in
       switch result {
-      case .success:
-        validateReceipt(completion: compltion)
-      case .failure(let error):
-        compltion(.failure(error))
+        case .success:
+          validateReceipt(completion: completion)
+        case .failure(let error):
+          completion(.failure(error))
       }
     })
   }
   
   /// Should be called on the main thread. Callback will be on the main thread
-  public static func purchasePackage(_ package: SKOfferPackage, compltion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+  public static func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
     guard SKServiceRegistry.storeKitService.canMakePayments else {
-      compltion(.failure(SKResponseError(errorCode: 0, message: "You don't have permission to make payments.")))
+      completion(.failure(SKResponseError(errorCode: 0, message: "You don't have permission to make payments.")))
       return
     }
     SKServiceRegistry.storeKitService.purchasePackage(package, completion: { result in
       switch result {
-      case .success:
-        validateReceipt(completion: compltion)
-      case .failure(let error):
-        compltion(.failure(error))
+        case .success:
+          validateReceipt(completion: completion)
+        case .failure(let error):
+          completion(.failure(error))
       }
     })
   }
@@ -199,8 +162,8 @@ public class SkarbSDK {
     return SKServiceRegistry.storeKitService.canMakePayments
   }
   
-//  MARK: Private
-  private static func generateDeviceId() -> String {
-    return UUID().uuidString
+  //  MARK: Private
+  private static func saveDeviceId(_ deviceId: String) {
+    SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
   }
 }

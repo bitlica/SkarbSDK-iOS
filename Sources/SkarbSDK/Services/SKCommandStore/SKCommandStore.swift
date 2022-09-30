@@ -18,26 +18,10 @@ class SKCommandStore {
     localAppgateCommands = SKServiceRegistry.userDefaultsService.codableArray(forKey: .appgateComands, objectType: SKCommand.self)
   }
   
-  var hasInstallCommand: Bool {
-    var result = false
-    exclusionSerialQueue.sync {
-      result = localAppgateCommands.first(where: { $0.commandType == .install }) != nil
-    }
-    return result
-  }
-
   var hasInstallV4Command: Bool {
     var result = false
     exclusionSerialQueue.sync {
       result = localAppgateCommands.first(where: { $0.commandType == .installV4 }) != nil
-    }
-    return result
-  }
-  
-  var hasPurhcaseCommand: Bool {
-    var result = false
-    exclusionSerialQueue.sync {
-      result = localAppgateCommands.first(where: { $0.commandType == .purchase }) != nil
     }
     return result
   }
@@ -54,14 +38,6 @@ class SKCommandStore {
     var result = false
     exclusionSerialQueue.sync {
       result = localAppgateCommands.first(where: { $0.commandType == .automaticSearchAds }) != nil
-    }
-    return result
-  }
-  
-  var hasSendSourceCommand: Bool {
-    var result = false
-    exclusionSerialQueue.sync {
-      result = localAppgateCommands.first(where: { $0.commandType == .source }) != nil
     }
     return result
   }
@@ -86,14 +62,6 @@ class SKCommandStore {
           break
         }
       }
-    }
-    return result
-  }
-  
-  var hasTestCommand: Bool {
-    var result = false
-    exclusionSerialQueue.sync {
-      result = localAppgateCommands.first(where: { $0.commandType == .test }) != nil
     }
     return result
   }
@@ -223,32 +191,7 @@ class SKCommandStore {
     return Array(newTransactions)
   }
   
-  func createInstallCommandIfNeeded(clientId: String, deviceId: String) {
-    
-//    V3
-    if !SKServiceRegistry.commandStore.hasInstallCommand,
-       SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) == nil {
-      let installDate = Formatter.iso8601.string(from: Date())
-      let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
-      var dataCount: Int = 0
-      if let appStoreReceiptURL = appStoreReceiptURL,
-        let recieptData = try? Data(contentsOf: appStoreReceiptURL) {
-        dataCount = recieptData.count
-      }
-      
-      let initData = SKInitData(clientId: clientId,
-                                deviceId: deviceId,
-                                installDate: installDate,
-                                receiptUrl: appStoreReceiptURL?.absoluteString ?? "",
-                                receiptLen: dataCount)
-      SKServiceRegistry.userDefaultsService.setValue(initData.getData(), forKey: .initData)
-      
-      let installCommand = SKCommand(commandType: .install,
-                                     status: .pending,
-                                     data: SKCommand.prepareAppgateData())
-      SKServiceRegistry.commandStore.saveCommand(installCommand)
-    }
-    
+  func createInstallCommandIfNeeded(clientId: String) {
 //    V4
     if !SKServiceRegistry.commandStore.hasInstallV4Command {
       let nowDate = Date()

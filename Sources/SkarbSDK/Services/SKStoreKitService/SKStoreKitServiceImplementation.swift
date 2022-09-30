@@ -52,18 +52,13 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     requestProductInfo(productIds: fetchProducts.map({ $0.productId })) { [weak self] result in
       switch result {
         case .success(let products):
-          if let product = products.first {
-            SkarbSDK.sendPurchase(productId: product.productIdentifier,
-                                  price: product.price.floatValue,
-                                  currency: product.priceLocale.currencyCode ?? "")
+          if !products.isEmpty {
             editedCommand.changeStatus(to: .done)
           } else {
             editedCommand.updateRetryCountAndFireDate()
             editedCommand.changeStatus(to: .pending)
           }
           SKServiceRegistry.commandStore.saveCommand(editedCommand)
-          
-          // V4. Send command for price
           self?.createPriceCommand(fetchProducts: fetchProducts,
                                    products: products,
                                    command: editedCommand)
@@ -202,16 +197,14 @@ private extension SKStoreKitServiceImplementation {
     }
     
     // Sends success callback if purchasing was initiated by SkarbSDK.purchaseProduct(...) method
-    self.purchasingProductCompletion?(.success(true))
+    purchasingProductCompletion?(.success(true))
     
     for transaction in transactions {
       SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
     }
     
-    self.sendPurchase(purchasedTransactions: transactions)
-    self.createFetchProductsCommand(purchasedTransactions: transactions)
-    // V4 part
-    self.createPurchaseAndTransactionCommand(purchasedTransactions: transactions)
+    createFetchProductsCommand(purchasedTransactions: transactions)
+    createPurchaseAndTransactionCommand(purchasedTransactions: transactions)
     
     if !isObservable {
       transactions.forEach { paymentQueue.finishTransaction($0) }
@@ -241,18 +234,7 @@ private extension SKStoreKitServiceImplementation {
     purchasingProductCompletion?(.failure(error))
   }
   
-  ///V3
-  func sendPurchase(purchasedTransactions: [SKPaymentTransaction]) {
-    if let allProducts = self.allProducts,
-       let purchasedTransaction = purchasedTransactions.first,
-       let product = allProducts.filter({ $0.productIdentifier == purchasedTransaction.payment.productIdentifier }).first {
-      SkarbSDK.sendPurchase(productId: purchasedTransaction.payment.productIdentifier,
-                            price: product.price.floatValue,
-                            currency: product.priceLocale.currencyCode ?? "")
-    }
-  }
-  
-  /// V3 and V4. Create one SKFetchProduct or each unique productId
+  /// Create one SKFetchProduct or each unique productId.
   /// Need to attach the newest transaction Date and Id
   func createFetchProductsCommand(purchasedTransactions: [SKPaymentTransaction]) {
     let productIds = Array(Set(purchasedTransactions.map { $0.payment.productIdentifier }))

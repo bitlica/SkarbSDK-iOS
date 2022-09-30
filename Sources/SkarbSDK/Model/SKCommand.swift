@@ -87,34 +87,6 @@ struct SKCommand {
     }
   }
   
-  static func prepareAppgateData() -> Data {
-    var params: [String: Any] = [:]
-    params["client"] = prepareClientData()
-    params["application"] = prepareApplicationData()
-    params["device"] = prepareDeviceData()
-    if let testData = SKServiceRegistry.userDefaultsService.codable(forKey: .testData, objectType: SKTestData.self) {
-      params["test"] = testData.getJSON()
-    }
-    if let brokerData = SKServiceRegistry.userDefaultsService.codable(forKey: .brokerData, objectType: SKBrokerData.self) {
-      params["source"] = brokerData.getJSON()
-    }
-    if let purchaseJSON = preparePurchaseData() {
-      params["purchase"] = purchaseJSON
-    }
-    var data: Data = Data()
-    guard JSONSerialization.isValidJSONObject(params) else {
-      SKLogger.logError("SKCommand prepareAppgateData: json isValidJSONObject", features: nil)
-      return data
-    }
-    do {
-      data = try JSONSerialization.data(withJSONObject: params, options: .fragmentsAllowed)
-    } catch {
-      SKLogger.logError("SKCommand prepareAppgateData: can't json serialization to Data", features: nil)
-    }
-    
-    return data
-  }
-  
   static func prepareApplogData(message: String, features: [String: Any]?) -> Data {
     var params: [String: Any] = [:]
     params["client"] = prepareClientData()
@@ -138,94 +110,8 @@ struct SKCommand {
   private static func prepareClientData() ->  [String: Any] {
     var params: [String: Any] = [:]
     params["timestamp"] = "\(Int(Date().timeIntervalSince1970 * 1000000))"
-    let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self)
-    params["client_id"] = initData?.clientId
+    params["client_id"] = SkarbSDK.clientId
     params["agent"] = SkarbSDK.agentName + SkarbSDK.version
-    return params
-  }
-  
-  private static func prepareApplicationData() -> [String: Any] {
-    
-    guard let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self) else {
-      var features: [String: Any] = [:]
-      features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
-      features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
-      let message = "SKCommand prepareApplicationData: called and initData is nil"
-      let command = SKCommand(commandType: .logging,
-                              status: .pending,
-                              data: SKCommand.prepareApplogData(message: message, features: features))
-      SKServiceRegistry.commandStore.saveCommand(command)
-      return [:]
-    }
-    
-    var params: [String: Any] = [:]
-    params["bundle_id"] = Bundle.main.bundleIdentifier
-    params["bundle_ver"] = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
-    params["device_id"] = initData.deviceId
-    params["date"] = initData.installDate
-    params["idfa"] = ASIdentifierManager.shared().advertisingIdentifier.uuidString
-    params["receipt_url"] = initData.receiptUrl
-    params["receipt_len"] = initData.receiptLen
-    
-    return params
-  }
-  
-  private static func prepareDeviceData() -> [String: Any] {
-    var params: [String: Any] = [:]
-    if let preferredLanguage = Locale.preferredLanguages.first {
-      params["locale"] = preferredLanguage
-    } else {
-      params["locale"] = "unknown"
-    }
-    var systemInfo = utsname()
-    uname(&systemInfo)
-    let machineMirror = Mirror(reflecting: systemInfo.machine)
-    let identifier = machineMirror.children.reduce("") { identifier, element in
-      guard let value = element.value as? Int8, value != 0 else { return identifier }
-      return identifier + String(UnicodeScalar(UInt8(value)))
-    }
-    params["device"] = identifier
-    params["os_ver"] = UIDevice.current.systemVersion
-    
-    return params
-  }
-  
-  private static func prepareTestData(name: String, group: String) -> [String: Any]? {
-    var params: [String: Any] = [:]
-    params["name"] = name
-    params["group"] = group
-    return params
-  }
-  
-  private static func preparePurchaseData() -> [String: Any]? {
-    
-    guard let purchaseData = SKServiceRegistry.userDefaultsService.codable(forKey: .purchaseData, objectType: SKPurchaseData.self) else {
-      return nil
-    }
-    
-    guard let appStoreReceiptURL = Bundle.main.appStoreReceiptURL else {
-      SKLogger.logError("SKCommand preparePurchaseData: called but appStoreReceiptURL == nil",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
-      return nil
-    }
-    
-    guard let recieptData = try? Data(contentsOf: appStoreReceiptURL) else {
-      SKLogger.logError("SKCommand preparePurchaseData: called but recieptData == nil",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
-      return nil
-    }
-    
-    if recieptData.isEmpty {
-      SKLogger.logError("SKCommand preparePurchaseData: called but recieptData is empty",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
-      return nil
-    }
-    var params: [String: Any] = [:]
-    params["product_id"] = purchaseData.productId
-    params["price"] = purchaseData.price
-    params["currency"] = purchaseData.currency
-    params["receipt"] = recieptData.base64EncodedString()
-    
     return params
   }
 }

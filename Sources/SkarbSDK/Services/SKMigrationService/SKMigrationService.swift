@@ -13,29 +13,16 @@ struct SKMigrationService {
   
   static let schemaVersion: Int = 1
   
-  func doMigrationIfNeeded(deviceId: String) {
+  func doMigrationIfNeeded() {
     
     let oldSchemaVersion = SKServiceRegistry.userDefaultsService.int(forKey: .oldSchemaVersion)
     if oldSchemaVersion < 1 {
-      migrateDeviceId(deviceId: deviceId)
       migrateFetchingProducts()
       migrateInstallCommand()
     }
     
     SKServiceRegistry.userDefaultsService.setValue(SKMigrationService.schemaVersion,
                                                    forKey: .oldSchemaVersion)
-  }
-  
-  /// Means that user has v3 version and need to store deviceId for V4
-  private func migrateDeviceId(deviceId: String) {
-    if let initData = SKServiceRegistry.userDefaultsService.codable(forKey: .initData, objectType: SKInitData.self),
-       SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) == nil  {
-      SKServiceRegistry.userDefaultsService.setValue(initData.deviceId, forKey: .deviceId)
-    } else {
-      if SKServiceRegistry.userDefaultsService.string(forKey: .deviceId) == nil {
-        SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
-      }
-    }
   }
   
   /// Need to migrate SKCommand for fetchProducts from old format

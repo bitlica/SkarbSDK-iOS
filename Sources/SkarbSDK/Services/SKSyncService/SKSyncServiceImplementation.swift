@@ -87,8 +87,7 @@ class SKSyncServiceImplementation: SKSyncService {
       SKLogger.logInfo("Command start executing: \(command.description)")
       
       switch command.commandType {
-        case .install, .source, .test, .purchase, .logging, .installV4, .sourceV4,
-            .testV4, .purchaseV4, .transactionV4, .priceV4, .idfaV4:
+        case .logging, .installV4, .sourceV4, .testV4, .purchaseV4, .transactionV4, .priceV4, .idfaV4:
           SKServiceRegistry.serverAPI.syncCommand(command, completion: { [weak self] error in
             if let error = error {
               var features: [String: Any] = [:]

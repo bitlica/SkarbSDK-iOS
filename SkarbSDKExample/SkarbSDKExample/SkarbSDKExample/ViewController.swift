@@ -22,13 +22,6 @@ class ViewController: UIViewController {
 
     SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID",
                         isObservable: true)
-    SkarbSDK.useAutomaticAppleSearchAdsAttributionCollection(true)
-    requestIDFA()
-    
-//    TODO: Change bundle name
-    SkarbSDK.validateReceipt(completion: { result in
-      
-    })
   }
   
   private func requestIDFA() {

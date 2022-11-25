@@ -13,9 +13,9 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   
   private let isObservable: Bool
   private let paymentQueue: SKPaymentQueue
-  private var productInfoCompletion: ((Result<[SKProduct], Error>) -> Void)?
   private var restorePurchasingCompletion: ((Result<Bool, Error>) -> Void)?
   private var purchasingProductCompletion: ((Result<Bool, Error>) -> Void)?
+//  TODO: Think about [Request: completion] dictionary for multiple calling purchasing
   
   private let exclusionSerialQueue = DispatchQueue(label: "com.skarbSDK.skStoreKitService.exclusion")
   
@@ -29,10 +29,14 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     return localAllProducts
   }
   
+  private typealias RequestProductCompletion = (Result<[SKProduct], Error>) -> Void
+  private var requestProductsCompletions: [SKRequest: RequestProductCompletion]
+  
   init(isObservable: Bool) {
     self.isObservable = isObservable
     self.paymentQueue = SKPaymentQueue.default()
     cachedAllProducts = []
+    requestProductsCompletions = [:]
     super.init()
     self.paymentQueue.add(self)
   }
@@ -49,7 +53,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
       return
     }
     
-    requestProductInfo(productIds: fetchProducts.map({ $0.productId })) { [weak self] result in
+    requestProductsInfo(productIds: fetchProducts.map({ $0.productId })) { [weak self] result in
       switch result {
         case .success(let products):
           if !products.isEmpty {
@@ -68,10 +72,10 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     }
   }
   
-  func restorePurchases(compltion: @escaping (Result<Bool, Error>) -> Void) {
+  func restorePurchases(completion: @escaping (Result<Bool, Error>) -> Void) {
     dispatchPrecondition(condition: .onQueue(.main))
     SKLogger.logInfo("calling restorePurchases with SKPaymentQueue.restoreCompletedTransactions")
-    restorePurchasingCompletion = compltion
+    restorePurchasingCompletion = completion
     paymentQueue.restoreCompletedTransactions()
   }
   
@@ -84,23 +88,25 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   }
   
   func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<Bool, Error>) -> Void) {
-    guard let product = allProducts?.first(where: { $0.productIdentifier == package.products.first }) else {
-      requestProductInfo(productIds: package.products, completion: { [weak self] result in
-        switch result {
-          case .success(let products):
-            guard let product = products.first(where: { $0.productIdentifier == package.products.first }) else {
-              completion(.failure(SKResponseError(errorCode: 0, message: "Can't find productID in pacjage in [SKProducts] from App Store")))
-              return
-            }
-            self?.purchaseProduct(product, completion: completion)
-          case .failure(let error):
-            completion(.failure(error))
-        }
-      })
-      return
+    purchaseProduct(package.storeProduct, completion: completion)
+  }
+  
+  /// Might be called on any thread. Callback wil be on the main thread
+  func requestProductsInfo(productIds: [String],
+                           completion: @escaping (Result<[SKProduct], Error>) -> Void) {
+    
+    let request = SKProductsRequest(productIdentifiers: Set(productIds))
+    request.delegate = self
+    
+    exclusionSerialQueue.sync {
+      requestProductsCompletions[request] = completion
     }
     
-    purchaseProduct(product, completion: completion)
+    request.start()
+  }
+  
+  func fetchProduct(by productId: String) -> SKProduct? {
+    return allProducts?.filter({ $0.productIdentifier == productId }).first
   }
   
   var canMakePayments: Bool {
@@ -135,15 +141,19 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
   /// Sent when all transactions from the user's purchase history have successfully been added back to the queue.
   public func paymentQueueRestoreCompletedTransactionsFinished(_ queue: SKPaymentQueue) {
     SKLogger.logInfo("paymentQueueRestoreCompletedTransactionsFinished was called")
-    restorePurchasingCompletion?(.success(true))
-    restorePurchasingCompletion = nil
+    DispatchQueue.main.async {
+      self.restorePurchasingCompletion?(.success(true))
+      self.restorePurchasingCompletion = nil
+    }
   }
   
   /// Sent when an error is encountered while adding transactions from the user's purchase history back to the queue.
   public func paymentQueue(_ queue: SKPaymentQueue, restoreCompletedTransactionsFailedWithError error: Error) {
     SKLogger.logInfo(String(format: "paymentQueueRestoreCompletedTransactionsFailedWithError was called with error %@", error.localizedDescription))
-    restorePurchasingCompletion?(.failure(error))
-    restorePurchasingCompletion = nil
+    DispatchQueue.main.async {
+      self.restorePurchasingCompletion?(.failure(error))
+      self.restorePurchasingCompletion = nil
+    }
   }
 }
 
@@ -153,7 +163,7 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
     
     exclusionSerialQueue.sync {
       for product in response.products {
-        if !cachedAllProducts.contains(product) {
+        if cachedAllProducts.filter({ $0.productIdentifier == product.productIdentifier }).first == nil {
           cachedAllProducts.append(product)
         }
       }
@@ -161,7 +171,11 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
     SKLogger.logInfo("SKRequestDelegate fetched products successful")
     
     DispatchQueue.main.async {
-      self.productInfoCompletion?(.success(self.allProducts ?? []))
+      self.exclusionSerialQueue.sync {
+        let completion = self.requestProductsCompletions[request]
+        completion?(.success(self.allProducts ?? []))
+        self.requestProductsCompletions.removeValue(forKey: request)
+      }
     }
   }
   
@@ -170,25 +184,17 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
     SKLogger.logInfo("SKRequestDelegate got called with didFailWithError: \(error)")
     
     DispatchQueue.main.async {
-      self.productInfoCompletion?(.success(self.allProducts ?? []))
+      self.exclusionSerialQueue.sync {
+        let completion = self.requestProductsCompletions[request]
+        completion?(.failure(error))
+        self.requestProductsCompletions.removeValue(forKey: request)
+      }
     }
   }
 }
 
 //MARK: Private
 private extension SKStoreKitServiceImplementation {
-  
-  /// Mignt be called on any thread. Callback wil be on the main thread
-  func requestProductInfo(productIds: [String], completion: @escaping (Result<[SKProduct], Error>) -> Void) {
-    dispatchPrecondition(condition: .onQueue(.main))
-    
-    productInfoCompletion = completion
-    
-    let request = SKProductsRequest(productIdentifiers: Set(productIds))
-    request.delegate = self
-    
-    request.start()
-  }
   
   private func purchased(_ transactions: [SKPaymentTransaction]) {
 
@@ -271,8 +277,8 @@ private extension SKStoreKitServiceImplementation {
       }
       let installData = SKServiceRegistry.commandStore.getDeviceRequest()
       let purchaseDataV4 = Purchaseapi_ReceiptRequest(storefront: countryCode,
-                                                      region: self.allProducts?.first?.priceLocale.regionCode,
-                                                      currency: self.allProducts?.first?.priceLocale.currencyCode,
+                                                      region: allProducts?.first?.priceLocale.regionCode,
+                                                      currency: allProducts?.first?.priceLocale.currencyCode,
                                                       newTransactions: transactionIds,
                                                       docFolderDate: installData?.docDate,
                                                       appBuildDate: installData?.buildDate)

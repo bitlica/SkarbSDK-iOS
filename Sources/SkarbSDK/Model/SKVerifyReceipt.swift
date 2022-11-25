@@ -17,6 +17,19 @@ public struct SKVerifyReceipt {
     self.environment = verifyReceiptResponse.environment
     self.activeSubscriptions = verifyReceiptResponse.activeSubscriptions.map({ SKActiveSubscription(activeSubscription: $0) })
   }
+  
+  public var isActiveSubscription: Bool {
+    return !activeSubscriptions.filter { $0.expiryDate >= Date() }.isEmpty
+  }
+  
+  public var isActiveAnyNonSubscription: Bool {
+    return !nonSubscriptions.isEmpty
+  }
+  
+  /// User has any valid subscription or any non subscription product was purchased
+  public var isActive: Bool {
+    return isActiveSubscription || isActiveAnyNonSubscription
+  }
 }
 
 public struct SKActiveSubscription {

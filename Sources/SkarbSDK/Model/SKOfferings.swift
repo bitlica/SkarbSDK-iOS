@@ -6,12 +6,13 @@
 //
 
 import Foundation
+import StoreKit
 
 public struct SKOfferings {
   public let offerings: [SKOffering]
   
-  init(offeringsResponse: Setupsapi_OfferingsResponse) {
-    offerings = offeringsResponse.data.map({ SKOffering(offering: $0) })
+  init(offerings: [SKOffering]) {
+    self.offerings = offerings
   }
 }
 
@@ -20,21 +21,23 @@ public struct SKOffering {
   public let description: String
   public let packages: [SKOfferPackage]
   
-  init(offering: Setupsapi_Offering) {
-    id = offering.id
-    description = offering.description_p
-    packages = offering.packages.map({ SKOfferPackage(package: $0) })
+  init(id: String, description: String, packages: [SKOfferPackage]) {
+    self.id = id
+    self.description = description
+    self.packages = packages
   }
 }
 
 public struct SKOfferPackage {
   public let id: String
   public let description: String
-  public let products: [String]
+  public let productId: String
+  public let storeProduct: SKProduct
   
-  init(package: Setupsapi_Package) {
-    id = package.id
-    description = package.description_p
-    products = package.products
+  init(package: Setupsapi_Package, storeProduct: SKProduct) {
+    self.id = package.id
+    self.description = package.description_p
+    self.productId = package.products.first! //TODO: Will be only one productId
+    self.storeProduct = storeProduct
   }
 }

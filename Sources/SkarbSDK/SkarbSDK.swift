@@ -19,6 +19,9 @@ public class SkarbSDK {
   public static var isLoggingEnabled: Bool = false
   public static var automaticCollectIDFA: Bool = true
   
+//  TODO: Separate manager?
+  static var cachedVerifyReceipt: SKVerifyReceipt? = nil
+  
   public static func initialize(clientId: String,
                                 isObservable: Bool,
                                 deviceId: String? = nil) {
@@ -100,13 +103,30 @@ public class SkarbSDK {
   
   /// Verify receipt for user purchases.
   /// Might be called on the any thread. Callback will be on the main thread
-  public static func validateReceipt(completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
-    SKServiceRegistry.serverAPI.verifyReceipt(completion: completion)
+  public static func validateReceipt(with refreshPolicy: SKRefreshPolicy,
+                                     completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+    if refreshPolicy == .memoryCached,
+       let verifyReceipt = cachedVerifyReceipt {
+      completion(.success(verifyReceipt)) //TODO: Call on the main thread
+      return
+    }
+    
+    SKServiceRegistry.serverAPI.verifyReceipt(completion: { result in
+      switch result {
+        case .success(let updatedVerifyReceipt):
+          cachedVerifyReceipt = updatedVerifyReceipt
+          completion(.success(updatedVerifyReceipt))
+        case .failure(let error):
+          completion(.failure(error))
+      }
+    })
   }
   
   /// Might be called on the any thread. Callback will be on the main thread
-  public static func getOfferings(completion: @escaping (Result<SKOfferings, Error>) -> Void) {
-    SKServiceRegistry.serverAPI.getOfferings(completion: completion)
+  public static func getOfferings(with refreshPolicy: SKRefreshPolicy,
+                                  completion: @escaping (Result<SKOfferings, Error>) -> Void) {
+    SKServiceRegistry.offeringsManager.getOfferings(with: refreshPolicy,
+                                                    completion: completion)
   }
   
   //    MARK: Purchasing flow
@@ -115,10 +135,11 @@ public class SkarbSDK {
   /// - Note: This may force your users to enter the App Store password so should only be performed on request of
   /// the user. Typically with a button in settings or near your purchase UI.
   public static func restorePurchases(completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
-    SKServiceRegistry.storeKitService.restorePurchases(compltion: { result in
+    SKServiceRegistry.storeKitService.restorePurchases(completion: { result in
       switch result {
         case .success:
-          validateReceipt(completion: completion)
+          validateReceipt(with: .always,
+                          completion: completion)
         case .failure(let error):
           completion(.failure(error))
       }
@@ -134,7 +155,8 @@ public class SkarbSDK {
     SKServiceRegistry.storeKitService.purchaseProduct(product, completion: { result in
       switch result {
         case .success:
-          validateReceipt(completion: completion)
+          validateReceipt(with: .always,
+                          completion: completion)
         case .failure(let error):
           completion(.failure(error))
       }
@@ -150,7 +172,8 @@ public class SkarbSDK {
     SKServiceRegistry.storeKitService.purchasePackage(package, completion: { result in
       switch result {
         case .success:
-          validateReceipt(completion: completion)
+          validateReceipt(with: .always,
+                          completion: completion)
         case .failure(let error):
           completion(.failure(error))
       }

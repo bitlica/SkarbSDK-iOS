@@ -228,7 +228,7 @@ class SKServerAPIImplementaton: SKServerAPI {
     }
   }
   
-  func getOfferings(completion: @escaping (Result<SKOfferings, Error>) -> Void) {
+  func getOfferings(completion: @escaping (Result<Setupsapi_OfferingsResponse, Error>) -> Void) {
     let callOption = CallOptions(timeLimit: .timeout(.seconds(20)))
     let offeringsService = Setupsapi_SetupsClient(channel: clientChannel, defaultCallOptions: callOption)
     
@@ -244,15 +244,10 @@ class SKServerAPIImplementaton: SKServerAPI {
       SKLogger.logNetwork("SKResponse is \(result) for commandType = verifyReceipt")
       switch result {
         case .success(let offeringsResponse):
-          print(offeringsResponse)
-          DispatchQueue.main.async {
-            completion(.success(SKOfferings(offeringsResponse: offeringsResponse)))
-          }
+          completion(.success(offeringsResponse))
         case .failure(let error):
           let message = (error as? GRPCStatus)?.message ?? error.localizedDescription
-          DispatchQueue.main.async {
-            completion(.failure(SKResponseError(errorCode: error.code, message: message)))
-          }
+          completion(.failure(SKResponseError(errorCode: error.code, message: message)))
       }
     }
   }

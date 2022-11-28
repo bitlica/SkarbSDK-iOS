@@ -193,7 +193,7 @@ class SKServerAPIImplementaton: SKServerAPI {
     }
   }
   
-  func verifyReceipt(completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+  func verifyReceipt(completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
     let callOption = CallOptions(timeLimit: .timeout(.seconds(20)))
     let purchaseService = Purchaseapi_IngesterClient(channel: clientChannel, defaultCallOptions: callOption)
     var verifyRequest = Purchaseapi_VerifyReceiptRequest()
@@ -217,7 +217,7 @@ class SKServerAPIImplementaton: SKServerAPI {
       switch result {
         case .success(let verifyReceiptResponse):
           DispatchQueue.main.async {
-            completion(.success(SKVerifyReceipt(verifyReceiptResponse: verifyReceiptResponse)))
+            completion(.success(SKUserPurchaseInfo(verifyReceiptResponse: verifyReceiptResponse)))
           }
         case .failure(let error):
           let message = (error as? GRPCStatus)?.message ?? error.localizedDescription

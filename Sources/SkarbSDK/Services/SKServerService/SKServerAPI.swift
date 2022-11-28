@@ -11,6 +11,6 @@ import UIKit
 
 protocol SKServerAPI {
   func syncCommand(_ command: SKCommand, completion: ((SKResponseError?) -> Void)?)
-  func verifyReceipt(completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void)
+  func verifyReceipt(completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void)
   func getOfferings(completion: @escaping (Result<Setupsapi_OfferingsResponse, Error>) -> Void)
 }

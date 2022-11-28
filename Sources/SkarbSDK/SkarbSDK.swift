@@ -12,15 +12,19 @@ import StoreKit
 
 public class SkarbSDK {
   
+//  MARK: Public
+  public static var isLoggingEnabled: Bool = false
+  public static var automaticCollectIDFA: Bool = true
+  
+//  MARK: Private
   static let agentName: String = "SkarbSDK-iOS"
   static let version: String = "0.6.1"
   
   static var clientId: String = ""
-  public static var isLoggingEnabled: Bool = false
-  public static var automaticCollectIDFA: Bool = true
   
 //  TODO: Separate manager?
-  static var cachedVerifyReceipt: SKVerifyReceipt? = nil
+//  Callback main thread?
+  static var cachedUserPurchaseInfo: SKUserPurchaseInfo? = nil
   
   public static func initialize(clientId: String,
                                 isObservable: Bool,
@@ -104,18 +108,18 @@ public class SkarbSDK {
   /// Verify receipt for user purchases.
   /// Might be called on the any thread. Callback will be on the main thread
   public static func validateReceipt(with refreshPolicy: SKRefreshPolicy,
-                                     completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+                                     completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
     if refreshPolicy == .memoryCached,
-       let verifyReceipt = cachedVerifyReceipt {
-      completion(.success(verifyReceipt)) //TODO: Call on the main thread
+       let userPurchaseInfo = cachedUserPurchaseInfo {
+      completion(.success(userPurchaseInfo)) //TODO: Call on the main thread
       return
     }
     
     SKServiceRegistry.serverAPI.verifyReceipt(completion: { result in
       switch result {
-        case .success(let updatedVerifyReceipt):
-          cachedVerifyReceipt = updatedVerifyReceipt
-          completion(.success(updatedVerifyReceipt))
+        case .success(let updatedUserPurchaseInfo):
+          cachedUserPurchaseInfo = updatedUserPurchaseInfo
+          completion(.success(updatedUserPurchaseInfo))
         case .failure(let error):
           completion(.failure(error))
       }
@@ -134,7 +138,7 @@ public class SkarbSDK {
   /// Should be called on the main thread. Callback will be on the main thread
   /// - Note: This may force your users to enter the App Store password so should only be performed on request of
   /// the user. Typically with a button in settings or near your purchase UI.
-  public static func restorePurchases(completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+  public static func restorePurchases(completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
     SKServiceRegistry.storeKitService.restorePurchases(completion: { result in
       switch result {
         case .success:
@@ -147,7 +151,7 @@ public class SkarbSDK {
   }
   
   /// Should be called on the main thread. Callback will be on the main thread
-  public static func purchaseProduct(_ product: SKProduct, completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+  public static func purchaseProduct(_ product: SKProduct, completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
     guard SKServiceRegistry.storeKitService.canMakePayments else {
       completion(.failure(SKResponseError(errorCode: 0, message: "You don't have permission to make payments.")))
       return
@@ -164,7 +168,7 @@ public class SkarbSDK {
   }
   
   /// Should be called on the main thread. Callback will be on the main thread
-  public static func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<SKVerifyReceipt, Error>) -> Void) {
+  public static func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
     guard SKServiceRegistry.storeKitService.canMakePayments else {
       completion(.failure(SKResponseError(errorCode: 0, message: "You don't have permission to make payments.")))
       return
@@ -183,6 +187,10 @@ public class SkarbSDK {
   //  Indicates whether the user is allowed to make payments.
   public static func canMakePayments() -> Bool {
     return SKServiceRegistry.storeKitService.canMakePayments
+  }
+  
+  public static func setStoreKitDelegate(_ delegate: SKStoreKitDelegate?) {
+    SKServiceRegistry.storeKitService.delegate = delegate
   }
   
   //  MARK: Private

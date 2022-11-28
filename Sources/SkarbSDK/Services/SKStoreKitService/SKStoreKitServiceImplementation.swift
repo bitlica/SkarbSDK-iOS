@@ -11,6 +11,11 @@ import StoreKit
 
 class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   
+//  MARK: Public
+  
+  weak var delegate: SKStoreKitDelegate?
+  
+//  MARK: Private
   private let isObservable: Bool
   private let paymentQueue: SKPaymentQueue
   private var restorePurchasingCompletion: ((Result<Bool, Error>) -> Void)?
@@ -123,6 +128,7 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
     var purchasedTransactions: [SKPaymentTransaction] = []
     
     transactions.forEach { transaction in
+      delegate?.storeKitUpdatedTransaction(transaction)
       switch transaction.transactionState {
         case .purchased:
           purchasedTransactions.append(transaction)
@@ -155,6 +161,12 @@ extension SKStoreKitServiceImplementation: SKPaymentTransactionObserver {
       self.restorePurchasingCompletion = nil
     }
   }
+  
+  public func paymentQueue(_ queue: SKPaymentQueue,
+                           shouldAddStorePayment payment: SKPayment,
+                           for product: SKProduct) -> Bool {
+    return delegate?.storeKit(shouldAddStorePayment: payment, for: product) ?? false
+  }
 }
 
 extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
@@ -170,12 +182,14 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
     }
     SKLogger.logInfo("SKRequestDelegate fetched products successful")
     
+    var completion: RequestProductCompletion? = nil
+    exclusionSerialQueue.sync {
+      completion = self.requestProductsCompletions[request]
+      self.requestProductsCompletions.removeValue(forKey: request)
+    }
+    
     DispatchQueue.main.async {
-      self.exclusionSerialQueue.sync {
-        let completion = self.requestProductsCompletions[request]
-        completion?(.success(self.allProducts ?? []))
-        self.requestProductsCompletions.removeValue(forKey: request)
-      }
+      completion?(.success(self.allProducts ?? []))
     }
   }
   
@@ -183,12 +197,14 @@ extension SKStoreKitServiceImplementation: SKProductsRequestDelegate {
     
     SKLogger.logInfo("SKRequestDelegate got called with didFailWithError: \(error)")
     
+    var completion: RequestProductCompletion? = nil
+    exclusionSerialQueue.sync {
+      completion = self.requestProductsCompletions[request]
+      self.requestProductsCompletions.removeValue(forKey: request)
+    }
+    
     DispatchQueue.main.async {
-      self.exclusionSerialQueue.sync {
-        let completion = self.requestProductsCompletions[request]
-        completion?(.failure(error))
-        self.requestProductsCompletions.removeValue(forKey: request)
-      }
+      completion?(.failure(error))
     }
   }
 }

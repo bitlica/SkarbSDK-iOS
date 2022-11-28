@@ -12,7 +12,7 @@ class SKServiceRegistry {
   static let serverAPI: SKServerAPI = SKServerAPIImplementaton()
   static let userDefaultsService: SKUserDefaultsService = SKUserDefaultsService()
   static let syncService: SKSyncService = SKSyncServiceImplementation()
-  static var storeKitService: SKStoreKitService!
+  public static var storeKitService: SKStoreKitService!
   static let commandStore: SKCommandStore = SKCommandStore()
   static let migrationService: SKMigrationService = SKMigrationService()
   static let offeringsManager: SKOfferingsManager = SKOfferingsManagerImplementation()

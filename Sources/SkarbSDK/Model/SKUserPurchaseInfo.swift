@@ -8,10 +8,10 @@
 import Foundation
 import SwiftProtobuf
 
-public struct SKVerifyReceipt {
+public struct SKUserPurchaseInfo {
   public var environment: String
   public var activeSubscriptions: [SKActiveSubscription] = []
-  public var nonSubscriptions: [NonSubscription] = []
+  public var nonSubscriptions: [SKNonSubscription] = []
   
   init(verifyReceiptResponse: Purchaseapi_VerifyReceiptResponse) {
     self.environment = verifyReceiptResponse.environment
@@ -54,7 +54,7 @@ public struct SKActiveSubscription {
   }
 }
 
-public struct NonSubscription {
+public struct SKNonSubscription {
   public let transactionID: String
   public let originalTransactionID: String
   public let purchaseDate: Date

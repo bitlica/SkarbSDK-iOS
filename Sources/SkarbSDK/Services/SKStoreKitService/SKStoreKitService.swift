@@ -9,6 +9,12 @@
 import Foundation
 import StoreKit
 
+public protocol SKStoreKitDelegate: AnyObject {
+  func storeKitUpdatedTransaction(_ updatedTransaction: SKPaymentTransaction)
+  func storeKit(shouldAddStorePayment payment: SKPayment,
+                for product: SKProduct) -> Bool
+}
+
 protocol SKStoreKitService {
   func requestProductInfoAndSendPurchase(command: SKCommand)
   func restorePurchases(completion: @escaping (Result<Bool, Error>) -> Void)
@@ -20,4 +26,5 @@ protocol SKStoreKitService {
   func fetchProduct(by productId: String) -> SKProduct?
   
   var canMakePayments: Bool { get }
+  var delegate: SKStoreKitDelegate? { get set }
 }

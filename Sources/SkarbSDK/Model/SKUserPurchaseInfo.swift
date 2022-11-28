@@ -8,6 +8,7 @@
 import Foundation
 import SwiftProtobuf
 
+
 public struct SKUserPurchaseInfo {
   public var environment: String
   public var activeSubscriptions: [SKActiveSubscription] = []
@@ -21,16 +22,15 @@ public struct SKUserPurchaseInfo {
   public var isActiveSubscription: Bool {
     return !activeSubscriptions.filter { $0.expiryDate >= Date() }.isEmpty
   }
-  
   public var isActiveAnyNonSubscription: Bool {
     return !nonSubscriptions.isEmpty
   }
-  
   /// User has any valid subscription or any non subscription product was purchased
   public var isActive: Bool {
     return isActiveSubscription || isActiveAnyNonSubscription
   }
 }
+
 
 public struct SKActiveSubscription {
   public let transactionID: String
@@ -52,7 +52,24 @@ public struct SKActiveSubscription {
     trialPeriod = activeSubscription.trialPeriod
     renewalInfo = activeSubscription.renewalInfo
   }
+  
+  public var willRenew: Bool {
+    return renewalInfo == "active"
+  }
+  public var isCancelled: Bool {
+    return renewalInfo == "cancelled"
+  }
+  public var isInBillingRetry: Bool {
+    return renewalInfo == "billing_retry"
+  }
+  public var isInGracePeriod: Bool {
+    return renewalInfo == "grace_period"
+  }
+  public var isTrial: Bool {
+    return trialPeriod
+  }
 }
+
 
 public struct SKNonSubscription {
   public let transactionID: String

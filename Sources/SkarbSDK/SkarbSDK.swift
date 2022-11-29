@@ -111,7 +111,9 @@ public class SkarbSDK {
                                      completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
     if refreshPolicy == .memoryCached,
        let userPurchaseInfo = cachedUserPurchaseInfo {
-      completion(.success(userPurchaseInfo)) //TODO: Call on the main thread
+      DispatchQueue.main.async {
+        completion(.success(userPurchaseInfo))
+      }
       return
     }
     

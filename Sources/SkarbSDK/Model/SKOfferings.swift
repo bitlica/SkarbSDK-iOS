@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import StoreKit
 
 public struct SKOfferings {
   public let offerings: [SKOffering]
@@ -25,19 +24,5 @@ public struct SKOffering {
     self.id = id
     self.description = description
     self.packages = packages
-  }
-}
-
-public struct SKOfferPackage {
-  public let id: String
-  public let description: String
-  public let productId: String
-  public let storeProduct: SKProduct
-  
-  init(package: Setupsapi_Package, storeProduct: SKProduct) {
-    self.id = package.id
-    self.description = package.description_p
-    self.productId = package.products.first! //TODO: Will be only one productId
-    self.storeProduct = storeProduct
   }
 }

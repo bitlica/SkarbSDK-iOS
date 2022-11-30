@@ -9,6 +9,9 @@ import Foundation
 
 public struct SKOfferings {
   public let offerings: [SKOffering]
+  public var allOfferingPackages: [SKOfferPackage] {
+    return offerings.flatMap { $0.packages }
+  }
   
   init(offerings: [SKOffering]) {
     self.offerings = offerings

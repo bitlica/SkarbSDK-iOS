@@ -21,28 +21,35 @@ public struct SKOfferPackage {
     self.storeProduct = storeProduct
   }
   
-  var period: SKProduct.PeriodUnit? {
+  public var isTrial: Bool {
+    guard let intro = storeProduct.introductoryPrice else {
+      return false
+    }
+    return intro.paymentMode == SKProductDiscount.PaymentMode.freeTrial
+  }
+  
+  public var period: SKProduct.PeriodUnit? {
     return storeProduct.subscriptionPeriod?.unit
   }
   
-  var numberOfUnits: Int? {
+  public var numberOfUnits: Int? {
     return storeProduct.subscriptionPeriod?.numberOfUnits
   }
   
-  var price: Decimal {
+  public var price: Decimal {
     return storeProduct.price as Decimal
   }
   
-  var currencyCode: String? {
+  public var currencyCode: String? {
     return storeProduct.priceLocale.currencyCode
   }
   
-  var localizedPriceString: String {
+  public var localizedPriceString: String {
     return priceAsString(locale: storeProduct.priceLocale,
                          price: storeProduct.price) ?? ""
   }
   
-  var localizedIntroductoryPriceString: String? {
+  public var localizedIntroductoryPriceString: String? {
       guard #available(iOS 12.2, *),
             let intro = storeProduct.introductoryPrice
       else {

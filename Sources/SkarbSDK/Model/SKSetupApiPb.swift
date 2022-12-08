@@ -135,7 +135,7 @@ struct Setupsapi_Package {
 
   var description_p: String = String()
 
-  var products: [String] = []
+  var productID: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -409,7 +409,7 @@ extension Setupsapi_Package: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "id"),
     2: .same(proto: "description"),
-    3: .same(proto: "products"),
+    3: .standard(proto: "product_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -420,7 +420,7 @@ extension Setupsapi_Package: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.id) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.description_p) }()
-      case 3: try { try decoder.decodeRepeatedStringField(value: &self.products) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.productID) }()
       default: break
       }
     }
@@ -433,8 +433,8 @@ extension Setupsapi_Package: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if !self.description_p.isEmpty {
       try visitor.visitSingularStringField(value: self.description_p, fieldNumber: 2)
     }
-    if !self.products.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.products, fieldNumber: 3)
+    if !self.productID.isEmpty {
+      try visitor.visitSingularStringField(value: self.productID, fieldNumber: 3)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -442,7 +442,7 @@ extension Setupsapi_Package: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
   static func ==(lhs: Setupsapi_Package, rhs: Setupsapi_Package) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.description_p != rhs.description_p {return false}
-    if lhs.products != rhs.products {return false}
+    if lhs.productID != rhs.productID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

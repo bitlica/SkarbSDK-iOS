@@ -99,8 +99,7 @@ private extension SKOfferingsManagerImplementation {
   }
   
   func createPackage(with package: Setupsapi_Package) -> SKOfferPackage? {
-    //          TODO: Will be only one productId, not products
-    guard let storeProduct = SKServiceRegistry.storeKitService.fetchProduct(by: package.products.first!) else {
+    guard let storeProduct = SKServiceRegistry.storeKitService.fetchProduct(by: package.productID) else {
       return nil
     }
     

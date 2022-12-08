@@ -13,7 +13,7 @@ extension Setupsapi_OfferingsResponse {
     var productIds: [String] = []
     for offering in data {
       for package in offering.packages {
-        productIds.append(package.products.first!)
+        productIds.append(package.productID)
       }
     }
     return productIds

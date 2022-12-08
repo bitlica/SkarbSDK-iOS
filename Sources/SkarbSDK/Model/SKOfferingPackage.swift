@@ -17,7 +17,7 @@ public struct SKOfferPackage {
   init(package: Setupsapi_Package, storeProduct: SKProduct) {
     self.id = package.id
     self.description = package.description_p
-    self.productId = package.products.first! //TODO: Will be only one productId
+    self.productId = package.productID
     self.storeProduct = storeProduct
   }
   

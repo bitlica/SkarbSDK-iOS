@@ -56,15 +56,19 @@ public struct SKActiveSubscription {
   public var willRenew: Bool {
     return renewalInfo == "active"
   }
+  
   public var isCancelled: Bool {
     return renewalInfo == "cancelled"
   }
+  
   public var isInBillingRetry: Bool {
     return renewalInfo == "billing_retry"
   }
+  
   public var isInGracePeriod: Bool {
     return renewalInfo == "grace_period"
   }
+  
   public var isTrial: Bool {
     return trialPeriod
   }

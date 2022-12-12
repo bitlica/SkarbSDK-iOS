@@ -28,6 +28,10 @@ public struct SKOfferPackage {
     return intro.paymentMode == SKProductDiscount.PaymentMode.freeTrial
   }
   
+  public var isSubscription: Bool {
+    return storeProduct.subscriptionPeriod != nil
+  }
+  
   public var period: SKProduct.PeriodUnit? {
     return storeProduct.subscriptionPeriod?.unit
   }

@@ -19,8 +19,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   private let isObservable: Bool
   private let paymentQueue: SKPaymentQueue
   private var restorePurchasingCompletion: ((Result<Bool, Error>) -> Void)?
-  private var purchasingProductCompletion: ((Result<Bool, Error>) -> Void)?
-//  TODO: Think about [Request: completion] dictionary for multiple calling purchasing
+  private var purchasingProductCompletions: [String: ((Result<Bool, Error>) -> Void)]
   
   private let exclusionSerialQueue = DispatchQueue(label: "com.skarbSDK.skStoreKitService.exclusion")
   
@@ -41,6 +40,7 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     self.isObservable = isObservable
     self.paymentQueue = SKPaymentQueue.default()
     cachedAllProducts = []
+    purchasingProductCompletions = [:]
     requestProductsCompletions = [:]
     super.init()
     self.paymentQueue.add(self)
@@ -89,7 +89,9 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     SKLogger.logInfo("calling purchaseProduct with productId = \(product.productIdentifier)")
     let payment = SKMutablePayment(product: product)
     SKPaymentQueue.default().add(payment)
-    purchasingProductCompletion = completion
+    exclusionSerialQueue.sync {
+      purchasingProductCompletions[product.productIdentifier] = completion
+    }
   }
   
   func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<Bool, Error>) -> Void) {
@@ -219,8 +221,19 @@ private extension SKStoreKitServiceImplementation {
     }
     
     // Sends success callback if purchasing was initiated by SkarbSDK.purchaseProduct(...) method
-    purchasingProductCompletion?(.success(true))
-    
+    for transaction in transactions {
+      var purchaseCompletion: ((Result<Bool, Error>) -> Void)? = nil
+      let productIdentifier = transaction.payment.productIdentifier
+      exclusionSerialQueue.sync {
+        purchaseCompletion = purchasingProductCompletions[productIdentifier]
+        purchasingProductCompletions.removeValue(forKey: productIdentifier)
+      }
+      
+      DispatchQueue.main.async {
+        purchaseCompletion?(.success(true))
+      }
+    }
+        
     for transaction in transactions {
       SKLogger.logInfo("paymentQueue updatedTransactions: called. TransactionState is purchased. ProductIdentifier = \(transaction.payment.productIdentifier), transactionDate = \(String(describing: transaction.transactionDate))")
     }
@@ -244,16 +257,29 @@ private extension SKStoreKitServiceImplementation {
       SKPaymentQueue.default().finishTransaction(transaction)
     }
     
+    var purchaseCompletion: ((Result<Bool, Error>) -> Void)? = nil
+    let productIdentifier = transaction.payment.productIdentifier
+    exclusionSerialQueue.sync {
+      purchaseCompletion = purchasingProductCompletions[productIdentifier]
+      purchasingProductCompletions.removeValue(forKey: productIdentifier)
+    }
+    
     guard let error = transaction.error as? SKError else {
       if let error = transaction.error {
-        purchasingProductCompletion?(.failure(error))
+        DispatchQueue.main.async {
+          purchaseCompletion?(.failure(error))
+        }
       } else {
-        purchasingProductCompletion?(.failure(SKResponseError(errorCode: 0, message: "Purchasing failed")))
+        DispatchQueue.main.async {
+          purchaseCompletion?(.failure(SKResponseError(errorCode: 0, message: "Purchasing failed")))
+        }
       }
       return
     }
     
-    purchasingProductCompletion?(.failure(error))
+    DispatchQueue.main.async {
+      purchaseCompletion?(.failure(error))
+    }
   }
   
   /// Create one SKFetchProduct or each unique productId.

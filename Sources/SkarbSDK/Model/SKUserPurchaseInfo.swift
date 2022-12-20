@@ -15,8 +15,9 @@ public struct SKUserPurchaseInfo {
   public var nonSubscriptions: [SKNonSubscription] = []
   
   init(verifyReceiptResponse: Purchaseapi_VerifyReceiptResponse) {
-    self.environment = verifyReceiptResponse.environment
-    self.activeSubscriptions = verifyReceiptResponse.activeSubscriptions.map({ SKActiveSubscription(activeSubscription: $0) })
+    environment = verifyReceiptResponse.environment
+    activeSubscriptions = verifyReceiptResponse.activeSubscriptions.map({ SKActiveSubscription(activeSubscription: $0) })
+    nonSubscriptions = verifyReceiptResponse.nonSubscriptions.map({ SKNonSubscription(nonSubscription: $0) })
   }
   
   public var isActiveSubscription: Bool {

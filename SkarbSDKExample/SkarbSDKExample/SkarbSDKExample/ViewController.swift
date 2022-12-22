@@ -23,15 +23,5 @@ class ViewController: UIViewController {
     SkarbSDK.initialize(clientId: "YOUR_CLIENT_ID",
                         isObservable: true)
   }
-  
-  private func requestIDFA() {
-    if #available(iOS 14, *) {
-      ATTrackingManager.requestTrackingAuthorization { status in
-        if case ATTrackingManager.AuthorizationStatus.authorized = status {
-          SkarbSDK.sendIDFA(idfa: ASIdentifierManager.shared().advertisingIdentifier.uuidString)
-        }
-      }
-    }
-  }
 }
 

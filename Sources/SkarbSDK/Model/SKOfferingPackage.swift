@@ -63,8 +63,68 @@ public struct SKOfferPackage {
     return priceAsString(locale: intro.priceLocale,
                          price: intro.price)
   }
+  
+  public var monthlyLocalizedPriceString: String? {
+    let monthFactor: Decimal? = {
+      switch period {
+      case .day: return 1 / 30
+      case .week: return 1 / 4
+      case .month: return 1
+      case .year: return 12
+      case .none, .some(_):
+        return nil
+      }
+    }()
+    guard let numberOfUnits,
+          let monthFactor else {
+      return nil
+    }
+    
+    let periodsPerMonth: Decimal = monthFactor * Decimal(numberOfUnits)
+
+    let price = (price as NSDecimalNumber)
+      .dividing(by: periodsPerMonth as NSDecimalNumber,
+                withBehavior: Self.roundingBehavior) as Decimal
+    
+    return NSDecimalNumber(decimal: price).stringValue
+  }
+  
+  public var weeklyLocalizedPriceString: String? {
+    let weeklyFactor: Decimal? = {
+      switch period {
+      case .day: return 1 / 7
+      case .week: return 1
+      case .month: return 1 * 30 / 7
+      case .year: return 52
+      case .none, .some(_):
+        return nil
+      }
+    }()
+    guard let numberOfUnits,
+          let weeklyFactor else {
+      return nil
+    }
+    
+    let periodsPerWeek: Decimal = weeklyFactor * Decimal(numberOfUnits)
+
+    let price = (price as NSDecimalNumber)
+      .dividing(by: periodsPerWeek as NSDecimalNumber,
+                withBehavior: Self.roundingBehavior) as Decimal
+    
+    return NSDecimalNumber(decimal: price).stringValue
+  }
 
   // MARK: Private
+  
+  private static let roundingBehavior = NSDecimalNumberHandler(
+      roundingMode: .down,
+      scale: 2,
+      raiseOnExactness: false,
+      raiseOnOverflow: false,
+      raiseOnUnderflow: false,
+      raiseOnDivideByZero: false
+  )
+  
   private func priceAsString(locale: Locale,
                      price: NSDecimalNumber) -> String? {
     let formatter = NumberFormatter()

@@ -86,7 +86,8 @@ public struct SKOfferPackage {
       .dividing(by: periodsPerMonth as NSDecimalNumber,
                 withBehavior: Self.roundingBehavior) as Decimal
     
-    return NSDecimalNumber(decimal: price).stringValue
+    return priceAsString(locale: storeProduct.priceLocale,
+                         price: NSDecimalNumber(decimal: price))
   }
   
   public var weeklyLocalizedPriceString: String? {
@@ -111,7 +112,8 @@ public struct SKOfferPackage {
       .dividing(by: periodsPerWeek as NSDecimalNumber,
                 withBehavior: Self.roundingBehavior) as Decimal
     
-    return NSDecimalNumber(decimal: price).stringValue
+    return priceAsString(locale: storeProduct.priceLocale,
+                         price: NSDecimalNumber(decimal: price))
   }
 
   // MARK: Private

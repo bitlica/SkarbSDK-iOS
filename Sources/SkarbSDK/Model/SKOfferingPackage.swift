@@ -8,16 +8,38 @@
 import Foundation
 import StoreKit
 
+public enum PurchaseType {
+  case weekly
+  case monthly
+  case yearly
+  case consumable
+  case nonConsumable
+  case unknown
+  
+  static func initWith(string: String) -> PurchaseType {
+    switch string {
+    case "weekly": return .weekly
+    case "monthly": return .monthly
+    case "yearly": return .yearly
+    case "consumable": return .consumable
+    case "non-consumable": return .nonConsumable
+    default: return .unknown
+    }
+  }
+}
+
 public struct SKOfferPackage {
   public let id: String
   public let description: String
   public let productId: String
+  public let purchaseType: PurchaseType
   public let storeProduct: SKProduct
   
   init(package: Setupsapi_Package, storeProduct: SKProduct) {
     self.id = package.id
     self.description = package.description_p
     self.productId = package.productID
+    self.purchaseType = PurchaseType.initWith(string: package.purchaseType)
     self.storeProduct = storeProduct
   }
   

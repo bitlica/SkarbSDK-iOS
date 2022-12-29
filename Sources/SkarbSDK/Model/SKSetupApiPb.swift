@@ -137,6 +137,8 @@ struct Setupsapi_Package {
 
   var productID: String = String()
 
+  var purchaseType: String = String()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -410,6 +412,7 @@ extension Setupsapi_Package: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     1: .same(proto: "id"),
     2: .same(proto: "description"),
     3: .standard(proto: "product_id"),
+    4: .standard(proto: "purchase_type"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -421,6 +424,7 @@ extension Setupsapi_Package: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
       case 1: try { try decoder.decodeSingularStringField(value: &self.id) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.description_p) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self.productID) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.purchaseType) }()
       default: break
       }
     }
@@ -436,6 +440,9 @@ extension Setupsapi_Package: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if !self.productID.isEmpty {
       try visitor.visitSingularStringField(value: self.productID, fieldNumber: 3)
     }
+    if !self.purchaseType.isEmpty {
+      try visitor.visitSingularStringField(value: self.purchaseType, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -443,6 +450,7 @@ extension Setupsapi_Package: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if lhs.id != rhs.id {return false}
     if lhs.description_p != rhs.description_p {return false}
     if lhs.productID != rhs.productID {return false}
+    if lhs.purchaseType != rhs.purchaseType {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

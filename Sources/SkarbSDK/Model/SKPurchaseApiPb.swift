@@ -213,6 +213,8 @@ struct Purchaseapi_VerifyReceiptResponse {
 
   var nonSubscriptions: [Purchaseapi_NonSubscription] = []
 
+  var onetimes: [Purchaseapi_OnetimePurchase] = []
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -244,6 +246,7 @@ struct Purchaseapi_ActiveSubscription {
 
   var trialPeriod: Bool = false
 
+  /// supported values are active, cancelled, grace_period, billing_retry
   var renewalInfo: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -282,6 +285,58 @@ struct Purchaseapi_NonSubscription {
   fileprivate var _purchaseDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
+struct Purchaseapi_OnetimePurchase {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var transactionID: String = String()
+
+  var purchaseDate: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {return _purchaseDate ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_purchaseDate = newValue}
+  }
+  /// Returns true if `purchaseDate` has been explicitly set.
+  var hasPurchaseDate: Bool {return self._purchaseDate != nil}
+  /// Clears the value of `purchaseDate`. Subsequent reads from it will return its default value.
+  mutating func clearPurchaseDate() {self._purchaseDate = nil}
+
+  var productID: String = String()
+
+  var quantity: Int32 = 0
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _purchaseDate: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+}
+
+struct Purchaseapi_CheckConsumablesRequest {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var auth: Auth_Auth {
+    get {return _auth ?? Auth_Auth()}
+    set {_auth = newValue}
+  }
+  /// Returns true if `auth` has been explicitly set.
+  var hasAuth: Bool {return self._auth != nil}
+  /// Clears the value of `auth`. Subsequent reads from it will return its default value.
+  mutating func clearAuth() {self._auth = nil}
+
+  var installID: String = String()
+
+  var receipt: Data = Data()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _auth: Auth_Auth? = nil
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Purchaseapi_TransactionsRequest: @unchecked Sendable {}
 extension Purchaseapi_ReceiptRequest: @unchecked Sendable {}
@@ -290,6 +345,8 @@ extension Purchaseapi_VerifyReceiptRequest: @unchecked Sendable {}
 extension Purchaseapi_VerifyReceiptResponse: @unchecked Sendable {}
 extension Purchaseapi_ActiveSubscription: @unchecked Sendable {}
 extension Purchaseapi_NonSubscription: @unchecked Sendable {}
+extension Purchaseapi_OnetimePurchase: @unchecked Sendable {}
+extension Purchaseapi_CheckConsumablesRequest: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -606,6 +663,7 @@ extension Purchaseapi_VerifyReceiptResponse: SwiftProtobuf.Message, SwiftProtobu
     1: .same(proto: "environment"),
     2: .standard(proto: "active_subscriptions"),
     3: .standard(proto: "non_subscriptions"),
+    4: .same(proto: "onetimes"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -617,6 +675,7 @@ extension Purchaseapi_VerifyReceiptResponse: SwiftProtobuf.Message, SwiftProtobu
       case 1: try { try decoder.decodeSingularStringField(value: &self.environment) }()
       case 2: try { try decoder.decodeRepeatedMessageField(value: &self.activeSubscriptions) }()
       case 3: try { try decoder.decodeRepeatedMessageField(value: &self.nonSubscriptions) }()
+      case 4: try { try decoder.decodeRepeatedMessageField(value: &self.onetimes) }()
       default: break
       }
     }
@@ -632,6 +691,9 @@ extension Purchaseapi_VerifyReceiptResponse: SwiftProtobuf.Message, SwiftProtobu
     if !self.nonSubscriptions.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.nonSubscriptions, fieldNumber: 3)
     }
+    if !self.onetimes.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.onetimes, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -639,6 +701,7 @@ extension Purchaseapi_VerifyReceiptResponse: SwiftProtobuf.Message, SwiftProtobu
     if lhs.environment != rhs.environment {return false}
     if lhs.activeSubscriptions != rhs.activeSubscriptions {return false}
     if lhs.nonSubscriptions != rhs.nonSubscriptions {return false}
+    if lhs.onetimes != rhs.onetimes {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -777,6 +840,108 @@ extension Purchaseapi_NonSubscription: SwiftProtobuf.Message, SwiftProtobuf._Mes
     if lhs._purchaseDate != rhs._purchaseDate {return false}
     if lhs.productID != rhs.productID {return false}
     if lhs.quantity != rhs.quantity {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Purchaseapi_OnetimePurchase: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".OnetimePurchase"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "transaction_id"),
+    2: .standard(proto: "purchase_date"),
+    3: .standard(proto: "product_id"),
+    4: .same(proto: "quantity"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.transactionID) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._purchaseDate) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.productID) }()
+      case 4: try { try decoder.decodeSingularInt32Field(value: &self.quantity) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if !self.transactionID.isEmpty {
+      try visitor.visitSingularStringField(value: self.transactionID, fieldNumber: 1)
+    }
+    try { if let v = self._purchaseDate {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    if !self.productID.isEmpty {
+      try visitor.visitSingularStringField(value: self.productID, fieldNumber: 3)
+    }
+    if self.quantity != 0 {
+      try visitor.visitSingularInt32Field(value: self.quantity, fieldNumber: 4)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Purchaseapi_OnetimePurchase, rhs: Purchaseapi_OnetimePurchase) -> Bool {
+    if lhs.transactionID != rhs.transactionID {return false}
+    if lhs._purchaseDate != rhs._purchaseDate {return false}
+    if lhs.productID != rhs.productID {return false}
+    if lhs.quantity != rhs.quantity {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Purchaseapi_CheckConsumablesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".CheckConsumablesRequest"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "auth"),
+    2: .standard(proto: "install_id"),
+    3: .same(proto: "receipt"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._auth) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.installID) }()
+      case 3: try { try decoder.decodeSingularBytesField(value: &self.receipt) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._auth {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    if !self.installID.isEmpty {
+      try visitor.visitSingularStringField(value: self.installID, fieldNumber: 2)
+    }
+    if !self.receipt.isEmpty {
+      try visitor.visitSingularBytesField(value: self.receipt, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Purchaseapi_CheckConsumablesRequest, rhs: Purchaseapi_CheckConsumablesRequest) -> Bool {
+    if lhs._auth != rhs._auth {return false}
+    if lhs.installID != rhs.installID {return false}
+    if lhs.receipt != rhs.receipt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

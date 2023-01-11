@@ -153,23 +153,6 @@ public class SkarbSDK {
   }
   
   /// Should be called on the main thread. Callback will be on the main thread
-  public static func purchaseProduct(_ product: SKProduct, completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
-    guard SKServiceRegistry.storeKitService.canMakePayments else {
-      completion(.failure(SKResponseError(errorCode: 0, message: "You don't have permission to make payments.")))
-      return
-    }
-    SKServiceRegistry.storeKitService.purchaseProduct(product, completion: { result in
-      switch result {
-        case .success:
-          validateReceipt(with: .always,
-                          completion: completion)
-        case .failure(let error):
-          completion(.failure(error))
-      }
-    })
-  }
-  
-  /// Should be called on the main thread. Callback will be on the main thread
   public static func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
     guard SKServiceRegistry.storeKitService.canMakePayments else {
       completion(.failure(SKResponseError(errorCode: 0, message: "You don't have permission to make payments.")))

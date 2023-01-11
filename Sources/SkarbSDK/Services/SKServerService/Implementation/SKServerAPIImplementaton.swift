@@ -96,7 +96,7 @@ class SKServerAPIImplementaton: SKServerAPI {
                                            commandType: command.commandType,
                                            completion: completion)
           }
-        case .purchaseV4:
+        case .purchaseV4, .setReceipt:
           guard let purchaseRequest = try? decoder.decode(Purchaseapi_ReceiptRequest.self, from: command.data) else {
             let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
             SKLogger.logError("SyncCommand called with purchaseV4. Purchaseapi_ReceiptRequest cannt be decoded",

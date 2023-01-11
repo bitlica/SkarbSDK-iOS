@@ -12,23 +12,23 @@ import SwiftProtobuf
 public struct SKUserPurchaseInfo {
   public var environment: String
   public var activeSubscriptions: [SKActiveSubscription] = []
-  public var nonSubscriptions: [SKNonSubscription] = []
+  public var onetimePurchases: [SKOnetimePurchase] = []
   
   init(verifyReceiptResponse: Purchaseapi_VerifyReceiptResponse) {
     environment = verifyReceiptResponse.environment
     activeSubscriptions = verifyReceiptResponse.activeSubscriptions.map({ SKActiveSubscription(activeSubscription: $0) })
-    nonSubscriptions = verifyReceiptResponse.nonSubscriptions.map({ SKNonSubscription(nonSubscription: $0) })
+    onetimePurchases = verifyReceiptResponse.onetimes.map({ SKOnetimePurchase(onetimePurchase: $0) })
   }
   
   public var isActiveSubscription: Bool {
     return !activeSubscriptions.filter { $0.expiryDate >= Date() }.isEmpty
   }
-  public var isActiveAnyNonSubscription: Bool {
-    return !nonSubscriptions.isEmpty
+  public var isAnyOnetimePurchased: Bool {
+    return !onetimePurchases.isEmpty
   }
   /// User has any valid subscription or any non subscription product was purchased
   public var isActive: Bool {
-    return isActiveSubscription || isActiveAnyNonSubscription
+    return isActiveSubscription || isAnyOnetimePurchased
   }
 }
 
@@ -76,18 +76,16 @@ public struct SKActiveSubscription {
 }
 
 
-public struct SKNonSubscription {
+public struct SKOnetimePurchase {
   public let transactionID: String
-  public let originalTransactionID: String
   public let purchaseDate: Date
   public let productID: String
   public let quantity: Int32
   
-  init(nonSubscription: Purchaseapi_NonSubscription) {
-    transactionID = nonSubscription.transactionID
-    originalTransactionID = nonSubscription.originalTransactionID
-    purchaseDate = nonSubscription.purchaseDate.date
-    productID = nonSubscription.productID
-    quantity = nonSubscription.quantity
+  init(onetimePurchase: Purchaseapi_OnetimePurchase) {
+    transactionID = onetimePurchase.transactionID
+    purchaseDate = onetimePurchase.purchaseDate.date
+    productID = onetimePurchase.productID
+    quantity = onetimePurchase.quantity
   }
 }

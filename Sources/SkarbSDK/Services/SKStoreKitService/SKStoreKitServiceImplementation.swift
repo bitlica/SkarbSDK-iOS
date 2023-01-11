@@ -84,18 +84,15 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
     paymentQueue.restoreCompletedTransactions()
   }
   
-  func purchaseProduct(_ product: SKProduct, completion: @escaping (Result<Bool, Error>) -> Void) {
+  func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<Bool, Error>) -> Void) {
     dispatchPrecondition(condition: .onQueue(.main))
+    let product = package.storeProduct
     SKLogger.logInfo("calling purchaseProduct with productId = \(product.productIdentifier)")
     let payment = SKMutablePayment(product: product)
     SKPaymentQueue.default().add(payment)
     exclusionSerialQueue.sync {
       purchasingProductCompletions[product.productIdentifier] = completion
     }
-  }
-  
-  func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<Bool, Error>) -> Void) {
-    purchaseProduct(package.storeProduct, completion: completion)
   }
   
   /// Might be called on any thread. Callback wil be on the main thread
@@ -312,12 +309,12 @@ private extension SKStoreKitServiceImplementation {
   
   func createPurchaseAndTransactionCommand(purchasedTransactions: [SKPaymentTransaction]) {
     let transactionIds: [String] = purchasedTransactions.compactMap { $0.transactionIdentifier }
+    var countryCode: String? = nil
+    if #available(iOS 13.0, *) {
+      countryCode = SKPaymentQueue.default().storefront?.countryCode
+    }
+    let installData = SKServiceRegistry.commandStore.getDeviceRequest()
     if !SKServiceRegistry.commandStore.hasPurhcaseV4Command {
-      var countryCode: String? = nil
-      if #available(iOS 13.0, *) {
-        countryCode = SKPaymentQueue.default().storefront?.countryCode
-      }
-      let installData = SKServiceRegistry.commandStore.getDeviceRequest()
       let purchaseDataV4 = Purchaseapi_ReceiptRequest(storefront: countryCode,
                                                       region: allProducts?.first?.priceLocale.regionCode,
                                                       currency: allProducts?.first?.priceLocale.currencyCode,
@@ -330,6 +327,31 @@ private extension SKStoreKitServiceImplementation {
       SKServiceRegistry.commandStore.saveCommand(purchaseV4Command)
     }
     
+    // Just no need to send receipt for duplicated product identifiers
+    let productIdentifiers = Set(purchasedTransactions.compactMap { $0.payment.productIdentifier })
+    for productId in productIdentifiers {
+      // default is true bacause we may not have [SKProduct] and purchase might be not subscription
+      // server should have each updated receipt at this case not to lose one time puchases
+      // no needs to send receipt for subscription purchases
+      var shouldSendPurchase = true
+      if let product = fetchProduct(by: productId),
+         product.introductoryPrice != nil {
+        shouldSendPurchase = false
+      }
+      if shouldSendPurchase {
+        let purchaseDataV4 = Purchaseapi_ReceiptRequest(storefront: countryCode,
+                                                        region: allProducts?.first?.priceLocale.regionCode,
+                                                        currency: allProducts?.first?.priceLocale.currencyCode,
+                                                        newTransactions: transactionIds,
+                                                        docFolderDate: installData?.docDate,
+                                                        appBuildDate: installData?.buildDate)
+        let purchaseV4Command = SKCommand(commandType: .setReceipt,
+                                          status: .pending,
+                                          data: purchaseDataV4.getData())
+        SKServiceRegistry.commandStore.saveCommand(purchaseV4Command)
+      }
+    }
+        
     // Always sends transactions even in case if it was the first purchase
     // and transactions are included into purchase command
     let newTransactions = SKServiceRegistry.commandStore.getNewTransactionIds(transactionIds)

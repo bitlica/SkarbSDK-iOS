@@ -18,7 +18,6 @@ public protocol SKStoreKitDelegate: AnyObject {
 protocol SKStoreKitService {
   func requestProductInfoAndSendPurchase(command: SKCommand)
   func restorePurchases(completion: @escaping (Result<Bool, Error>) -> Void)
-  func purchaseProduct(_ product: SKProduct, completion: @escaping (Result<Bool, Error>) -> Void)
   func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<Bool, Error>) -> Void)
   
   func requestProductsInfo(productIds: [String],

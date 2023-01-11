@@ -44,6 +44,11 @@ internal protocol Purchaseapi_IngesterClientProtocol: GRPCClient {
     _ request: Purchaseapi_VerifyReceiptRequest,
     callOptions: CallOptions?
   ) -> UnaryCall<Purchaseapi_VerifyReceiptRequest, Purchaseapi_VerifyReceiptResponse>
+
+  func checkConsumables(
+    _ request: Purchaseapi_CheckConsumablesRequest,
+    callOptions: CallOptions?
+  ) -> UnaryCall<Purchaseapi_CheckConsumablesRequest, SwiftProtobuf.Google_Protobuf_Empty>
 }
 
 extension Purchaseapi_IngesterClientProtocol {
@@ -104,6 +109,24 @@ extension Purchaseapi_IngesterClientProtocol {
       interceptors: self.interceptors?.makeVerifyReceiptInterceptors() ?? []
     )
   }
+
+  /// Unary call to CheckConsumables
+  ///
+  /// - Parameters:
+  ///   - request: Request to send to CheckConsumables.
+  ///   - callOptions: Call options.
+  /// - Returns: A `UnaryCall` with futures for the metadata, status and response.
+  internal func checkConsumables(
+    _ request: Purchaseapi_CheckConsumablesRequest,
+    callOptions: CallOptions? = nil
+  ) -> UnaryCall<Purchaseapi_CheckConsumablesRequest, SwiftProtobuf.Google_Protobuf_Empty> {
+    return self.makeUnaryCall(
+      path: "/purchaseapi.Ingester/CheckConsumables",
+      request: request,
+      callOptions: callOptions ?? self.defaultCallOptions,
+      interceptors: self.interceptors?.makeCheckConsumablesInterceptors() ?? []
+    )
+  }
 }
 
 internal protocol Purchaseapi_IngesterClientInterceptorFactoryProtocol {
@@ -116,6 +139,9 @@ internal protocol Purchaseapi_IngesterClientInterceptorFactoryProtocol {
 
   /// - Returns: Interceptors to use when invoking 'verifyReceipt'.
   func makeVerifyReceiptInterceptors() -> [ClientInterceptor<Purchaseapi_VerifyReceiptRequest, Purchaseapi_VerifyReceiptResponse>]
+
+  /// - Returns: Interceptors to use when invoking 'checkConsumables'.
+  func makeCheckConsumablesInterceptors() -> [ClientInterceptor<Purchaseapi_CheckConsumablesRequest, SwiftProtobuf.Google_Protobuf_Empty>]
 }
 
 internal final class Purchaseapi_IngesterClient: Purchaseapi_IngesterClientProtocol {
@@ -149,6 +175,8 @@ internal protocol Purchaseapi_IngesterProvider: CallHandlerProvider {
   func setTransactions(request: Purchaseapi_TransactionsRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
 
   func verifyReceipt(request: Purchaseapi_VerifyReceiptRequest, context: StatusOnlyCallContext) -> EventLoopFuture<Purchaseapi_VerifyReceiptResponse>
+
+  func checkConsumables(request: Purchaseapi_CheckConsumablesRequest, context: StatusOnlyCallContext) -> EventLoopFuture<SwiftProtobuf.Google_Protobuf_Empty>
 }
 
 extension Purchaseapi_IngesterProvider {
@@ -188,6 +216,15 @@ extension Purchaseapi_IngesterProvider {
         userFunction: self.verifyReceipt(request:context:)
       )
 
+    case "CheckConsumables":
+      return UnaryServerHandler(
+        context: context,
+        requestDeserializer: ProtobufDeserializer<Purchaseapi_CheckConsumablesRequest>(),
+        responseSerializer: ProtobufSerializer<SwiftProtobuf.Google_Protobuf_Empty>(),
+        interceptors: self.interceptors?.makeCheckConsumablesInterceptors() ?? [],
+        userFunction: self.checkConsumables(request:context:)
+      )
+
     default:
       return nil
     }
@@ -207,4 +244,8 @@ internal protocol Purchaseapi_IngesterServerInterceptorFactoryProtocol {
   /// - Returns: Interceptors to use when handling 'verifyReceipt'.
   ///   Defaults to calling `self.makeInterceptors()`.
   func makeVerifyReceiptInterceptors() -> [ServerInterceptor<Purchaseapi_VerifyReceiptRequest, Purchaseapi_VerifyReceiptResponse>]
+
+  /// - Returns: Interceptors to use when handling 'checkConsumables'.
+  ///   Defaults to calling `self.makeInterceptors()`.
+  func makeCheckConsumablesInterceptors() -> [ServerInterceptor<Purchaseapi_CheckConsumablesRequest, SwiftProtobuf.Google_Protobuf_Empty>]
 }

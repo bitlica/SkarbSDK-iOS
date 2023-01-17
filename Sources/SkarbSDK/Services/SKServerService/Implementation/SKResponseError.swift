@@ -24,7 +24,7 @@ public struct SKResponseError: Error {
   }
   
   let errorCode: Int
-  let message: String
+  public let message: String
 
   public static let noResponseCode = 9999
   static let genericRetryMessage = "General response error"

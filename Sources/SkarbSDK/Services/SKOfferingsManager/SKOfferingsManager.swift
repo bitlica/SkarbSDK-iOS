@@ -37,13 +37,14 @@ class SKOfferingsManagerImplementation: SKOfferingsManager {
     SKServiceRegistry.serverAPI.getOfferings(completion: { [weak self] result in
       guard let self = self else { return }
       switch result {
-        case .success(let updatedOfferings):
-          self.parseUpdatedOfferings(updatedOfferings,
-                                     completion: completion)
-        case .failure(let error):
-          DispatchQueue.main.async {
-            completion(.failure(error))
-          }
+      case .success(let updatedOfferings):
+        self.parseUpdatedOfferings(updatedOfferings,
+                                   retryCount: 0,
+                                   completion: completion)
+      case .failure(let error):
+        DispatchQueue.main.async {
+          completion(.failure(error))
+        }
       }
     })
   }
@@ -54,8 +55,17 @@ class SKOfferingsManagerImplementation: SKOfferingsManager {
 private extension SKOfferingsManagerImplementation {
   
   func parseUpdatedOfferings(_ updatedOfferings: Setupsapi_OfferingsResponse,
-                            completion: @escaping (Result<SKOfferings, Error>) -> Void) {
+                             retryCount: Int,
+                             completion: @escaping (Result<SKOfferings, Error>) -> Void) {
     let offeringsData = updatedOfferings.data.compactMap { self.createOffering(with: $0) }
+    
+    guard retryCount < 3 else {
+      DispatchQueue.main.async {
+        let error = SKResponseError(errorCode: 34, message: "Can't get offerings after 3 attempts. Don't have [SKProduct] for offerings")
+        completion(.failure(error))
+      }
+      return
+    }
     
     // If count is not equal -> there are no SKProduct for any `productId`
     // and need to fetch them
@@ -63,16 +73,17 @@ private extension SKOfferingsManagerImplementation {
       DispatchQueue.main.async {
         SKServiceRegistry.storeKitService.requestProductsInfo(productIds: updatedOfferings.allProductIds) { [weak self] result in
           switch result {
-            case .success:
+          case .success:
+            self?.parseUpdatedOfferings(updatedOfferings,
+                                        retryCount: retryCount + 1,
+                                        completion: completion)
+          case .failure(let error):
+            SKLogger.logInfo("parseUpdatedOfferings(:) fetching error during requestProductsInfo(:). Try to fetch one more time. Error = \(error.localizedDescription)")
+            DispatchQueue.global().asyncAfter(deadline: .now() + 1, execute: {
               self?.parseUpdatedOfferings(updatedOfferings,
+                                          retryCount: retryCount + 1,
                                           completion: completion)
-            case .failure:
-  //            TODO: Think about stopping tries after some failures.
-              SKLogger.logInfo("parseUpdatedOfferings(:) fetching error during requestProductsInfo(:). Try to fetch one more time")
-              DispatchQueue.global().asyncAfter(deadline: .now() + 1, execute: {
-                self?.parseUpdatedOfferings(updatedOfferings,
-                                            completion: completion)
-              })
+            })
           }
         }
       }

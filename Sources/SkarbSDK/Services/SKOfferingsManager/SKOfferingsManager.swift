@@ -60,16 +60,28 @@ private extension SKOfferingsManagerImplementation {
     let offeringsData = updatedOfferings.data.compactMap { self.createOffering(with: $0) }
     
     guard retryCount < 3 else {
+      
+      let offerings = SKOfferings(offerings: offeringsData)
+      exclusionSerialQueue.sync {
+        cachedOfferings = offerings
+      }
+      
       DispatchQueue.main.async {
-        let error = SKResponseError(errorCode: 34, message: "Can't get offerings after 3 attempts. Don't have [SKProduct] for offerings")
-        completion(.failure(error))
+        if offerings.offerings.isEmpty {
+          let message = "Can't get offerings after 3 attempts. Don't have [SKProduct] for offerings"
+          SKLogger.logInfo(message)
+          let error = SKResponseError(errorCode: 34, message: message)
+          completion(.failure(error))
+        } else {
+          completion(.success(offerings))
+        }
       }
       return
     }
     
     // If count is not equal -> there are no SKProduct for any `productId`
     // and need to fetch them
-    guard offeringsData.count == updatedOfferings.data.count else {
+    guard offeringsData.flatMap({ $0.packages }).count == updatedOfferings.data.flatMap({ $0.packages }).count else {
       DispatchQueue.main.async {
         SKServiceRegistry.storeKitService.requestProductsInfo(productIds: updatedOfferings.allProductIds) { [weak self] result in
           switch result {
@@ -79,7 +91,7 @@ private extension SKOfferingsManagerImplementation {
                                         completion: completion)
           case .failure(let error):
             SKLogger.logInfo("parseUpdatedOfferings(:) fetching error during requestProductsInfo(:). Try to fetch one more time. Error = \(error.localizedDescription)")
-            DispatchQueue.global().asyncAfter(deadline: .now() + 1, execute: {
+            DispatchQueue.global().asyncAfter(deadline: .now() + Double(retryCount) * 0.15, execute: {
               self?.parseUpdatedOfferings(updatedOfferings,
                                           retryCount: retryCount + 1,
                                           completion: completion)
@@ -98,11 +110,8 @@ private extension SKOfferingsManagerImplementation {
     }
   }
   
-  func createOffering(with offering: Setupsapi_Offering) -> SKOffering? {
+  func createOffering(with offering: Setupsapi_Offering) -> SKOffering {
     let packages = offering.packages.compactMap { createPackage(with: $0) }
-    guard packages.count == offering.packages.count else {
-      return nil
-    }
     
     return SKOffering(id: offering.id,
                       description: offering.description_p,

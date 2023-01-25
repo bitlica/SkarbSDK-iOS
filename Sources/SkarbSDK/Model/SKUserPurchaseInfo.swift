@@ -58,8 +58,8 @@ public struct SKActiveSubscription {
     return renewalInfo == "active"
   }
   
-  public var isCancelled: Bool {
-    return renewalInfo == "cancelled"
+  public var isExpired: Bool {
+    return renewalInfo == "expired"
   }
   
   public var isInBillingRetry: Bool {
@@ -72,6 +72,14 @@ public struct SKActiveSubscription {
   
   public var isTrial: Bool {
     return trialPeriod
+  }
+  
+  public var willCancel: Bool {
+    return renewalInfo == "will_cancel"
+  }
+  
+  public var isRefunded: Bool {
+    return renewalInfo == "refunded"
   }
 }
 

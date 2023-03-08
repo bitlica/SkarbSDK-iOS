@@ -141,6 +141,9 @@ public class SkarbSDK {
   /// - Note: This may force your users to enter the App Store password so should only be performed on request of
   /// the user. Typically with a button in settings or near your purchase UI.
   public static func restorePurchases(completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
+    guard SKServiceRegistry.storeKitService != nil else {
+      fatalError("SkarbSDK wasn't initialized. Use 'initialize' method before calling 'restorePurchases()'")
+    }
     SKServiceRegistry.storeKitService.restorePurchases(completion: { result in
       switch result {
         case .success:
@@ -154,6 +157,9 @@ public class SkarbSDK {
   
   /// Should be called on the main thread. Callback will be on the main thread
   public static func purchasePackage(_ package: SKOfferPackage, completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
+    guard SKServiceRegistry.storeKitService != nil else {
+      fatalError("SkarbSDK wasn't initialized. Use 'initialize' method before calling 'purchasePackage()'")
+    }
     guard SKServiceRegistry.storeKitService.canMakePayments else {
       completion(.failure(SKResponseError(errorCode: 0, message: "You don't have permission to make payments.")))
       return
@@ -171,10 +177,16 @@ public class SkarbSDK {
   
   //  Indicates whether the user is allowed to make payments.
   public static func canMakePayments() -> Bool {
+    guard SKServiceRegistry.storeKitService != nil else {
+      fatalError("SkarbSDK wasn't initialized. Use 'initialize' method before calling 'canMakePayments()'")
+    }
     return SKServiceRegistry.storeKitService.canMakePayments
   }
   
   public static func setStoreKitDelegate(_ delegate: SKStoreKitDelegate?) {
+    guard SKServiceRegistry.storeKitService != nil else {
+      fatalError("SkarbSDK wasn't initialized. Use 'initialize' method before calling 'setStoreKitDelegate()'")
+    }
     SKServiceRegistry.storeKitService.delegate = delegate
   }
   

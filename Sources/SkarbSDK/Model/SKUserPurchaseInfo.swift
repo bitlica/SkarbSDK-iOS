@@ -21,7 +21,7 @@ public struct SKUserPurchaseInfo {
   }
   
   public var isActiveSubscription: Bool {
-    return !activeSubscriptions.filter { $0.expiryDate >= Date() }.isEmpty
+    return !activeSubscriptions.filter { $0.isActive }.isEmpty
   }
   public var isAnyOnetimePurchased: Bool {
     return !onetimePurchases.isEmpty
@@ -29,6 +29,10 @@ public struct SKUserPurchaseInfo {
   /// User has any valid subscription or any non subscription product was purchased
   public var isActive: Bool {
     return isActiveSubscription || isAnyOnetimePurchased
+  }
+  
+  public func fetchActiveSubscription(by productId: String) -> SKActiveSubscription? {
+    return activeSubscriptions.first { $0.productID == productId }
   }
 }
 
@@ -52,6 +56,10 @@ public struct SKActiveSubscription {
     introOfferPeriod = activeSubscription.introOfferPeriod
     trialPeriod = activeSubscription.trialPeriod
     renewalInfo = activeSubscription.renewalInfo
+  }
+  
+  public var isActive: Bool {
+    return expiryDate >= Date()
   }
   
   public var willRenew: Bool {

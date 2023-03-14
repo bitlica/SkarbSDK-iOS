@@ -137,6 +137,11 @@ public struct SKOfferPackage {
     return priceAsString(locale: storeProduct.priceLocale,
                          price: NSDecimalNumber(decimal: price))
   }
+  
+  public func localizedPriceWithDiscount(_ discount: Double) -> String {
+    return priceAsString(locale: storeProduct.priceLocale,
+                         price: NSDecimalNumber(value: storeProduct.price.doubleValue / discount)) ?? ""
+  }
 
   // MARK: Private
   

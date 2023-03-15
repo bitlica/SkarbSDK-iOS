@@ -11,12 +11,12 @@ import SwiftProtobuf
 
 public struct SKUserPurchaseInfo {
   public var environment: String
-  public var activeSubscriptions: [SKActiveSubscription] = []
+  public var activeSubscriptions: [SKPurchasedSubscription] = []
   public var onetimePurchases: [SKOnetimePurchase] = []
   
   init(verifyReceiptResponse: Purchaseapi_VerifyReceiptResponse) {
     environment = verifyReceiptResponse.environment
-    activeSubscriptions = verifyReceiptResponse.activeSubscriptions.map({ SKActiveSubscription(activeSubscription: $0) })
+    activeSubscriptions = verifyReceiptResponse.activeSubscriptions.map({ SKPurchasedSubscription(activeSubscription: $0) })
     onetimePurchases = verifyReceiptResponse.onetimes.map({ SKOnetimePurchase(onetimePurchase: $0) })
   }
   
@@ -31,13 +31,13 @@ public struct SKUserPurchaseInfo {
     return isActiveSubscription || isAnyOnetimePurchased
   }
   
-  public func fetchActiveSubscription(by productId: String) -> SKActiveSubscription? {
+  public func fetchActiveSubscription(by productId: String) -> SKPurchasedSubscription? {
     return activeSubscriptions.first { $0.productID == productId }
   }
 }
 
 
-public struct SKActiveSubscription {
+public struct SKPurchasedSubscription {
   public let transactionID: String
   public let originalTransactionID: String
   public let expiryDate: Date

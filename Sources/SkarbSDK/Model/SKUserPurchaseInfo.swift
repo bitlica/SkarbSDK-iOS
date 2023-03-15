@@ -31,7 +31,7 @@ public struct SKUserPurchaseInfo {
     return isActiveSubscription || isAnyOnetimePurchased
   }
   
-  public func fetchActiveSubscription(by productId: String) -> SKPurchasedSubscription? {
+  public func fetchPurchasedSubscription(by productId: String) -> SKPurchasedSubscription? {
     return purchasedSubscriptions.first { $0.productID == productId }
   }
 }

@@ -105,6 +105,22 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.saveCommand(idfaV4Command)
   }
   
+  public static func sendAppsflyerId(_ appsflyerId: String) {
+    guard !SKServiceRegistry.commandStore.hasSetAppsflyerIdCommand else {
+      return
+    }
+    
+    let attributionRequest = Installapi_AttribRequest(
+      broker: SKBroker.appsflyer.name,
+      features: [:],
+      brokerUserID: appsflyerId
+    )
+    let sourceV4Command = SKCommand(commandType: .sourceV4,
+                                    status: .pending,
+                                    data: attributionRequest.getData())
+    SKServiceRegistry.commandStore.saveCommand(sourceV4Command)
+  }
+  
   /// Verify receipt for user purchases.
   /// Might be called on the any thread. Callback will be on the main thread
   public static func validateReceipt(with refreshPolicy: SKRefreshPolicy,

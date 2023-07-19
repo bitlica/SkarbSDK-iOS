@@ -62,7 +62,7 @@ class SKServerAPIImplementaton: SKServerAPI {
                                            commandType: command.commandType,
                                            completion: completion)
           }
-        case .sourceV4:
+        case .sourceV4, .setAppsflyerId:
           guard let attribRequest = try? decoder.decode(Installapi_AttribRequest.self, from: command.data) else {
             let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
             SKLogger.logError("SyncCommand called with sourceV4. Installapi_AttribRequest cannt be decoded",

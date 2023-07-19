@@ -112,7 +112,7 @@ public class SkarbSDK {
     
     let attributionRequest = Installapi_AttribRequest(
       broker: SKBroker.appsflyer.name,
-      features: [:],
+      features: nil,
       brokerUserID: appsflyerId
     )
     let sourceV4Command = SKCommand(commandType: .sourceV4,

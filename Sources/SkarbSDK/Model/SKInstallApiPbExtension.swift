@@ -190,17 +190,18 @@ extension Installapi_DeviceRequest: SKCodableStruct {
 extension Installapi_AttribRequest: SKCodableStruct {
   
   init(broker: String,
-       features: [AnyHashable: Any],
+       features: [AnyHashable: Any]?,
        brokerUserID: String?) {
     self.auth = Auth_Auth.createDefault()
     self.installID = SkarbSDK.getDeviceId()
     self.broker = broker
     self.brokerUserID = brokerUserID ?? ""
     
-    guard JSONSerialization.isValidJSONObject(features) else {
+    guard let features = features,
+          JSONSerialization.isValidJSONObject(features) else {
       SKLogger.logError("Api_AttribRequest init: json isValidJSONObject",
                         features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
-                                   SKLoggerFeatureType.internalValue.name: features.description])
+                                   SKLoggerFeatureType.internalValue.name: features?.description])
       return
     }
     do {

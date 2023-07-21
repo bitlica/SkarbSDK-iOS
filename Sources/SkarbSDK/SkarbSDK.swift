@@ -115,7 +115,7 @@ public class SkarbSDK {
       features: nil,
       brokerUserID: appsflyerId
     )
-    let sourceV4Command = SKCommand(commandType: .sourceV4,
+    let sourceV4Command = SKCommand(commandType: .setAppsflyerId,
                                     status: .pending,
                                     data: attributionRequest.getData())
     SKServiceRegistry.commandStore.saveCommand(sourceV4Command)

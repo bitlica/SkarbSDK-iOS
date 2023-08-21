@@ -74,14 +74,6 @@ class SKCommandStore {
     return result
   }
   
-  var hasSetAppsflyerIdCommand: Bool {
-    var result = false
-    exclusionSerialQueue.sync {
-      result = localAppgateCommands.first(where: { $0.commandType == .setAppsflyerId }) != nil
-    }
-    return result
-  }
-  
   func saveCommand(_ command: SKCommand) {
     var isNew: Bool = false
     exclusionSerialQueue.sync {

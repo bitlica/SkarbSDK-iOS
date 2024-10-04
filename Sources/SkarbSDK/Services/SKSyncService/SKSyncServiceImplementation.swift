@@ -135,26 +135,6 @@ class SKSyncServiceImplementation: SKSyncService {
               SKServiceRegistry.commandStore.saveCommand(command)
             }
           }
-          else {
-            DispatchQueue.main.async {
-              ADClient.shared().requestAttributionDetails ({ (attributionJSON, error) in
-                guard error == nil else {
-                  command.updateRetryCountAndFireDate()
-                  command.changeStatus(to: .pending)
-                  SKServiceRegistry.commandStore.saveCommand(command)
-                  return
-                }
-                
-                if let attributionJSON = attributionJSON {
-                  SkarbSDK.sendSource(broker: .searchads,
-                                      features: attributionJSON,
-                                      brokerUserID: nil)
-                }
-                command.changeStatus(to: .done)
-                SKServiceRegistry.commandStore.saveCommand(command)
-              })
-            }
-          }
         case .fetchIdfa:
           command.changeStatus(to: .done)
           SKServiceRegistry.commandStore.saveCommand(command)

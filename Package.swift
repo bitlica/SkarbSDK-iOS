@@ -17,7 +17,7 @@ let package = Package(
     // Dependencies declare other packages that this package depends on.
     .package(url: "https://github.com/grpc/grpc-swift", .upToNextMajor(from: "1.23.1")),
     .package(name: "SwiftProtobuf", url: "https://github.com/apple/swift-protobuf.git", .upToNextMajor(from: "1.28.1")),
-    .package(name: "Reachability", url: "https://github.com/ashleymills/Reachability.swift", .upToNextMajor(from: "5.1.0")),
+    .package(name: "Reachability", url: "https://github.com/ashleymills/Reachability.swift", .upToNextMajor(from: "5.2.4")),
   ],
   targets: [
     .target(

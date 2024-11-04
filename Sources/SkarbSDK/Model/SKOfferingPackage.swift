@@ -138,6 +138,32 @@ public struct SKOfferPackage {
                          price: NSDecimalNumber(decimal: price))
   }
   
+  public var daylyLocalizedPriceString: String? {
+    let dayFactor: Decimal? = {
+      switch period {
+      case .day: return 1
+      case .week: return 7
+      case .month: return 30
+      case .year: return 365
+      case .none, .some(_):
+        return nil
+      }
+    }()
+    guard let numberOfUnits,
+          let dayFactor else {
+      return nil
+    }
+    
+    let periodsPerDay: Decimal = dayFactor * Decimal(numberOfUnits)
+
+    let price = (price as NSDecimalNumber)
+      .dividing(by: periodsPerDay as NSDecimalNumber,
+                withBehavior: Self.roundingBehavior) as Decimal
+    
+    return priceAsString(locale: storeProduct.priceLocale,
+                         price: NSDecimalNumber(decimal: price))
+  }
+  
   public func localizedPriceWithMultiplier(_ multiplier: Double) -> String {
     return priceAsString(locale: storeProduct.priceLocale,
                          price: NSDecimalNumber(value: storeProduct.price.doubleValue * multiplier)) ?? ""

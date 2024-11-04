@@ -138,7 +138,7 @@ public struct SKOfferPackage {
                          price: NSDecimalNumber(decimal: price))
   }
   
-  public var daylyLocalizedPriceString: String? {
+  public var dailyLocalizedPriceString: String? {
     let dayFactor: Decimal? = {
       switch period {
       case .day: return 1

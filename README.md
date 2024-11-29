@@ -24,7 +24,7 @@ Once you have your Swift package set up, adding SkarbSDK as a dependency is as e
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/bitlica/SkarbSDK.git", .upToNextMajor(from: "0.6.19"))
+    .package(url: "https://github.com/bitlica/SkarbSDK.git", .upToNextMajor(from: "0.6.20"))
 ]
 ```
 

@@ -20,9 +20,10 @@ PODS:
     - SwiftProtobuf (< 2.0.0, >= 1.19.0)
   - Logging (1.4.0)
   - ReachabilitySwift (5.0.0)
-  - SkarbSDK (0.6.0):
+  - SkarbSDK (0.6.19):
     - gRPC-Swift (= 1.8.0)
     - ReachabilitySwift (= 5.0.0)
+    - SwiftProtobuf (= 1.24.0)
   - SwiftNIO (2.40.0):
     - _NIODataStructures (= 2.40.0)
     - CNIOAtomics (= 2.40.0)
@@ -153,7 +154,7 @@ PODS:
     - SwiftNIOFoundationCompat (< 3, >= 2.32.0)
     - SwiftNIOPosix (< 3, >= 2.32.0)
     - SwiftNIOTLS (< 3, >= 2.32.0)
-  - SwiftProtobuf (1.20.2)
+  - SwiftProtobuf (1.24.0)
 
 DEPENDENCIES:
   - SkarbSDK (from `../../`)
@@ -204,7 +205,7 @@ SPEC CHECKSUMS:
   gRPC-Swift: 74adcaaa62ac5e0a018938840328cb1fdfb09e7b
   Logging: beeb016c9c80cf77042d62e83495816847ef108b
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
-  SkarbSDK: 35976fc860cfd518bc12728345dcca32fff6e6cc
+  SkarbSDK: e2c0b889ddf0a7bc6e4a4a6399fd07a7a4e8fc58
   SwiftNIO: 829958aab300642625091f82fc2f49cb7cf4ef24
   SwiftNIOConcurrencyHelpers: 697370136789b1074e4535eaae75cbd7f900370e
   SwiftNIOCore: 473fdfe746534d7aa25766916459eeaf6f92ef49
@@ -218,8 +219,8 @@ SPEC CHECKSUMS:
   SwiftNIOSSL: d153c5a6fc5b2301b0519b4c4d037a9414212da6
   SwiftNIOTLS: 598af547490133e9aac52aed0c23c4a90c31dcfc
   SwiftNIOTransportServices: 0b2b407819d82eb63af558c5396e33c945759503
-  SwiftProtobuf: 9f458aaa7844a2fc0b910053e66578bc4e2da9c1
+  SwiftProtobuf: bcfd2bc231cf9ae552cdc7c4e877bd3b41fe57b1
 
 PODFILE CHECKSUM: ea1f3993f33ef2b70c64d77230904ad75af2225b
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.16.2

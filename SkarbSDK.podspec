@@ -11,8 +11,8 @@ Pod::Spec.new do |s|
   s.homepage     = 'https://github.com/bitlica/SkarbSDK'
   s.license      = 'MIT'
   s.author       = { "Bitlica Inc" => "support@bitlica.com" }
-  s.platform     = :ios, '11.3'
-  s.ios.deployment_target = '11.3'
+  s.platform     = :ios, '12.'
+  s.ios.deployment_target = '12.0'
   s.source       = { :git => "https://github.com/bitlica/SkarbSDK.git", :tag => "#{s.version}" }
   s.source_files  = 'Sources/SkarbSDK/**/*'
   s.frameworks = 'Foundation', 'AdSupport', 'UIKit', 'StoreKit', 'AppTrackingTransparency', 'AdServices'

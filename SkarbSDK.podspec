@@ -18,5 +18,5 @@ Pod::Spec.new do |s|
   s.frameworks = 'Foundation', 'AdSupport', 'UIKit', 'StoreKit', 'AppTrackingTransparency', 'AdServices'
   s.dependency 'gRPC-Swift', '1.8.0'
   s.dependency 'SwiftProtobuf', '1.24.0'
-  s.dependency 'ReachabilitySwift', '5.0.0'
+  s.dependency 'ReachabilitySwift', '5.2.4'
 end

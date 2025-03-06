@@ -108,6 +108,8 @@ public class SkarbSDK {
   /// Verify receipt for user purchases.
   /// Might be called on the any thread. Callback will be on the main thread
   public static func validateReceipt(with refreshPolicy: SKRefreshPolicy,
+                                     retryAttempt: Int = 0,
+                                     maxRetryAttempts: Int = 0,
                                      completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
     if refreshPolicy == .memoryCached,
        let userPurchaseInfo = cachedUserPurchaseInfo {
@@ -123,7 +125,16 @@ public class SkarbSDK {
           cachedUserPurchaseInfo = updatedUserPurchaseInfo
           completion(.success(updatedUserPurchaseInfo))
         case .failure(let error):
+        if retryAttempt < maxRetryAttempts {
+          // retry
+          validateReceipt(
+            with: refreshPolicy,
+            retryAttempt: retryAttempt + 1,
+            maxRetryAttempts: maxRetryAttempts,
+            completion: completion)
+        } else {
           completion(.failure(error))
+        }
       }
     })
   }
@@ -148,6 +159,7 @@ public class SkarbSDK {
       switch result {
         case .success:
           validateReceipt(with: .always,
+                          maxRetryAttempts: 2,
                           completion: completion)
         case .failure(let error):
           completion(.failure(error))

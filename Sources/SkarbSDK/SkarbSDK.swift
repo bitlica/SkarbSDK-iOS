@@ -127,11 +127,14 @@ public class SkarbSDK {
         case .failure(let error):
         if retryAttempt < maxRetryAttempts {
           // retry
-          validateReceipt(
-            with: refreshPolicy,
-            retryAttempt: retryAttempt + 1,
-            maxRetryAttempts: maxRetryAttempts,
-            completion: completion)
+          let delay = Double(retryAttempt) * 0.15
+          DispatchQueue.global().asyncAfter(deadline: .now() + delay) {
+            validateReceipt(
+              with: refreshPolicy,
+              retryAttempt: retryAttempt + 1,
+              maxRetryAttempts: maxRetryAttempts,
+              completion: completion)
+          }
         } else {
           completion(.failure(error))
         }

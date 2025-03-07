@@ -18,7 +18,7 @@ public class SkarbSDK {
   
 //  MARK: Private
   static let agentName: String = "SkarbSDK-iOS"
-  static let version: String = "0.6.20"
+  static let version: String = "0.6.22"
   
   static var clientId: String = ""
   

@@ -15,6 +15,7 @@ public enum SKBroker {
   case appsflyer
   case adjust
   case branch
+  case tenjin
   case custom(String)
   
   var name: String {
@@ -31,6 +32,8 @@ public enum SKBroker {
         return "adjust"
       case .branch:
         return "branch"
+    case .tenjin:
+      return "tenjin"
       case .custom(let value):
         return value
     }

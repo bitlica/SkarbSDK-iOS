@@ -50,6 +50,20 @@ public struct SKOfferPackage {
     return intro.paymentMode == SKProductDiscount.PaymentMode.freeTrial
   }
   
+  public var isIntroPriceOrPeriod: Bool {
+    guard let intro = storeProduct.introductoryPrice else {
+      return false
+    }
+    switch intro.paymentMode {
+    case .freeTrial:
+      return false
+    case .payUpFront, .payAsYouGo:
+      return true
+    @unknown default:
+      return false
+    }
+  }
+  
   public var isSubscription: Bool {
     return storeProduct.subscriptionPeriod != nil
   }

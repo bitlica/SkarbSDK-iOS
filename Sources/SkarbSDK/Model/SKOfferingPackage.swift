@@ -72,6 +72,10 @@ public struct SKOfferPackage {
     return storeProduct.subscriptionPeriod?.unit
   }
   
+  public var trialPeriodDuration: Int? {
+    isTrial ? storeProduct.introductoryPrice?.subscriptionPeriod.numberOfUnits : nil
+  }
+  
   public var numberOfUnits: Int? {
     return storeProduct.subscriptionPeriod?.numberOfUnits
   }

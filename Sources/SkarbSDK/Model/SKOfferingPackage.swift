@@ -15,7 +15,7 @@ public enum PurchaseType {
   case consumable
   case nonConsumable
   case unknown
-  
+
   static func initWith(string: String) -> PurchaseType {
     switch string {
     case "weekly": return .weekly
@@ -28,61 +28,102 @@ public enum PurchaseType {
   }
 }
 
+/// Introductory offer of a package, as a value type, so host apps never need to reach
+/// through to `SKProduct.introductoryPrice`.
+public struct SKIntroductoryOffer {
+  public let price: Decimal
+  public let priceLocale: Locale
+  public let identifier: String?
+  public let periodUnit: SKProduct.PeriodUnit
+  public let periodDuration: Int
+  public let numberOfPeriods: Int
+  /// True for a free trial, false for a paid introductory period.
+  public let isFreeTrial: Bool
+}
+
 public struct SKOfferPackage {
   public let id: String
   public let description: String
   public let productId: String
   public let purchaseType: PurchaseType
-  public let storeProduct: SKProduct
-  
-  init(package: Setupsapi_Package, storeProduct: SKProduct) {
+
+  /// The raw StoreKit 1 product.
+  ///
+  /// - Warning: `nil` when SkarbSDK runs on StoreKit 2, where `SKProduct` does not exist.
+  /// Everything this used to be reached through for is exposed directly on the package:
+  /// `priceLocale`, `period`, `numberOfUnits`, `discountPeriod`, `discountPeriodDuration`.
+  public let storeProduct: SKProduct?
+
+  /// Product metadata, independent of the StoreKit version that produced it.
+  let productInfo: SKProductInfo
+
+  init(package: Setupsapi_Package, productInfo: SKProductInfo) {
     self.id = package.id
     self.description = package.description_p
     self.productId = package.productID
     self.purchaseType = PurchaseType.initWith(string: package.purchaseType)
-    self.storeProduct = storeProduct
+    self.productInfo = productInfo
+    self.storeProduct = productInfo.storeProduct
   }
-  
+
   public var isTrial: Bool {
-    guard let intro = storeProduct.introductoryPrice else {
+    guard let intro = productInfo.introductoryOffer else {
       return false
     }
-    return intro.paymentMode == SKProductDiscount.PaymentMode.freeTrial
+    return intro.paymentMode.isFreeTrial
   }
-  
+
   public var isIntroPriceOrPeriod: Bool {
-    guard let intro = storeProduct.introductoryPrice else {
+    guard let intro = productInfo.introductoryOffer else {
       return false
     }
-    switch intro.paymentMode {
-    case .freeTrial:
-      return false
-    case .payUpFront, .payAsYouGo:
-      return true
-    @unknown default:
-      return false
-    }
+    return intro.paymentMode.isPaidIntroductory
   }
-  
+
   public var isSubscription: Bool {
-    return storeProduct.subscriptionPeriod != nil
+    return productInfo.subscriptionPeriod != nil
   }
-  
+
   public var period: SKProduct.PeriodUnit? {
-    return storeProduct.subscriptionPeriod?.unit
+    return productInfo.subscriptionPeriod?.unit
   }
-  
+
+  /// Same value as `period`, under a name that cannot be shadowed by a host app's own
+  /// `period` extension on this type.
+  public var subscriptionPeriodUnit: SKProduct.PeriodUnit? {
+    return productInfo.subscriptionPeriod?.unit
+  }
+
+  public var introductoryOffer: SKIntroductoryOffer? {
+    guard let intro = productInfo.introductoryOffer else {
+      return nil
+    }
+    return SKIntroductoryOffer(price: intro.price,
+                               priceLocale: intro.priceLocale,
+                               identifier: intro.identifier,
+                               periodUnit: intro.period.unit,
+                               periodDuration: intro.period.count,
+                               numberOfPeriods: intro.numberOfPeriods,
+                               isFreeTrial: intro.paymentMode.isFreeTrial)
+  }
+
+  /// Locale the price is formatted in. On StoreKit 1 this is `SKProduct.priceLocale`,
+  /// on StoreKit 2 it is `Product.priceFormatStyle.locale`.
+  public var priceLocale: Locale {
+    return productInfo.priceLocale
+  }
+
   public var trialPeriodDuration: Int? {
-    isTrial ? storeProduct.introductoryPrice?.subscriptionPeriod.numberOfUnits : nil
+    isTrial ? productInfo.introductoryOffer?.period.count : nil
   }
-  
+
   public var trialExpirationDateFromToday: Date? {
     guard isTrial,
     let discountPeriodDuration = discountPeriodDuration,
           let discountPeriod = discountPeriod else {
       return nil
     }
-    
+
     let days: Int
     switch discountPeriod {
     case .day:
@@ -96,7 +137,7 @@ public struct SKOfferPackage {
     @unknown default:
       days = 0
     }
-    
+
     let calendar = Calendar.current
     let today = Date()
     guard let trialExpDate = calendar.date(
@@ -106,46 +147,44 @@ public struct SKOfferPackage {
     ) else {
       return nil
     }
-    
+
     return trialExpDate
   }
-  
+
   public var discountPeriodDuration: Int? {
-    storeProduct.introductoryPrice?.subscriptionPeriod.numberOfUnits
+    productInfo.introductoryOffer?.period.count
   }
-  
+
   public var discountPeriod: SKProduct.PeriodUnit? {
-    storeProduct.introductoryPrice?.subscriptionPeriod.unit
+    productInfo.introductoryOffer?.period.unit
   }
-  
+
   public var numberOfUnits: Int? {
-    return storeProduct.subscriptionPeriod?.numberOfUnits
+    return productInfo.subscriptionPeriod?.count
   }
-  
+
   public var price: Decimal {
-    return storeProduct.price as Decimal
+    return productInfo.price
   }
-  
+
   public var currencyCode: String? {
-    return storeProduct.priceLocale.currencyCode
+    return productInfo.currencyCode
   }
-  
+
   public var localizedPriceString: String {
-    return priceAsString(locale: storeProduct.priceLocale,
-                         price: storeProduct.price) ?? ""
+    return priceAsString(locale: productInfo.priceLocale,
+                         price: NSDecimalNumber(decimal: productInfo.price)) ?? ""
   }
-  
+
   public var localizedIntroductoryPriceString: String? {
-      guard #available(iOS 12.2, *),
-            let intro = storeProduct.introductoryPrice
-      else {
-          return nil
-      }
+    guard let intro = productInfo.introductoryOffer else {
+      return nil
+    }
 
     return priceAsString(locale: intro.priceLocale,
-                         price: intro.price)
+                         price: NSDecimalNumber(decimal: intro.price))
   }
-  
+
   public var monthlyLocalizedPriceString: String? {
     let monthFactor: Decimal? = {
       switch period {
@@ -161,17 +200,17 @@ public struct SKOfferPackage {
           let monthFactor else {
       return nil
     }
-    
+
     let periodsPerMonth: Decimal = monthFactor * Decimal(numberOfUnits)
 
     let price = (price as NSDecimalNumber)
       .dividing(by: periodsPerMonth as NSDecimalNumber,
                 withBehavior: Self.roundingBehavior) as Decimal
-    
-    return priceAsString(locale: storeProduct.priceLocale,
+
+    return priceAsString(locale: productInfo.priceLocale,
                          price: NSDecimalNumber(decimal: price))
   }
-  
+
   public var weeklyLocalizedPriceString: String? {
     let weeklyFactor: Decimal? = {
       switch period {
@@ -187,17 +226,17 @@ public struct SKOfferPackage {
           let weeklyFactor else {
       return nil
     }
-    
+
     let periodsPerWeek: Decimal = weeklyFactor * Decimal(numberOfUnits)
 
     let price = (price as NSDecimalNumber)
       .dividing(by: periodsPerWeek as NSDecimalNumber,
                 withBehavior: Self.roundingBehavior) as Decimal
-    
-    return priceAsString(locale: storeProduct.priceLocale,
+
+    return priceAsString(locale: productInfo.priceLocale,
                          price: NSDecimalNumber(decimal: price))
   }
-  
+
   public var dailyLocalizedPriceString: String? {
     let dayFactor: Decimal? = {
       switch period {
@@ -213,24 +252,25 @@ public struct SKOfferPackage {
           let dayFactor else {
       return nil
     }
-    
+
     let periodsPerDay: Decimal = dayFactor * Decimal(numberOfUnits)
 
     let price = (price as NSDecimalNumber)
       .dividing(by: periodsPerDay as NSDecimalNumber,
                 withBehavior: Self.roundingBehavior) as Decimal
-    
-    return priceAsString(locale: storeProduct.priceLocale,
+
+    return priceAsString(locale: productInfo.priceLocale,
                          price: NSDecimalNumber(decimal: price))
   }
-  
+
   public func localizedPriceWithMultiplier(_ multiplier: Double) -> String {
-    return priceAsString(locale: storeProduct.priceLocale,
-                         price: NSDecimalNumber(value: storeProduct.price.doubleValue * multiplier)) ?? ""
+    let base = NSDecimalNumber(decimal: productInfo.price).doubleValue
+    return priceAsString(locale: productInfo.priceLocale,
+                         price: NSDecimalNumber(value: base * multiplier)) ?? ""
   }
 
   // MARK: Private
-  
+
   private static let roundingBehavior = NSDecimalNumberHandler(
       roundingMode: .down,
       scale: 2,
@@ -239,7 +279,7 @@ public struct SKOfferPackage {
       raiseOnUnderflow: false,
       raiseOnDivideByZero: false
   )
-  
+
   private func priceAsString(locale: Locale,
                      price: NSDecimalNumber) -> String? {
     let formatter = NumberFormatter()

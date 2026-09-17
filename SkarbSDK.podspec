@@ -4,14 +4,14 @@
 
 Pod::Spec.new do |s|
   s.name         = 'SkarbSDK'
-  s.version      = '0.6.31'
+  s.version      = '1.0.0'
   s.swift_version = '5.4'
   s.summary      = 'Summary'
   s.description  = 'Description'
   s.homepage     = 'https://github.com/bitlica/SkarbSDK'
   s.license      = 'MIT'
   s.author       = { "Bitlica Inc" => "support@bitlica.com" }
-  s.platform     = :ios, '12.'
+  s.platform     = :ios, '12.0'
   s.ios.deployment_target = '12.0'
   s.source       = { :git => "https://github.com/bitlica/SkarbSDK.git", :tag => "#{s.version}" }
   s.source_files  = 'Sources/SkarbSDK/**/*'

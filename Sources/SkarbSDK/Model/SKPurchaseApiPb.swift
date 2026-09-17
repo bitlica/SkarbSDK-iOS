@@ -94,6 +94,14 @@ struct Purchaseapi_ReceiptRequest {
     set {_uniqueStorage()._transactions = newValue}
   }
 
+  /// StoreKit 2 signed transactions (JWS, ES256). Verified by the backend against the Apple
+  /// Root CA chain, which makes a purchase provable without the legacy receipt containing it -
+  /// under StoreKit 2 a consumable never does. `receipt` keeps carrying the legacy blob.
+  var signedTransactions: [String] {
+    get {return _storage._signedTransactions}
+    set {_uniqueStorage()._signedTransactions = newValue}
+  }
+
   var idfa: String {
     get {return _storage._idfa}
     set {_uniqueStorage()._idfa = newValue}
@@ -194,6 +202,12 @@ struct Purchaseapi_VerifyReceiptRequest {
   var installID: String = String()
 
   var receipt: Data = Data()
+
+  /// StoreKit 2 signed transactions from `Transaction.all`, filtered to what still matters:
+  /// every consumable plus every live entitlement, newest first, revoked ones excluded.
+  /// Lets the backend answer with a purchase in the same call instead of after its async
+  /// pipeline - measured on sandbox, 4 seconds instead of 10 minutes 38 seconds.
+  var signedTransactions: [String] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -429,12 +443,14 @@ extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
     12: .same(proto: "currency"),
     13: .standard(proto: "doc_date"),
     14: .standard(proto: "build_date"),
+    15: .standard(proto: "signed_transactions"),
   ]
 
   fileprivate class _StorageClass {
     var _auth: Auth_Auth? = nil
     var _installID: String = String()
     var _transactions: [String] = []
+    var _signedTransactions: [String] = []
     var _idfa: String = String()
     var _idfv: String = String()
     var _receiptURL: String = String()
@@ -454,6 +470,7 @@ extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
       _auth = source._auth
       _installID = source._installID
       _transactions = source._transactions
+      _signedTransactions = source._signedTransactions
       _idfa = source._idfa
       _idfv = source._idfv
       _receiptURL = source._receiptURL
@@ -495,6 +512,7 @@ extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
         case 12: try { try decoder.decodeSingularStringField(value: &_storage._currency) }()
         case 13: try { try decoder.decodeSingularMessageField(value: &_storage._docDate) }()
         case 14: try { try decoder.decodeSingularMessageField(value: &_storage._buildDate) }()
+        case 15: try { try decoder.decodeRepeatedStringField(value: &_storage._signedTransactions) }()
         default: break
         }
       }
@@ -546,6 +564,9 @@ extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
       try { if let v = _storage._buildDate {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 14)
       } }()
+      if !_storage._signedTransactions.isEmpty {
+        try visitor.visitRepeatedStringField(value: _storage._signedTransactions, fieldNumber: 15)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -558,6 +579,7 @@ extension Purchaseapi_ReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf._Mess
         if _storage._auth != rhs_storage._auth {return false}
         if _storage._installID != rhs_storage._installID {return false}
         if _storage._transactions != rhs_storage._transactions {return false}
+        if _storage._signedTransactions != rhs_storage._signedTransactions {return false}
         if _storage._idfa != rhs_storage._idfa {return false}
         if _storage._idfv != rhs_storage._idfv {return false}
         if _storage._receiptURL != rhs_storage._receiptURL {return false}
@@ -615,6 +637,7 @@ extension Purchaseapi_VerifyReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf
     1: .same(proto: "auth"),
     2: .standard(proto: "install_id"),
     3: .same(proto: "receipt"),
+    4: .standard(proto: "signed_transactions"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -626,6 +649,7 @@ extension Purchaseapi_VerifyReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf
       case 1: try { try decoder.decodeSingularMessageField(value: &self._auth) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.installID) }()
       case 3: try { try decoder.decodeSingularBytesField(value: &self.receipt) }()
+      case 4: try { try decoder.decodeRepeatedStringField(value: &self.signedTransactions) }()
       default: break
       }
     }
@@ -645,6 +669,9 @@ extension Purchaseapi_VerifyReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf
     if !self.receipt.isEmpty {
       try visitor.visitSingularBytesField(value: self.receipt, fieldNumber: 3)
     }
+    if !self.signedTransactions.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.signedTransactions, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -652,6 +679,7 @@ extension Purchaseapi_VerifyReceiptRequest: SwiftProtobuf.Message, SwiftProtobuf
     if lhs._auth != rhs._auth {return false}
     if lhs.installID != rhs.installID {return false}
     if lhs.receipt != rhs.receipt {return false}
+    if lhs.signedTransactions != rhs.signedTransactions {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

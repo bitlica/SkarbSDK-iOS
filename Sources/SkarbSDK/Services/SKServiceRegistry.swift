@@ -16,9 +16,25 @@ class SKServiceRegistry {
   static let commandStore: SKCommandStore = SKCommandStore()
   static let migrationService: SKMigrationService = SKMigrationService()
   static let offeringsManager: SKOfferingsManager = SKOfferingsManagerImplementation()
-  
-  static func initialize(isObservable: Bool) {
+
+  /// Version actually in use, after the availability check. Read by
+  /// `SkarbSDK.effectiveStoreKitVersion`.
+  static var activeStoreKitVersion: SKStoreKitVersion = .v1
+
+  /// The single seam where the StoreKit version is chosen.
+  static func initialize(isObservable: Bool, storeKitVersion: SKStoreKitVersion) {
     _ = syncService
+
+    if storeKitVersion == .v2 {
+      if #available(iOS 15.0, *) {
+        activeStoreKitVersion = .v2
+        storeKitService = SKStoreKit2ServiceImplementation(isObservable: isObservable)
+        return
+      }
+      SKLogger.logInfo("SkarbSDK: useStoreKitVersion(.v2) was requested but StoreKit 2 needs iOS 15. Falling back to StoreKit 1.")
+    }
+
+    activeStoreKitVersion = .v1
     storeKitService = SKStoreKitServiceImplementation(isObservable: isObservable)
   }
 }

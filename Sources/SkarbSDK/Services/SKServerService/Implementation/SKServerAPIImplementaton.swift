@@ -97,13 +97,51 @@ class SKServerAPIImplementaton: SKServerAPI {
                                            completion: completion)
           }
         case .purchaseV4, .setReceipt:
-          guard let purchaseRequest = try? decoder.decode(Purchaseapi_ReceiptRequest.self, from: command.data) else {
+          guard var purchaseRequest = try? decoder.decode(Purchaseapi_ReceiptRequest.self, from: command.data) else {
             let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
             SKLogger.logError("SyncCommand called with purchaseV4. Purchaseapi_ReceiptRequest cannt be decoded",
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                          SKLoggerFeatureType.internalValue.name: value])
             return
           }
+          // Re-read the receipt from disk ONLY when the queued copy is empty.
+          //
+          // The queued copy is written when the command is created, which is before the
+          // transaction is finished. That ordering matters for consumables: Apple keeps a
+          // consumable in the receipt only until `finish()`, and drops it at the next receipt
+          // update - so the pre-finish copy can be the better one, and overwriting it
+          // unconditionally could send a receipt that no longer mentions the purchase.
+          //
+          // An empty blob, on the other hand, used to be frozen into the queue forever, because
+          // SKCommand equality includes `data` so the command was never overwritten. That is the
+          // case worth fixing, and it is the only case where a re-read can add anything: on
+          // StoreKit 2 nothing rewrites the receipt after a purchase anyway.
+          if purchaseRequest.receipt.isEmpty,
+             let appStoreReceiptURL = Bundle.main.appStoreReceiptURL,
+             let receiptData = try? Data(contentsOf: appStoreReceiptURL),
+             !receiptData.isEmpty {
+            purchaseRequest.receipt = receiptData
+            purchaseRequest.receiptLen = "\(receiptData.count)"
+            purchaseRequest.receiptURL = appStoreReceiptURL.absoluteString
+            SKLogger.logInfo("SyncCommand \(command.commandType): queued receipt was empty, re-read \(receiptData.count) bytes at send time")
+          }
+          if purchaseRequest.receipt.isEmpty {
+            // Sent anyway, deliberately: this is what StoreKit 1 has always done, and the
+            // backend's request log is the only place where the attempt is visible at all.
+            // Suppressing it on the device would hide a real problem - a purchase reported with
+            // no proof - behind silence.
+            //
+            // The request will fail (`parse receipt: pkcs7: input data is empty`), the command
+            // goes back to `.pending` with backoff, and each failure also enqueues a `logging`
+            // command. That amplification is the pre-existing "no retry ceiling" debt, not
+            // something this branch introduces - see docs/storekit2-tech-debt.md 4.1.
+            //
+            // A build installed from Xcode has no receipt file at all, and on a fresh install
+            // the file appears a few seconds after first launch, so this window is normal.
+            // Logged at info level on purpose: `logError` would enqueue a command of its own.
+            SKLogger.logInfo("SyncCommand \(command.commandType): receipt is EMPTY, sending anyway (StoreKit 1 parity). Receipt file right now - \(SKPurchaseCommandFactory.receiptState()), appStoreReceiptURL = \(String(describing: Bundle.main.appStoreReceiptURL))")
+          }
+          SKLogger.logInfo("SyncCommand \(command.commandType): sending receipt of \(purchaseRequest.receipt.count) bytes, transactions = \(purchaseRequest.transactions), signed_transactions = \(purchaseRequest.signedTransactions.count) (\(purchaseRequest.signedTransactions.map { "\($0.count)ch" })), storefront = \(purchaseRequest.storefront), region = \(purchaseRequest.region), currency = \(purchaseRequest.currency)")
           let call = purchaseService.setReceipt(purchaseRequest)
           call.initialMetadata.whenComplete({ [weak self] result in
             self?.validateGrpcResponseResult(result, commandType: command.commandType.rawValue, retryCount: command.retryCount)
@@ -194,19 +232,55 @@ class SKServerAPIImplementaton: SKServerAPI {
   }
   
   func verifyReceipt(completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
+    // Signed transactions are read from StoreKit, which is async, so the request is built and
+    // sent once they are in hand. On StoreKit 1 this answers immediately with an empty list.
+    //
+    // `storeKitService` is an implicitly unwrapped optional set by `SKServiceRegistry.initialize`.
+    // This call site must not be the one that crashes on a caller who reached `validateReceipt`
+    // before `initialize` - before signed transactions existed, `verifyReceipt` did not touch the
+    // registry at all, and that must stay true.
+    guard let storeKitService = SKServiceRegistry.storeKitService else {
+      SKLogger.logInfo("verifyReceipt: called before SkarbSDK.initialize, sending without signed transactions")
+      sendVerifyReceipt(signedTransactions: [], completion: completion)
+      return
+    }
+    storeKitService.collectSignedTransactions { [weak self] signedTransactions in
+      self?.sendVerifyReceipt(signedTransactions: signedTransactions, completion: completion)
+    }
+  }
+
+  private func sendVerifyReceipt(signedTransactions: [String],
+                                 completion: @escaping (Result<SKUserPurchaseInfo, Error>) -> Void) {
     let callOption = CallOptions(timeLimit: .timeout(.seconds(20)))
     let purchaseService = Purchaseapi_IngesterClient(channel: clientChannel, defaultCallOptions: callOption)
     var verifyRequest = Purchaseapi_VerifyReceiptRequest()
     verifyRequest.auth = Auth_Auth.createDefault()
     verifyRequest.installID = SkarbSDK.getDeviceId()
+    verifyRequest.signedTransactions = signedTransactions
     let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
     if let appStoreReceiptURL = appStoreReceiptURL,
        let recieptData = try? Data(contentsOf: appStoreReceiptURL) {
       verifyRequest.receipt = recieptData
+      SKLogger.logInfo("verifyReceipt: sending receipt of \(recieptData.count) bytes and \(signedTransactions.count) signed transaction(s)")
     } else {
       verifyRequest.receipt = Data()
+      // On StoreKit 2 this is the expected failure when testing with a local Xcode
+      // .storekit configuration file: there is no receipt file at all. Use a real
+      // sandbox account instead.
       SKLogger.logError("Create purchase for V4. recieptData is nil",
-                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.internalValue.name: "appStoreReceiptURL = \(String(describing: appStoreReceiptURL))"])
+    }
+    if verifyRequest.receipt.isEmpty {
+      // An empty receipt is acceptable to the backend only when a JWS comes with it - that is
+      // the agreed contract. Without one the call still goes out for StoreKit 1 parity and the
+      // backend answers `parse receipt: pkcs7: input data is empty`, after which
+      // `SkarbSDK.validateReceipt` falls through to on-device entitlements.
+      if signedTransactions.isEmpty {
+        SKLogger.logInfo("verifyReceipt: no receipt on disk and no signed transactions, calling the server anyway (StoreKit 1 parity). Expect a parse failure and a fall-through to on-device entitlements.")
+      } else {
+        SKLogger.logInfo("verifyReceipt: no receipt on disk, sending \(signedTransactions.count) signed transaction(s) instead")
+      }
     }
     let call = purchaseService.verifyReceipt(verifyRequest)
     call.initialMetadata.whenComplete({ [weak self] result in

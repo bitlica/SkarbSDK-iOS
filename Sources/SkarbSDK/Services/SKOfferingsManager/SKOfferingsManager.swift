@@ -125,10 +125,10 @@ private extension SKOfferingsManagerImplementation {
   }
   
   func createPackage(with package: Setupsapi_Package) -> SKOfferPackage? {
-    guard let storeProduct = SKServiceRegistry.storeKitService.fetchProduct(by: package.productID) else {
+    guard let productInfo = SKServiceRegistry.storeKitService.fetchProduct(by: package.productID) else {
       return nil
     }
-    
-    return SKOfferPackage(package: package, storeProduct: storeProduct)
+
+    return SKOfferPackage(package: package, productInfo: productInfo)
   }
 }

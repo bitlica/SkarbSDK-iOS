@@ -76,17 +76,28 @@ extension Purchaseapi_TransactionsRequest: SKCodableStruct {
 }
 
 extension Purchaseapi_ReceiptRequest: SKCodableStruct {
-  
+
+  /// Per-request cap agreed with the backend.
+  static let maxSignedTransactions = 200
+
   init(storefront: String?,
        region: String?,
        currency: String?,
        newTransactions: [String],
+       newSignedTransactions: [String] = [],
        docFolderDate: SwiftProtobuf.Google_Protobuf_Timestamp?,
        appBuildDate: SwiftProtobuf.Google_Protobuf_Timestamp?) {
     let authData = Auth_Auth.createDefault()
     auth = authData
     installID = SkarbSDK.getDeviceId()
     transactions = newTransactions
+    // Empty on StoreKit 1, which has no signed transactions. The legacy receipt below is sent
+    // either way: the backend treats the two as independent, and an empty `receipt` is only
+    // acceptable when a JWS is present.
+    signedTransactions = Array(newSignedTransactions.prefix(Self.maxSignedTransactions))
+    if newSignedTransactions.count > Self.maxSignedTransactions {
+      SKLogger.logInfo("Purchaseapi_ReceiptRequest: \(newSignedTransactions.count) signed transactions exceed the \(Self.maxSignedTransactions) per-request limit, sending the first \(Self.maxSignedTransactions)")
+    }
     idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
     idfv = UIDevice.current.identifierForVendor?.uuidString ?? ""
     let appStoreReceiptURL = Bundle.main.appStoreReceiptURL
@@ -123,6 +134,9 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
     let auth = try container.decode(Auth_Auth.self, forKey: .auth)
     let installID = try container.decode(String.self, forKey: .installID)
     let transactions = try container.decode(Array<String>.self, forKey: .transactions)
+    // `decodeIfPresent`: commands queued by an older SDK build have no such key, and failing to
+    // decode them would strand them in the queue forever.
+    let signedTransactions = try container.decodeIfPresent(Array<String>.self, forKey: .signedTransactions) ?? []
     let idfa = try container.decode(String.self, forKey: .idfa)
     let idfv = try container.decode(String.self, forKey: .idfv)
     let receiptURL = try container.decode(String.self, forKey: .receiptURL)
@@ -140,6 +154,7 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
       $0.auth = auth
       $0.installID = installID
       $0.transactions = transactions
+      $0.signedTransactions = signedTransactions
       $0.idfa = idfa
       $0.idfv = idfv
       $0.receiptURL = receiptURL
@@ -160,6 +175,7 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
     try container.encode(auth, forKey: .auth)
     try container.encode(installID, forKey: .installID)
     try container.encode(transactions, forKey: .transactions)
+    try container.encode(signedTransactions, forKey: .signedTransactions)
     try container.encode(idfa, forKey: .idfa)
     try container.encode(idfv, forKey: .idfv)
     try container.encode(receiptURL, forKey: .receiptURL)
@@ -187,6 +203,7 @@ extension Purchaseapi_ReceiptRequest: SKCodableStruct {
     case auth
     case installID
     case transactions
+    case signedTransactions
     case idfa
     case idfv
     case receiptURL

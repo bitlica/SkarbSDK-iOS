@@ -18,8 +18,19 @@ public struct SKUserPurchaseInfo: Codable {
     environment = verifyReceiptResponse.environment
     purchasedSubscriptions = verifyReceiptResponse.activeSubscriptions.map({ SKPurchasedSubscription(activeSubscription: $0) })
     onetimePurchases = verifyReceiptResponse.onetimes.map({ SKOnetimePurchase(onetimePurchase: $0) })
+    SKUserPurchaseInfo.logServerAnswer(verifyReceiptResponse)
   }
-  
+
+  /// Logs the transaction ids the backend answered with.
+  ///
+  /// `non_subscriptions` is included even though the SDK does not read it into this model: the
+  /// field exists in `VerifyReceiptResponse` (number 3) and nothing on the client has ever looked
+  /// at it, so this is the cheapest way to find out what the backend puts there - and whether
+  /// consumables come back through it.
+  private static func logServerAnswer(_ response: Purchaseapi_VerifyReceiptResponse) {
+    SKLogger.logInfo("verifyReceipt answer: environment = \(response.environment), subscriptions = \(response.activeSubscriptions.map { $0.transactionID }), nonSubscriptions = \(response.nonSubscriptions.map { $0.transactionID }) (NOT read by the SDK), onetimes = \(response.onetimes.map { $0.transactionID })")
+  }
+
   public var isActiveSubscription: Bool {
     return !purchasedSubscriptions.filter { $0.isActive }.isEmpty
   }
@@ -57,7 +68,7 @@ public struct SKPurchasedSubscription: Codable {
     trialPeriod = activeSubscription.trialPeriod
     renewalInfo = activeSubscription.renewalInfo
   }
-  
+
   public var isActive: Bool {
     return expiryDate >= Date()
   }

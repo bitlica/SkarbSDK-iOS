@@ -22,7 +22,7 @@ public class SkarbSDK {
 
 //  MARK: Private
   static let agentName: String = "SkarbSDK-iOS"
-  static let version: String = "1.0.0"
+  static let version: String = "1.1.0"
 
   static var clientId: String = ""
 
@@ -32,12 +32,8 @@ public class SkarbSDK {
   /// Selects the StoreKit API SkarbSDK uses internally. Default is `.v1`.
   ///
   /// Must be called BEFORE `initialize(clientId:isObservable:)`. `.v2` requires iOS 15;
-  /// on earlier versions the SDK silently keeps running on StoreKit 1.
-  ///
-  /// Entitlements are server-derived on both versions: `SKUserPurchaseInfo` is built from the
-  /// `verifyReceipt` answer and from nothing else. What `.v2` adds to the request is the
-  /// Apple-signed transactions alongside the app receipt, because a StoreKit 2 receipt does not
-  /// carry a consumable and is not rewritten after a purchase.
+  /// on earlier versions the SDK silently keeps running on StoreKit 1. Entitlements stay
+  /// server-derived either way - what `.v2` adds is the Apple-signed transactions.
   public static func useStoreKitVersion(_ version: SKStoreKitVersion) {
     guard !isInitialized else {
       SKLogger.logError("SkarbSDK: useStoreKitVersion() was called after initialize() and is ignored. Call it before initialize().",
@@ -248,6 +244,21 @@ public class SkarbSDK {
     })
   }
   
+  /// Reports a purchase another SDK made. Optional - SkarbSDK observes purchases on its own.
+  /// Deduplicated by transaction id, so reporting one it already caught is a no-op.
+  /// `transactionId` is required on StoreKit 1, which cannot look a transaction up by product.
+  /// Announces nothing to `SKStoreKitObserver` and never finishes the transaction. See README.
+  public static func reportPurchase(productId: String,
+                                    transactionId: String? = nil,
+                                    transactionDate: Date? = nil) {
+    guard SKServiceRegistry.storeKitService != nil else {
+      fatalError("SkarbSDK wasn't initialized. Use 'initialize' method before calling 'reportPurchase()'")
+    }
+    SKServiceRegistry.storeKitService.reportPurchase(productId: productId,
+                                                     transactionId: transactionId,
+                                                     transactionDate: transactionDate)
+  }
+
   //  Indicates whether the user is allowed to make payments.
   public static func canMakePayments() -> Bool {
     guard SKServiceRegistry.storeKitService != nil else {
@@ -263,10 +274,10 @@ public class SkarbSDK {
       fatalError("SkarbSDK wasn't initialized. Use 'initialize' method before calling 'setStoreKitDelegate()'")
     }
     if effectiveStoreKitVersion == .v2 {
-      // Loud on purpose: `storeKitUpdatedTransaction` is the only channel a host has for
-      // `.purchasing` / `.deferred`, so anything built on it (typically a purchase funnel in
-      // analytics) goes silent under StoreKit 2 with no other symptom. `SKStoreKitObserver`
-      // reports the same four states on both versions.
+      // Loud on purpose: for a host that never adopted `SKStoreKitObserver`,
+      // `storeKitUpdatedTransaction` is its only channel for purchase state, so a funnel built
+      // on it goes silent under StoreKit 2 with no other symptom. Forwarding would be possible -
+      // `SKStoreKitDelegate` explains why it is deliberately not done.
       SKLogger.logWarn("SkarbSDK: setStoreKitDelegate() was called while running on StoreKit 2. Only 'shouldAddStorePayment' is forwarded - 'storeKitUpdatedTransaction' will NEVER be called, so purchase-state analytics wired to it will stop. Adopt SKStoreKitObserver instead.",
                        features: [SKLoggerFeatureType.internalValue.name: "storeKitVersion=v2"])
     }

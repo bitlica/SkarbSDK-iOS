@@ -23,6 +23,10 @@ protocol SKStoreKitService {
                            completion: @escaping (Result<[SKProductInfo], Error>) -> Void)
   func fetchProduct(by productId: String) -> SKProductInfo?
 
+  /// See `SkarbSDK.reportPurchase(productId:transactionId:transactionDate:)`. Deduplicated
+  /// against the automatic channels, so reporting an already observed purchase is a no-op.
+  func reportPurchase(productId: String, transactionId: String?, transactionDate: Date?)
+
   /// StoreKit 2 signed transactions the device can prove right now, for `verifyReceipt`.
   /// Always empty on StoreKit 1, which has no such thing.
   func collectSignedTransactions(completion: @escaping ([String]) -> Void)

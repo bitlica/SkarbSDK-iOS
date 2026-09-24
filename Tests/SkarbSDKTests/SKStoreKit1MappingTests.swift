@@ -174,6 +174,35 @@ final class SKStoreKit1MappingTests: XCTestCase {
     XCTAssertNil(event.jws)
   }
 
+  func testQueueReportedPurchaseCanCarryASignedTransaction() {
+    // On StoreKit 2 the payment queue is how a purchase made by another SDK in the same app is
+    // observed. The queue itself has no JWS, so the service matches one from
+    // `Transaction.latest(for:)` and passes it in here. Without this the payload for somebody
+    // else's purchase would lose the only thing that lets the backend resolve a consumable.
+    let transaction = FakeTransaction(productId: "test.pack.7f21",
+                                      transactionId: "1000000123",
+                                      date: Date(timeIntervalSince1970: 1_700_000_000))
+
+    let event = SKPurchaseEvent(skTransaction: transaction, jws: "jws-stub-4c8e1a")
+
+    XCTAssertEqual(event.transactionId, "1000000123")
+    XCTAssertEqual(event.jws, "jws-stub-4c8e1a")
+  }
+
+  func testTransactionIdHasTheSameStringFormOnBothStoreKitVersions() {
+    // The whole cross-channel dedup rests on this: the queue reports `transactionIdentifier` as
+    // a string, StoreKit 2 reports `Transaction.id` as a `UInt64`, and `reportedTransactionIds`
+    // only recognises one purchase arriving through both channels because the decimal form of
+    // the second equals the first. If that ever stops holding, every purchase another SDK makes
+    // would be reported twice.
+    let queueReported = FakeTransaction(productId: "test.pack.7f21",
+                                        transactionId: "1000000123",
+                                        date: nil).transactionIdentifier
+    let storeKit2Reported = String(UInt64(1_000_000_123))
+
+    XCTAssertEqual(queueReported, storeKit2Reported)
+  }
+
   // MARK: SKOfferPackage
 
   func testOfferPackageExposesTheSameProductPropertiesAsBefore() {

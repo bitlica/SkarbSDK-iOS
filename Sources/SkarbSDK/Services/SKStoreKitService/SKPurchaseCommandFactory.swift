@@ -5,11 +5,10 @@
 
 import Foundation
 
-/// Builds and enqueues the backend commands for observed purchases.
-///
-/// Both StoreKit implementations funnel through here, so the wire payload cannot
-/// drift between v1 and v2. Logic is a straight lift from the original
-/// `SKStoreKitServiceImplementation` — comments included — so the payload stays identical.
+/// Builds and enqueues the backend commands for observed purchases. Both StoreKit
+/// implementations funnel through here, so the wire payload cannot drift between v1 and v2.
+/// The decisions the building rests on are the static functions below, covered by
+/// `SKPurchaseCommandFactoryTests`.
 struct SKPurchaseCommandFactory {
 
   /// Product metadata already cached by the StoreKit service.
@@ -29,21 +28,99 @@ struct SKPurchaseCommandFactory {
     return cachedProducts.first(where: { $0.productId == productId })
   }
 
-  /// Create one SKFetchProduct or each unique productId.
-  /// Need to attach the newest transaction Date and Id
-  func createFetchProductsCommand(purchasedEvents: [SKPurchaseEvent]) {
-    let productIds = Array(Set(purchasedEvents.map { $0.productId }))
+//  MARK: Decisions
+
+  /// Whether the app receipt has to travel for this product. Inherited from StoreKit 1: an
+  /// unknown product always gets its receipt, a subscription does not need one because the system
+  /// rewrites the receipt after the purchase. StoreKit 2 rewrites nothing and `transactionV4` has
+  /// no field for a signature, so a purchase carrying one always gets its receipt.
+  static func shouldSendReceipt(productId: String,
+                                events: [SKPurchaseEvent],
+                                product: SKProductInfo?) -> Bool {
+    if events.contains(where: { $0.productId == productId && $0.jws != nil }) {
+      return true
+    }
+    guard let product = product else {
+      return true
+    }
+    return product.introductoryOffer == nil
+  }
+
+  /// The events the backend has not been told about yet, given the ids it considers new. An event
+  /// without an id is always kept: StoreKit 1 can report one, and there is nothing to dedup it
+  /// against, so dropping it would silently lose the purchase.
+  static func unreportedEvents(_ events: [SKPurchaseEvent],
+                               newTransactionIds: Set<String>) -> [SKPurchaseEvent] {
+    return events.filter { event in
+      guard let id = event.transactionId else { return true }
+      return newTransactionIds.contains(id)
+    }
+  }
+
+  /// One `SKFetchProduct` per product id, carrying its newest purchase. An event with no date
+  /// loses to one that has a date - an unknown date must not pass for the most recent.
+  static func fetchProducts(for events: [SKPurchaseEvent]) -> [SKFetchProduct] {
+    let productIds = Array(Set(events.map { $0.productId }))
     var fetchProducts: [SKFetchProduct] = []
     for productId in productIds {
-      let event = purchasedEvents
+      let event = events
         .filter { $0.productId == productId }
-        .sorted { $0.transactionDate ?? Date() < $1.transactionDate ?? Date() }.last
+        .sorted { $0.transactionDate ?? .distantPast < $1.transactionDate ?? .distantPast }.last
       if let event = event {
         fetchProducts.append(SKFetchProduct(productId: event.productId,
                                             transactionDate: event.transactionDate,
                                             transactionId: event.transactionId))
       }
     }
+    return fetchProducts
+  }
+
+  /// Price payloads for the fetched products whose metadata actually arrived, plus the ids whose
+  /// metadata did not - the caller logs those, since logging an error here would itself queue a
+  /// command.
+  static func priceProducts(for fetchProducts: [SKFetchProduct],
+                            products: [SKProductInfo]) -> (products: [Priceapi_Product],
+                                                           missingProductIds: [String]) {
+    var priceApiProducts: [Priceapi_Product] = []
+    var missing: [String] = []
+    for fetchProduct in fetchProducts {
+      guard let product = products.first(where: { $0.productId == fetchProduct.productId }) else {
+        missing.append(fetchProduct.productId)
+        continue
+      }
+      priceApiProducts.append(Priceapi_Product(product: product,
+                                               transactionDate: fetchProduct.transactionDate,
+                                               transactionId: fetchProduct.transactionId))
+    }
+    return (priceApiProducts, missing)
+  }
+
+  /// `unreportedEvents` against the durable check: an id `getNewTransactionIds` does not consider
+  /// new was queued before, in this run or an earlier one. Until this existed only
+  /// `transactionV4` was protected, so `setReceipt`, `priceV4` and `fetchProducts` were rebuilt
+  /// every time the same purchase was observed again.
+  static func newEvents(_ events: [SKPurchaseEvent]) -> [SKPurchaseEvent] {
+    let ids = events.compactMap { $0.transactionId }
+    guard !ids.isEmpty else {
+      return events
+    }
+    let unknown = Set(SKServiceRegistry.commandStore.getNewTransactionIds(ids))
+    let kept = unreportedEvents(events, newTransactionIds: unknown)
+    if kept.count < events.count {
+      let dropped = events.count - kept.count
+      SKLogger.logInfo("SKPurchaseCommandFactory: \(dropped) of \(events.count) purchase(s) already queued for the backend, not rebuilt")
+    }
+    return kept
+  }
+
+//  MARK: Commands
+
+  func createFetchProductsCommand(purchasedEvents: [SKPurchaseEvent]) {
+    let purchasedEvents = Self.newEvents(purchasedEvents)
+    guard !purchasedEvents.isEmpty else {
+      return
+    }
+    let fetchProducts = Self.fetchProducts(for: purchasedEvents)
     let encoder = JSONEncoder()
     if let productData = try? encoder.encode(fetchProducts) {
       let fetchCommand = SKCommand(commandType: .fetchProducts,
@@ -59,16 +136,19 @@ struct SKPurchaseCommandFactory {
   }
 
   func createPurchaseAndTransactionCommand(purchasedEvents: [SKPurchaseEvent]) {
+    let purchasedEvents = Self.newEvents(purchasedEvents)
+    guard !purchasedEvents.isEmpty else {
+      return
+    }
     let transactionIds: [String] = purchasedEvents.compactMap { $0.transactionId }
     // Empty under StoreKit 1: only StoreKit 2 has signed transactions.
     let signedTransactions: [String] = purchasedEvents.compactMap { $0.jws }
     let installData = SKServiceRegistry.commandStore.getDeviceRequest()
 
     SKLogger.logInfo("SKPurchaseCommandFactory: building commands. storefront = \(storefrontCountryCode ?? "nil"), region = \(regionCode ?? "nil"), currency = \(currencyCode ?? "nil"), transactions = \(transactionIds)")
-    // The receipt is read into the command payload right here, inside
-    // `Purchaseapi_ReceiptRequest.init`. Logging its state at this exact moment is the only way
-    // to tell an empty payload caused by a missing receipt from one caused by the App Store
-    // writing the file a moment later than we asked for it.
+    // The receipt is read into the payload inside `Purchaseapi_ReceiptRequest.init`, so its state
+    // at this exact moment is the only way to tell an empty payload caused by a missing receipt
+    // from one caused by the App Store writing the file a moment later than we asked for it.
     SKLogger.logInfo("SKPurchaseCommandFactory: app receipt at command-creation time - \(Self.receiptState())")
 
     if !SKServiceRegistry.commandStore.hasPurhcaseV4Command {
@@ -89,14 +169,9 @@ struct SKPurchaseCommandFactory {
     // Just no need to send receipt for duplicated product identifiers
     let productIdentifiers = Set(purchasedEvents.map { $0.productId })
     for productId in productIdentifiers {
-      // default is true bacause we may not have product metadata and purchase might be not subscription
-      // server should have each updated receipt at this case not to lose one time puchases
-      // no needs to send receipt for subscription purchases
-      var shouldSendPurchase = true
-      if let product = product(by: productId),
-         product.introductoryOffer != nil {
-        shouldSendPurchase = false
-      }
+      let shouldSendPurchase = Self.shouldSendReceipt(productId: productId,
+                                                      events: purchasedEvents,
+                                                      product: product(by: productId))
       if shouldSendPurchase {
         let purchaseDataV4 = Purchaseapi_ReceiptRequest(storefront: storefrontCountryCode,
                                                         region: regionCode,
@@ -111,7 +186,7 @@ struct SKPurchaseCommandFactory {
         SKServiceRegistry.commandStore.saveCommand(purchaseV4Command)
         SKLogger.logInfo("SKPurchaseCommandFactory: created setReceipt command for \(productId). signed_transactions (field 15): \(signedTransactions.count) - \(purchasedEvents.map { "\($0.transactionId ?? "nil")/\($0.jws?.count ?? 0)ch" })")
       } else {
-        SKLogger.logInfo("SKPurchaseCommandFactory: skipped setReceipt for \(productId) - product has an introductory offer")
+        SKLogger.logInfo("SKPurchaseCommandFactory: skipped setReceipt for \(productId) - product has an introductory offer and the purchase carries no signed transaction")
       }
     }
 
@@ -132,35 +207,14 @@ struct SKPurchaseCommandFactory {
     }
   }
 
-  /// Presence and size of the app receipt file, for logging.
-  static func receiptState() -> String {
-    guard let url = Bundle.main.appStoreReceiptURL else {
-      return "appStoreReceiptURL is nil"
-    }
-    guard FileManager.default.fileExists(atPath: url.path) else {
-      return "no file at \(url.lastPathComponent)"
-    }
-    guard let data = try? Data(contentsOf: url) else {
-      return "file at \(url.lastPathComponent) exists but is unreadable"
-    }
-    return "\(data.count) bytes at \(url.lastPathComponent)"
-  }
-
   func createPriceCommand(fetchProducts: [SKFetchProduct],
                           products: [SKProductInfo],
                           command: SKCommand) {
-    var priceApiProducts: [Priceapi_Product] = []
-    for fetchProduct in fetchProducts {
-      guard let product = products.first(where: { $0.productId == fetchProduct.productId }) else {
-        SKLogger.logError("SKSyncServiceImplementation. Send command for price. Product is nil. FetchProduct = \(fetchProduct.productId)",
-                          features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
-                                     SKLoggerFeatureType.retryCount.name: command.retryCount])
-        continue
-      }
-      let priceApiProduct = Priceapi_Product(product: product,
-                                             transactionDate: fetchProduct.transactionDate,
-                                             transactionId: fetchProduct.transactionId)
-      priceApiProducts.append(priceApiProduct)
+    let (priceApiProducts, missing) = Self.priceProducts(for: fetchProducts, products: products)
+    for productId in missing {
+      SKLogger.logError("SKSyncServiceImplementation. Send command for price. Product is nil. FetchProduct = \(productId)",
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.retryCount.name: command.retryCount])
     }
 
     guard !priceApiProducts.isEmpty else {
@@ -180,5 +234,19 @@ struct SKPurchaseCommandFactory {
       SKLogger.logInfo("SKPurchaseCommandFactory: priceV4 product \(priceApiProduct.productID) - price \(priceApiProduct.price), period \(priceApiProduct.period.unit)/\(priceApiProduct.period.count), intro mode \(priceApiProduct.intro.mode) type \(priceApiProduct.intro.type), discounts \(priceApiProduct.discounts.count)")
     }
     SKLogger.logInfo("SKPurchaseCommandFactory: created priceV4 command. storefront = \(storefrontCountryCode ?? "nil"), region = \(products.first?.regionCode ?? "nil"), currency = \(products.first?.currencyCode ?? "nil")")
+  }
+
+  /// Presence and size of the app receipt file, for logging.
+  static func receiptState() -> String {
+    guard let url = Bundle.main.appStoreReceiptURL else {
+      return "appStoreReceiptURL is nil"
+    }
+    guard FileManager.default.fileExists(atPath: url.path) else {
+      return "no file at \(url.lastPathComponent)"
+    }
+    guard let data = try? Data(contentsOf: url) else {
+      return "file at \(url.lastPathComponent) exists but is unreadable"
+    }
+    return "\(data.count) bytes at \(url.lastPathComponent)"
   }
 }

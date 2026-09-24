@@ -5,20 +5,17 @@
 
 import Foundation
 import StoreKit
+import UIKit
 
-/// StoreKit 2 implementation of `SKStoreKitService`.
+/// StoreKit 2 implementation of `SKStoreKitService`. The backend contract is additive: commands
+/// are built by the same `SKPurchaseCommandFactory` the StoreKit 1 path uses, plus the
+/// Apple-signed transaction - the only thing that can prove a consumable.
 ///
-/// The backend contract is additive, not replaced: the app receipt still travels in every
-/// command, and every command is built by `SKPurchaseCommandFactory`, the same one the StoreKit 1
-/// path uses. What StoreKit 2 adds on top:
-///
-/// - Apple-signed transactions (`VerificationResult.jwsRepresentation`) alongside the receipt -
-///   the purchase's own in `SetReceipt`, and consumables plus live entitlements from
-///   `Transaction.all` in `VerifyReceipt` (see `collectSignedTransactions`). Nothing else can
-///   prove a consumable: a StoreKit 2 receipt has no `in_app` entry for one.
-///
-/// Entitlements themselves stay entirely server-derived, on both versions: `SKUserPurchaseInfo`
-/// is built from the `verifyReceipt` answer and the SDK adds nothing of its own to it.
+/// Purchases are observed through two channels, both feeding `reportPurchased`:
+/// `Transaction.updates` (with what `purchase()` returns) for this SDK's own purchases, and
+/// `sweepPurchaseHistory` for everybody else's - measured 24.09.2026, that is the only channel
+/// that sees a purchase another SDK made. The StoreKit 1 payment queue is observed too, but
+/// reports nothing: see `paymentQueue(_:updatedTransactions:)`.
 @available(iOS 15.0, *)
 final class SKStoreKit2ServiceImplementation: NSObject, SKStoreKitService {
 
@@ -30,8 +27,8 @@ final class SKStoreKit2ServiceImplementation: NSObject, SKStoreKitService {
 //  MARK: Private
   private let isObservable: Bool
 
-  /// `NSLock` rather than a serial `DispatchQueue`: this cache is touched from async
-  /// contexts, and a `queue.sync` there parks a cooperative-pool thread.
+  /// `NSLock` rather than a serial queue: touched from async contexts, where `queue.sync` would
+  /// park a cooperative-pool thread.
   private let cacheLock = NSLock()
   private var cachedAllProducts: [SKProductInfo] = []
   /// Raw StoreKit 2 products, needed to start a purchase.
@@ -39,30 +36,20 @@ final class SKStoreKit2ServiceImplementation: NSObject, SKStoreKitService {
 
   private var updatesTask: Task<Void, Never>?
   private var unfinishedTask: Task<Void, Never>?
+  private var sweepTask: Task<Void, Never>?
 
-  /// A transaction is delivered by BOTH `purchase()` and `Transaction.updates`, and at launch by
-  /// both `Transaction.updates` and `Transaction.unfinished`. Without this it gets reported to
-  /// the backend more than once, which duplicates `priceV4`.
-  private var reportedTransactionIds: Set<UInt64> = []
+  /// One transaction arrives through several channels, and without this it reaches the backend
+  /// once per channel. Keyed by the id as a STRING, the one form both StoreKit versions agree on.
+  private var reportedTransactionIds: Set<String> = []
 
-  /// Completions of `purchasePackage` calls that have not been answered yet, keyed by product id.
-  ///
-  /// `product.purchase()` is not a reliable way to learn that a purchase went through. Measured
-  /// on a live sandbox build on 14.09.2026, it failed in two different ways while the purchase
-  /// itself completed and reached the backend through `Transaction.updates`:
-  ///
-  /// - it never returned at all, leaving the paywall spinner up forever;
-  /// - it returned `.userCancelled` eleven seconds after the sheet had already closed, with the
-  ///   user having tapped nothing.
-  ///
-  /// Both left the caller waiting for a result that the device already had. So the completion is
-  /// parked here and whichever path sees the transaction first answers it - the `purchase()`
-  /// continuation or the `Transaction.updates` listener.
+  /// Completions of `purchasePackage` calls not answered yet, keyed by product id. `purchase()`
+  /// is not a reliable way to learn that a purchase went through - measured on sandbox, it both
+  /// hung forever and answered `.userCancelled` for a purchase that completed - so whichever path
+  /// sees the transaction first answers the parked completion.
   private var pendingPurchases: [String: (Result<Bool, Error>) -> Void] = [:]
 
-  /// Command building calls into `SKCommandStore`, which is GCD-serial-queue based. Running that
-  /// straight from a `Task` parks a cooperative-pool thread on `queue.sync`, so it is pushed onto
-  /// a regular queue instead.
+  /// `SKCommandStore` is GCD-serial-queue based, and calling it straight from a `Task` parks a
+  /// cooperative-pool thread on `queue.sync`.
   private let commandQueue = DispatchQueue(label: "com.skarbSDK.skStoreKit2.commands")
 
   var allProducts: [SKProductInfo]? {
@@ -74,18 +61,21 @@ final class SKStoreKit2ServiceImplementation: NSObject, SKStoreKitService {
   init(isObservable: Bool) {
     self.isObservable = isObservable
     super.init()
-    // The StoreKit 1 queue is kept ONLY to answer `shouldAddStorePayment` for purchases
-    // promoted in the App Store. StoreKit 2 replaces it with `PurchaseIntent`, which needs
-    // iOS 16.4, so that is a follow-up. No transaction handling happens through it.
+    // Two purposes: `shouldAddStorePayment` for App Store promoted purchases (StoreKit 2 needs
+    // iOS 16.4 for `PurchaseIntent`), and observing purchases another SDK in the same app made,
+    // which no StoreKit 2 channel does reliably. See `paymentQueue(_:updatedTransactions:)`.
     SKPaymentQueue.default().add(self)
     startTransactionUpdatesListener()
     drainUnfinishedTransactions()
+    startHistorySweep()
     SKLogger.logInfo("SKStoreKitService: running on StoreKit 2. isObservable = \(isObservable) (SDK \(isObservable ? "will NOT" : "will") finish transactions)")
   }
 
   deinit {
     updatesTask?.cancel()
     unfinishedTask?.cancel()
+    sweepTask?.cancel()
+    NotificationCenter.default.removeObserver(self)
     SKPaymentQueue.default().remove(self)
   }
 
@@ -164,15 +154,14 @@ final class SKStoreKit2ServiceImplementation: NSObject, SKStoreKitService {
             switch verification {
               case .verified(let transaction):
                 SKLogger.logInfo("purchase succeeded: transaction \(transaction.id), product \(transaction.productID)")
-                if self.markReported(transaction) {
-                  await self.reportPurchased(transaction, jws: verification.jwsRepresentation)
-                  // Notified only by whichever path actually reported the transaction.
-                  // `Transaction.updates` delivers the same one, and if it wins the race it
-                  // notifies from `handle(_:source:)` - otherwise the observer would see
-                  // `.purchased` twice for a single purchase.
+                if self.markReported(String(transaction.id)) {
+                  await self.reportPurchased(SKPurchaseEvent(transaction: transaction,
+                                                             jws: verification.jwsRepresentation))
+                  // Only whoever reported the transaction notifies, or a purchase delivered
+                  // through several channels would announce `.purchased` more than once.
                   self.notifyObserver(.purchased, productId: package.productId)
                 } else {
-                  SKLogger.logInfo("transaction \(transaction.id) was already reported by Transaction.updates, not reporting again")
+                  SKLogger.logInfo("transaction \(transaction.id) was already reported by another channel, not reporting again")
                 }
                 await self.settle(transaction)
                 await self.resolvePendingPurchase(package.productId, .success(true))
@@ -187,26 +176,16 @@ final class SKStoreKit2ServiceImplementation: NSObject, SKStoreKitService {
             }
 
           case .userCancelled:
-            // NOT necessarily the user: StoreKit returns `.userCancelled` for a sheet that
-            // dismissed itself too - a sandbox account that cannot authenticate, a timeout -
-            // and carries no reason code to tell them apart.
-            //
-            // Reported immediately all the same. An earlier version waited several seconds here
-            // in case `Transaction.updates` contradicted it, but that delay is paid on every
-            // real cancellation - closing the sheet felt broken - and it never once paid off:
-            // in both observed false cancellations no transaction ever arrived, and the case
-            // that does need rescuing is a `purchase()` that never returns at all, which the
-            // `Transaction.updates` path below handles on its own.
-            //
-            // The guard is still worth keeping: if updates won the race and already answered the
-            // caller, there is nothing left to fail.
+            // NOT necessarily the user: StoreKit also returns `.userCancelled` for a sheet that
+            // dismissed itself. Reported immediately all the same - waiting for
+            // `Transaction.updates` to contradict it only made real cancellations feel broken.
             guard self.hasPendingPurchase(package.productId) else {
               SKLogger.logInfo("purchase for \(package.productId) came back as userCancelled, but Transaction.updates had already reported it - the cancellation was not real")
               return
             }
             SKLogger.logInfo("purchase for \(package.productId) came back as userCancelled")
-            // Bridged into SKErrorDomain so `error as? SKError` keeps working in host apps
-            // that already special-case cancellation.
+            // Bridged into SKErrorDomain so `error as? SKError` keeps working in hosts that
+            // already special-case cancellation.
             let error = NSError(domain: SKErrorDomain,
                                 code: SKError.Code.paymentCancelled.rawValue,
                                 userInfo: [NSLocalizedDescriptionKey: "Purchase was cancelled"])
@@ -214,12 +193,11 @@ final class SKStoreKit2ServiceImplementation: NSObject, SKStoreKitService {
             await self.resolvePendingPurchase(package.productId, .failure(error))
 
           case .pending:
-            // Ask-to-Buy / SCA. The completion MUST be called, otherwise the caller's
-            // paywall spinner hangs forever waiting for a result that never arrives.
+            // Ask-to-Buy / SCA. The completion MUST be called or the paywall spinner hangs.
             SKLogger.logInfo("purchase for \(package.productId) is PENDING external approval (Ask-to-Buy / SCA). It will arrive through Transaction.updates once approved.")
             self.notifyObserver(.deferred, productId: package.productId)
             await self.resolvePendingPurchase(package.productId,
-                                              .failure(SKResponseError(errorCode: 35,
+                                              .failure(SKResponseError(errorCode: SKResponseError.purchasePendingApprovalCode,
                                                                        message: "Purchase is pending approval")))
 
           @unknown default:
@@ -251,8 +229,7 @@ final class SKStoreKit2ServiceImplementation: NSObject, SKStoreKitService {
           SKLogger.logInfo("SKStoreKitService: StoreKit 2 returned no product for \(missing)")
         }
         self.cache(products)
-        // Only what this response brought, not the whole cache: a single-product refetch after a
-        // purchase used to print all 45 offering products and drown the interesting lines.
+        // Only what this response brought: logging the whole cache drowned the interesting lines.
         let receivedIds = Set(products.map { $0.id })
         for product in (self.allProducts ?? []).filter({ receivedIds.contains($0.productId) }) {
           SKLogger.logInfo("SKStoreKitService: cached \(product.productId) - price \(product.price) \(product.currencyCode ?? "?"), region \(product.regionCode ?? "?"), period \(product.subscriptionPeriod.map { "\($0.unit.rawValue)/\($0.count)" } ?? "none"), intro \(String(describing: product.introductoryOffer?.paymentMode))")
@@ -270,36 +247,116 @@ final class SKStoreKit2ServiceImplementation: NSObject, SKStoreKitService {
     return allProducts?.filter({ $0.productId == productId }).first
   }
 
+  /// What the device can prove wins over what the caller passed: the id and date come from Apple
+  /// rather than from a foreign SDK's bookkeeping. The caller's values are the fallback for a
+  /// purchase that is not in the device history.
+  func reportPurchase(productId: String, transactionId: String?, transactionDate: Date?) {
+    SKLogger.logInfo("SKStoreKitService: reportPurchase(\(productId), transactionId: \(transactionId ?? "nil")) on StoreKit 2")
+    Task { [weak self] in
+      guard let self = self else { return }
+      let matched = await self.matchedTransaction(productId: productId, transactionId: transactionId)
+
+      guard let resolvedId = matched.map({ String($0.transaction.id) }) ?? transactionId else {
+        SKLogger.logError("SkarbSDK.reportPurchase(\(productId)): no transactionId was passed and no transaction for this product is in the device history, so there is nothing the backend can be told. Pass the transaction id from the SDK that made the purchase.",
+                          features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                     SKLoggerFeatureType.internalValue.name: productId])
+        return
+      }
+
+      guard self.markReported(resolvedId) else {
+        SKLogger.logInfo("SKStoreKitService: reportPurchase - transaction \(resolvedId) for \(productId) was already reported in this session, ignoring")
+        return
+      }
+      if await self.isAlreadyReportedToBackend(resolvedId) {
+        SKLogger.logInfo("SKStoreKitService: reportPurchase - transaction \(resolvedId) for \(productId) is already queued for the backend, ignoring")
+        return
+      }
+
+      if matched == nil {
+        SKLogger.logInfo("SKStoreKitService: reportPurchase - \(productId) is not in the device transaction history, reporting without a signed transaction")
+      }
+      await self.reportPurchased(SKPurchaseEvent(productId: productId,
+                                                 transactionId: resolvedId,
+                                                 transactionDate: matched?.transaction.purchaseDate ?? transactionDate,
+                                                 jws: matched?.jws))
+    }
+  }
+
   var canMakePayments: Bool {
     return AppStore.canMakePayments
   }
 }
 
-// MARK: - Promoted purchases only
+// MARK: - StoreKit 1 queue
 
 @available(iOS 15.0, *)
 extension SKStoreKit2ServiceImplementation: SKPaymentTransactionObserver {
 
-  /// Purchases are handled through `Transaction.updates`, so nothing is reported from here.
+  /// Kept for `shouldAddStorePayment` and for finishing leftovers - it reports no purchases.
   ///
-  /// `.failed` and `.restored` still have to be finished though: registering an observer makes
-  /// the StoreKit 1 queue deliver them, and a state it delivers but nobody finishes stays in the
-  /// queue and is redelivered on every launch, forever. `.purchased` is deliberately left alone -
-  /// StoreKit 2 owns reporting and finishing it, and `finish()` there settles this queue too.
+  /// It was expected to be the channel for purchases another SDK makes, the way it is on
+  /// StoreKit 1. It is not. Measured on a sandbox device 23-24.09.2026 across seven runs: of 469
+  /// `.purchased` states the queue delivered, every one was history from an earlier install, and
+  /// none was the purchase just made - not even when the transaction was deliberately left
+  /// unfinished for five seconds first. `sweepPurchaseHistory` had it 141 ms after `finish()`.
   func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
-    guard !isObservable else {
-      // The host app owns finishing in this mode, same rule as on the StoreKit 1 path.
-      return
-    }
     for transaction in transactions {
+      let productId = transaction.payment.productIdentifier
+      // Every state, before any filtering. Whether the queue says anything at all about a
+      // purchase another SDK made is the question this channel exists to answer, and silence
+      // from `.purchased` alone cannot tell "the queue never heard of it" from "the queue heard
+      // of it but never completed it".
+      SKLogger.logInfo("SKStoreKitService: queue delivered \(Self.describe(transaction.transactionState)) for \(productId), transactionId \(transaction.transactionIdentifier ?? "nil"), ourPurchase = \(hasPendingPurchase(productId))")
       switch transaction.transactionState {
-        case .failed, .restored:
-          SKLogger.logInfo("SKStoreKitService: finishing StoreKit 1 queue leftover for \(transaction.payment.productIdentifier), state \(transaction.transactionState.rawValue)")
-          queue.finishTransaction(transaction)
-        default:
+        case .purchased:
+          // Deliberately not reported. Measured on a sandbox device 23.09.2026 across two runs:
+          // for a StoreKit 2 purchase another SDK made and finished, the queue stayed silent,
+          // and everything it DID deliver was history from earlier installs that the backend
+          // already has. `sweepPurchaseHistory` is what catches a foreign purchase now.
+          break
+
+        case .purchasing:
+          guard !hasPendingPurchase(productId) else { break }
+          notifyObserver(.purchasing, productId: productId)
+
+        case .deferred:
+          guard !hasPendingPurchase(productId) else { break }
+          notifyObserver(.deferred, productId: productId)
+
+        case .failed:
+          if !hasPendingPurchase(productId) {
+            // Same fallback as the StoreKit 1 path: the queue does not promise an error object.
+            let error = transaction.error ?? SKResponseError(errorCode: 0, message: "Purchasing failed")
+            notifyObserver(.failed(error), productId: productId)
+          }
+          finishQueueLeftover(transaction, queue: queue)
+
+        case .restored:
+          finishQueueLeftover(transaction, queue: queue)
+
+        @unknown default:
           break
       }
     }
+  }
+
+  static func describe(_ state: SKPaymentTransactionState) -> String {
+    switch state {
+      case .purchasing: return ".purchasing"
+      case .purchased: return ".purchased"
+      case .failed: return ".failed"
+      case .restored: return ".restored"
+      case .deferred: return ".deferred"
+      @unknown default: return "unknown(\(state.rawValue))"
+    }
+  }
+
+  /// A state the queue delivers and nobody finishes stays there and is redelivered on every
+  /// launch, forever. `isObservable` means somebody else owns finishing.
+  private func finishQueueLeftover(_ transaction: SKPaymentTransaction, queue: SKPaymentQueue) {
+    guard !isObservable else { return }
+    SKLogger.logInfo("SKStoreKitService: finishing StoreKit 1 queue leftover for \(transaction.payment.productIdentifier), state \(transaction.transactionState.rawValue)")
+    queue.finishTransaction(transaction)
   }
 
   func paymentQueue(_ queue: SKPaymentQueue,
@@ -329,6 +386,107 @@ private extension SKStoreKit2ServiceImplementation {
     }
   }
 
+  /// Purchases made outside SkarbSDK - by Adapty, RevenueCat or the host's own StoreKit code.
+  ///
+  /// Measured on a sandbox device 23.09.2026, twice: for a StoreKit 2 purchase another SDK made
+  /// and finished immediately, BOTH `Transaction.updates` and the StoreKit 1 payment queue said
+  /// nothing at all, while `Transaction.all` carried the transaction 141 ms after `finish()`.
+  /// This is the only channel that sees such a purchase without the host reporting it.
+  ///
+  /// `Transaction.all` is a FINITE sequence - a snapshot, not a subscription - so it has to be
+  /// read again on every occasion worth reading: launch, and the app coming back to the front.
+  /// A purchase therefore reaches the backend at the next such moment, not at the instant it
+  /// happens. `SkarbSDK.reportPurchase` is what a host uses when that delay is not acceptable.
+  func startHistorySweep() {
+    sweepTask = Task(priority: .background) { [weak self] in
+      await self?.sweepPurchaseHistory(reason: "launch")
+    }
+    NotificationCenter.default.addObserver(forName: UIApplication.didBecomeActiveNotification,
+                                           object: nil,
+                                           queue: nil) { [weak self] _ in
+      Task(priority: .background) { [weak self] in
+        await self?.sweepPurchaseHistory(reason: "foreground")
+      }
+    }
+  }
+
+  /// Only what happened after this install travels. Anything older belongs to a previous install,
+  /// carries no attribution for this one, and the backend already has it from the receipt and
+  /// from App Store Server Notifications. Without the cutoff the first sweep of a device with
+  /// history costs one `setReceipt` per transaction - measured on the same device: 38 commands
+  /// and 1.1 MB in 16 seconds.
+  ///
+  /// Renewals are NOT filtered by `originalID != id`, which looks like the obvious rule and is
+  /// wrong: a resubscribe after a lapse and a subscription upgrade both keep the old lineage, so
+  /// a freshly bought subscription arrives with an `originalID` that is not its own id. Measured
+  /// on one device, that rule would have dropped 8 of 16 real purchases. `Transaction.reason`
+  /// below is what separates them; the install cutoff and the durable dedup keep the volume down.
+  func sweepPurchaseHistory(reason: String) async {
+    let cutoff = Self.appInstallDate
+    var seen = 0
+    var reported = 0
+    // Tallied over EVERYTHING in history, not only what gets reported. Whether
+    // `Transaction.reason` can be trusted to separate a renewal from a resubscribe is the one
+    // question that decides if renewals may be dropped, and it is answered by the history a
+    // device already carries - no purchase needed.
+    var reasons: [String: Int] = [:]
+    var initialPurchases: [String] = []
+    for await verification in StoreKit.Transaction.all {
+      guard case .verified(let transaction) = verification else { continue }
+      seen += 1
+      if #available(iOS 17.0, *) {
+        reasons[transaction.reason.rawValue, default: 0] += 1
+        if transaction.reason == .purchase {
+          initialPurchases.append("\(transaction.id)/\(transaction.productID)/orig \(transaction.originalID)")
+        }
+        // Dropped only when the renewal is EXPLICIT. `Transaction.Reason` is a struct, not an
+        // enum, so Apple can add values without breaking the build - and an unrecognised one
+        // has to travel rather than vanish, because losing a real purchase costs more than
+        // sending a redundant renewal. On iOS 16 and below there is no `reason` at all and the
+        // install cutoff below is the only thing keeping the volume down.
+        //
+        // Renewals are dropped because the backend receives them from App Store Server
+        // Notifications anyway. Measured on one device: 56 of 72 transactions.
+        if transaction.reason == .renewal { continue }
+      }
+      guard transaction.revocationDate == nil else { continue }
+      guard transaction.purchaseDate >= cutoff else { continue }
+
+      let transactionId = String(transaction.id)
+      guard markReported(transactionId) else { continue }
+      if await isAlreadyReportedToBackend(transactionId) { continue }
+
+      SKLogger.logInfo("SKStoreKitService: history sweep (\(reason)) found unreported transaction \(transactionId) for \(transaction.productID), purchased \(transaction.purchaseDate), original \(transaction.originalID)\(Self.describeReason(transaction))")
+      await reportPurchased(SKPurchaseEvent(transaction: transaction,
+                                            jws: verification.jwsRepresentation))
+      reported += 1
+    }
+    SKLogger.logInfo("SKStoreKitService: history sweep (\(reason)) done - \(seen) transaction(s) in history, cutoff \(cutoff), \(reported) reported")
+    if !reasons.isEmpty {
+      SKLogger.logInfo("SKStoreKitService: history sweep (\(reason)) by Transaction.reason: \(reasons.map { "\($0.key)=\($0.value)" }.sorted().joined(separator: ", "))")
+      SKLogger.logInfo("SKStoreKitService: history sweep (\(reason)) reason == .purchase: [\(initialPurchases.joined(separator: ", "))]")
+    }
+  }
+
+  /// `Transaction.reason` tells a first purchase from a renewal properly, but only from iOS 17.
+  /// Logged rather than acted on until there is a measurement to back a rule on it.
+  static func describeReason(_ transaction: StoreKit.Transaction) -> String {
+    if #available(iOS 17.0, *) {
+      return ", reason \(transaction.reason)"
+    }
+    return ""
+  }
+
+  /// Creation date of the Documents folder - the same value `installV4` sends as `docDate`.
+  static var appInstallDate: Date {
+    guard let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).last,
+          let created = try? FileManager.default.attributesOfItem(atPath: documents.path)[.creationDate] as? Date else {
+      SKLogger.logInfo("SKStoreKitService: could not read the install date, sweeping the whole history")
+      return Date(timeIntervalSince1970: 0)
+    }
+    return created
+  }
+
   /// Recovers transactions left unfinished by a previous run, e.g. after a crash between
   /// the purchase and `finish()`.
   func drainUnfinishedTransactions() {
@@ -344,38 +502,40 @@ private extension SKStoreKit2ServiceImplementation {
   func handle(_ verification: VerificationResult<StoreKit.Transaction>, source: String) async {
     switch verification {
       case .verified(let transaction):
+        // Logged before any filtering, for the same reason the queue logs every state: whether a
+        // channel saw a purchase at all has to be separable from what was done about it.
+        SKLogger.logInfo("SKStoreKitService: \(source) delivered transaction \(transaction.id) for \(transaction.productID), purchased \(transaction.purchaseDate), original \(transaction.originalID), ourPurchase = \(hasPendingPurchase(transaction.productID))")
         if let revocationDate = transaction.revocationDate {
           SKLogger.logInfo("SKStoreKitService: \(source) reported REVOKED transaction \(transaction.id) for \(transaction.productID), revoked at \(revocationDate). Finishing without reporting.")
           await settle(transaction)
           return
         }
-        guard markReported(transaction) else {
+        guard markReported(String(transaction.id)) else {
           SKLogger.logInfo("SKStoreKitService: \(source) re-delivered transaction \(transaction.id) for \(transaction.productID), already reported in this session. Finishing without reporting again.")
           await settle(transaction)
-          // Reported already, but a caller can still be waiting - `purchase()` may have parked a
-          // completion it never answered.
+          // Reported already, but `purchase()` may have parked a completion it never answered.
           await resolvePendingPurchase(transaction.productID, .success(true))
           return
         }
-        // A device can carry a large backlog of transactions the app never finished - a
-        // TestFlight install with a year of sandbox renewals showed 45 of them. StoreKit hands
-        // every one of those to the launch drain, and without this check each would cost a
-        // product fetch plus a full command-building pass, and would be announced to the host as
-        // a fresh `.purchased`. `getNewTransactionIds` is the same durable dedup the backend
-        // reporting already relies on, so an id it does not consider new has been reported
-        // before: finish it and move on.
-        if isAlreadyReportedToBackend(transaction) {
-          SKLogger.logInfo("SKStoreKitService: \(source) delivered transaction \(transaction.id) for \(transaction.productID), already reported in an earlier session. Finishing without reporting or notifying again.")
+        // A device can carry a large backlog of never-finished transactions - 45 on one
+        // measured TestFlight install - and the launch drain hands over every one. Without this
+        // each would cost a product fetch, a command-building pass and a fresh `.purchased`.
+        if await isAlreadyReportedToBackend(String(transaction.id)) {
+          SKLogger.logInfo("SKStoreKitService: \(source) delivered transaction \(transaction.id) for \(transaction.productID), already reported in an earlier session. Finishing without reporting again.")
           await settle(transaction)
+          // A caller waiting on this product is not a backlog entry - it is somebody who just
+          // tapped buy, and its paywall spinner would hang. Nothing waits during a launch drain.
+          if hasPendingPurchase(transaction.productID) {
+            notifyObserver(.purchased, productId: transaction.productID)
+            await resolvePendingPurchase(transaction.productID, .success(true))
+          }
           return
         }
         SKLogger.logInfo("SKStoreKitService: \(source) reported transaction \(transaction.id) for \(transaction.productID), purchased \(transaction.purchaseDate), expires \(String(describing: transaction.expirationDate))")
-        await reportPurchased(transaction, jws: verification.jwsRepresentation)
+        await reportPurchased(SKPurchaseEvent(transaction: transaction, jws: verification.jwsRepresentation))
         notifyObserver(.purchased, productId: transaction.productID)
         await settle(transaction)
-        // A `purchasePackage` caller may still be waiting on this product: `purchase()` can hang
-        // or answer `.userCancelled` while the transaction arrives here instead. No-op when
-        // nothing is waiting, which is the normal case for a renewal or a launch-time drain.
+        // No-op unless a `purchasePackage` caller is still waiting on this product.
         await resolvePendingPurchase(transaction.productID, .success(true))
 
       case .unverified(let transaction, let error):
@@ -385,21 +545,36 @@ private extension SKStoreKit2ServiceImplementation {
     }
   }
 
+  /// The StoreKit 2 transaction behind a queue-reported purchase - for its JWS, and to finish it
+  /// through the same path every other transaction takes. A nil `transactionId` means "the newest
+  /// for this product", which is what `SkarbSDK.reportPurchase` passes when the host knows only
+  /// the product. Returning nil is normal: a consumable is absent from history unless the host
+  /// sets `SKIncludeConsumableInAppPurchaseHistory` (iOS 18+).
+  func matchedTransaction(productId: String,
+                          transactionId: String?) async -> (transaction: StoreKit.Transaction, jws: String)? {
+    guard let verification = await StoreKit.Transaction.latest(for: productId) else {
+      return nil
+    }
+    guard case .verified(let transaction) = verification else {
+      SKLogger.logInfo("SKStoreKitService: latest transaction for \(productId) is UNVERIFIED, not used as a signed transaction")
+      return nil
+    }
+    if let transactionId = transactionId, String(transaction.id) != transactionId {
+      SKLogger.logInfo("SKStoreKitService: latest transaction for \(productId) is \(transaction.id) but \(transactionId) was reported - not the same purchase")
+      return nil
+    }
+    return (transaction, verification.jwsRepresentation)
+  }
+
   // MARK: Reporting
 
-  func reportPurchased(_ transaction: StoreKit.Transaction, jws: String) async {
-    // Consumables are not recorded on the device. `verifyReceipt` is the single source of
-    // truth for them: the backend resolves the reported transaction id against the App Store
-    // Server API and returns the purchase in `onetimes`. The app receipt never carries one -
-    // it was absent from all seven receipts examined on 14.09.2026 - so the signed transaction
-    // below is what makes it resolvable. With it, and with
-    // `SKIncludeConsumableInAppPurchaseHistory` set by the host, four consecutive consumables
-    // came back from the server in 4 seconds each.
-    //
+  /// The single place both channels turn an observed purchase into backend commands. It takes an
+  /// `SKPurchaseEvent` rather than a `StoreKit.Transaction` so the queue path fits: it has only
+  /// an `SKPaymentTransaction` when no signed transaction could be matched.
+  func reportPurchased(_ event: SKPurchaseEvent) async {
     // Product metadata drives the intro-offer suppression of `.setReceipt` and the
-    // region / currency fields, so make sure it is cached before building commands.
-    await ensureProductCached(transaction.productID)
-    let event = SKPurchaseEvent(transaction: transaction, jws: jws)
+    // region / currency fields, so cache it before building commands.
+    await ensureProductCached(event.productId)
     await buildCommands { factory in
       factory.createFetchProductsCommand(purchasedEvents: [event])
       factory.createPurchaseAndTransactionCommand(purchasedEvents: [event])
@@ -423,21 +598,24 @@ private extension SKStoreKit2ServiceImplementation {
     }
   }
 
-  /// Whether the backend already has this transaction id, across launches.
+  /// Whether the backend already has this id. Unlike `markReported`, which is in-memory and only
+  /// covers one session, this survives restarts: `transactionV4` commands outlive their sending.
   ///
-  /// Unlike `markReported`, which is in-memory and only guards against the same transaction
-  /// arriving through two channels in one session, this survives restarts: it reads the command
-  /// queue, which keeps `transactionV4` commands after they are done.
-  func isAlreadyReportedToBackend(_ transaction: StoreKit.Transaction) -> Bool {
-    let id = String(transaction.id)
-    return SKServiceRegistry.commandStore.getNewTransactionIds([id]).isEmpty
+  /// Async for the same reason `buildCommands` is: the read goes through `SKCommandStore`'s own
+  /// serial queue, and a `queue.sync` from a `Task` parks a cooperative-pool thread.
+  func isAlreadyReportedToBackend(_ transactionId: String) async -> Bool {
+    return await withCheckedContinuation { (continuation: CheckedContinuation<Bool, Never>) in
+      commandQueue.async {
+        continuation.resume(returning: SKServiceRegistry.commandStore.getNewTransactionIds([transactionId]).isEmpty)
+      }
+    }
   }
 
-  /// Returns true the first time a transaction is seen, false on every redelivery.
-  func markReported(_ transaction: StoreKit.Transaction) -> Bool {
+  /// Returns true the first time a transaction id is seen, false on every redelivery.
+  func markReported(_ transactionId: String) -> Bool {
     cacheLock.lock()
     defer { cacheLock.unlock() }
-    return reportedTransactionIds.insert(transaction.id).inserted
+    return reportedTransactionIds.insert(transactionId).inserted
   }
 
   /// `isObservable == true` means the host app owns finishing.
@@ -504,17 +682,13 @@ private extension SKStoreKit2ServiceImplementation {
     return product
   }
 
-  // MARK: Callback plumbing
-
-
   // MARK: Pending purchases
 
   func parkPendingPurchase(_ productId: String, _ completion: @escaping (Result<Bool, Error>) -> Void) {
     cacheLock.lock()
     defer { cacheLock.unlock() }
     if let previous = pendingPurchases[productId] {
-      // Two overlapping calls for the same product: the earlier caller would otherwise never be
-      // answered, because the map holds one completion per product.
+      // The map holds one completion per product, so the earlier caller must be answered here.
       SKLogger.logInfo("SKStoreKitService: a purchase of \(productId) was already in flight, answering the previous caller with a failure")
       let error = SKResponseError(errorCode: 0, message: "Another purchase of this product was started")
       DispatchQueue.main.async { previous(.failure(error)) }
@@ -528,9 +702,8 @@ private extension SKStoreKit2ServiceImplementation {
     return pendingPurchases[productId] != nil
   }
 
-  /// Answers a parked `purchasePackage` completion exactly once. Whichever of the two paths -
-  /// the `purchase()` continuation or `Transaction.updates` - gets here first wins; the other
-  /// finds nothing and does nothing.
+  /// Answers a parked `purchasePackage` completion exactly once - whichever path gets here first
+  /// wins, the others find nothing.
   func resolvePendingPurchase(_ productId: String, _ result: Result<Bool, Error>) async {
     cacheLock.lock()
     let completion = pendingPurchases.removeValue(forKey: productId)
@@ -574,26 +747,13 @@ private extension SKStoreKit2ServiceImplementation {
 extension SKStoreKit2ServiceImplementation {
 
   /// Consumables and live entitlements from the account's history, as signed by Apple.
-  ///
-  /// Walked over `Transaction.all` rather than `currentEntitlements`, because entitlements hold
-  /// only what is active right now and drop a consumable at `finish()` - and that is exactly the
-  /// user whose purchases the backend cannot resolve from the receipt either, since a StoreKit 2
-  /// receipt carries no consumable `in_app` entry to key on. Expired subscriptions and past
-  /// renewals are filtered out: see the guard in the loop.
-  ///
-  /// Consumables appear here ONLY when the host app sets
-  /// `SKIncludeConsumableInAppPurchaseHistory` to true in its Info.plist; finished ones are
-  /// omitted otherwise (measured 14.09.2026 without the key: all=61, consumables=0). Apple
-  /// documents the key from iOS 18.
-  ///
-  /// Cost to be aware of: one JWS measures ~5.4 KB, so this is still a few KB per call on a
-  /// normal account and grows with each consumable. The count and total size are logged for
-  /// exactly that reason.
+  /// `Transaction.all` rather than `currentEntitlements`, which drops a consumable at `finish()`.
+  /// Consumables appear here ONLY when the host sets `SKIncludeConsumableInAppPurchaseHistory`
+  /// (iOS 18+). One JWS measures ~5.4 KB, which is why the count and size are logged.
   func collectSignedTransactions(completion: @escaping ([String]) -> Void) {
     Task {
       // Mapped into a StoreKit-free candidate so the choice of what to send can live in
-      // `SKSignedTransactionSelection`, where it is testable - `StoreKit.Transaction` has no
-      // public initializer.
+      // `SKSignedTransactionSelection`, where it is testable.
       var candidates: [SKSignedTransactionCandidate] = []
       for await verification in StoreKit.Transaction.all {
         // Unverified is not proof of anything, same rule as on the reporting path.

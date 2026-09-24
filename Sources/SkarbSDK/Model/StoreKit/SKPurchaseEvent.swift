@@ -17,7 +17,7 @@ struct SKPurchaseEvent {
   /// such transactions were dropped from the reported id list.
   let transactionId: String?
   let transactionDate: Date?
-  /// StoreKit 2 signed transaction (JWS). Captured now, not sent yet: no proto field
-  /// carries it. Wiring it up later is one line in the command factory.
+  /// StoreKit 2 signed transaction (JWS), sent in `signed_transactions` (field 15 of
+  /// `ReceiptRequest`). Nil on StoreKit 1, and on StoreKit 2 when no signed transaction matched.
   let jws: String?
 }

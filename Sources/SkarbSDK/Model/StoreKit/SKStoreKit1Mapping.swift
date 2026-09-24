@@ -96,10 +96,12 @@ extension SKProductInfo {
 
 extension SKPurchaseEvent {
 
-  init(skTransaction: SKPaymentTransaction) {
+  /// `jws` is always nil on the StoreKit 1 path. It is a parameter because the StoreKit 2 service
+  /// also builds events from `SKPaymentTransaction` and can usually match a signed one.
+  init(skTransaction: SKPaymentTransaction, jws: String? = nil) {
     productId = skTransaction.payment.productIdentifier
     transactionId = skTransaction.transactionIdentifier
     transactionDate = skTransaction.transactionDate
-    jws = nil
+    self.jws = jws
   }
 }

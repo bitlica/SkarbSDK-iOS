@@ -23,6 +23,10 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
   private var purchasingProductCompletions: [String: ((Result<Bool, Error>) -> Void)]
 
   private let exclusionSerialQueue = DispatchQueue(label: "com.skarbSDK.skStoreKitService.exclusion")
+  /// `reportPurchase` is the one entry point a host calls on a thread of its own choosing, and
+  /// building a command reads the whole app receipt off disk. Not `exclusionSerialQueue`: the
+  /// factory reads `allProducts`, which syncs onto that one.
+  private let commandQueue = DispatchQueue(label: "com.skarbSDK.skStoreKit1.commands")
 
   private var cachedAllProducts: [SKProductInfo]
   var allProducts: [SKProductInfo]? {
@@ -136,6 +140,27 @@ class SKStoreKitServiceImplementation: NSObject, SKStoreKitService {
 
   func fetchProduct(by productId: String) -> SKProductInfo? {
     return allProducts?.filter({ $0.productId == productId }).first
+  }
+
+  /// StoreKit 1 has no way to look a transaction up by product, so the caller's id is the only
+  /// thing there is. Duplicates are handled in `SKPurchaseCommandFactory.newEvents`.
+  func reportPurchase(productId: String, transactionId: String?, transactionDate: Date?) {
+    guard let transactionId = transactionId else {
+      SKLogger.logError("SkarbSDK.reportPurchase(\(productId)): StoreKit 1 cannot find a transaction by product, so transactionId is required here. Pass the id from the SDK that made the purchase.",
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
+                                   SKLoggerFeatureType.internalValue.name: productId])
+      return
+    }
+    SKLogger.logInfo("SKStoreKitService: reportPurchase(\(productId), transactionId: \(transactionId)) on StoreKit 1")
+    let event = SKPurchaseEvent(productId: productId,
+                                transactionId: transactionId,
+                                transactionDate: transactionDate,
+                                jws: nil)
+    commandQueue.async { [weak self] in
+      guard let factory = self?.commandFactory else { return }
+      factory.createFetchProductsCommand(purchasedEvents: [event])
+      factory.createPurchaseAndTransactionCommand(purchasedEvents: [event])
+    }
   }
 
   var canMakePayments: Bool {

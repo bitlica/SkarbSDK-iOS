@@ -91,6 +91,62 @@ Every callback is delivered on the **main thread**, and one purchase produces ex
 implementations - implement them only if you handle App Store promoted purchases, or if you
 initialized with `isObservable: true`.
 
+### Apps where another SDK owns purchasing
+
+SkarbSDK hears purchases another SDK in the same app makes - Adapty, RevenueCat, or your own
+StoreKit code - by sweeping `Transaction.all` at launch and whenever the app comes back to the
+front. On a sandbox device the purchase was in history 141 ms after the other SDK finished it,
+and reported before that SDK's own `finish()` returned, because dismissing the StoreKit sheet
+brings the app to the front.
+
+Note what this is NOT: the StoreKit 1 payment queue does not deliver such a purchase on `.v2`,
+and neither does `Transaction.updates`. Both were measured silent across seven runs.
+
+Three things to get right in that setup:
+
+**Initialize with `isObservable: true`.** The other SDK finishes its transactions after its own
+backend acknowledges them. With `false` SkarbSDK would finish them first and break that. The
+flag only controls finishing - reporting to the backend happens either way.
+
+**Set `SKIncludeConsumableInAppPurchaseHistory` in your Info.plist** if you sell consumables.
+Without it a finished consumable is absent from `Transaction.all` entirely, and the sweep cannot
+see it. Subscriptions do not need the key.
+
+**Report purchases yourself if you need them reported at the moment they happen** rather than at
+the next launch or foreground. Call it with a purchase the other SDK just completed; Adapty
+exposes the identifier as `vendorTransactionId`.
+
+```swift
+public static func reportPurchase(productId: String,
+                                  transactionId: String? = nil,
+                                  transactionDate: Date? = nil)
+```
+
+```swift
+// in the other SDK's purchase callback
+SkarbSDK.reportPurchase(productId: product.vendorProductId,
+                        transactionId: transaction.vendorTransactionId)
+```
+
+| Parameter | Required | What it is for |
+|---|---|---|
+| `productId` | always | Price, period, introductory offer and currency are resolved from it |
+| `transactionId` | StoreKit 1 only | On `.v2` the newest transaction for the product is used when it is omitted. StoreKit 1 cannot look a transaction up by product, so it is required there |
+| `transactionDate` | no | Used only when the transaction is not in the device history; otherwise Apple's own date wins |
+
+Safe to call for a purchase SkarbSDK already caught - reports are deduplicated by transaction id,
+in memory and across launches. Measured: with the sweep and this call both firing on one
+purchase, the backend was told once. The backend payload is identical to an automatically observed
+purchase. Two things it deliberately does not do: it does not announce `.purchased` to
+`SKStoreKitObserver`, because you are the one holding the purchase and would get the event
+twice; and it does not finish the transaction, whatever `isObservable` says, because the SDK
+that made the purchase owns that.
+
+On `.v2` the Apple-signed transaction is attached automatically when the purchase is in the
+device history. A consumable is only there if your app sets
+`SKIncludeConsumableInAppPurchaseHistory` in its Info.plist - without it the purchase is still
+reported, just without the signature.
+
 ### StoreKit 2 (opt-in)
 
 StoreKit 1 remains the default. To run the SDK on StoreKit 2:
@@ -116,16 +172,20 @@ The whole purchase API is identical on both versions - same methods, same signat
 models, same backend payload:
 
 `validateReceipt`, `getOfferings`, `isOfferingsAvailable`, `getCachedUserPurchaseInfoIfAvailable`,
-`purchasePackage`, `restorePurchases`, `canMakePayments`, every `SKOfferPackage` property except
+`purchasePackage`, `restorePurchases`, `reportPurchase`, `canMakePayments`, every `SKOfferPackage` property except
 `storeProduct` (`isTrial`, `period`, `numberOfUnits`, `localizedPriceString`,
 `monthlyLocalizedPriceString`, ...), `SKUserPurchaseInfo`, `SKOfferings`, `SKRefreshPolicy`.
 
 #### What you have to do
 
 1. **Adopt `SKStoreKitObserver`** if you use `SKStoreKitDelegate` for purchase state.
-   `storeKitUpdatedTransaction` is **never called** on StoreKit 2 - `SKPaymentTransaction` does
-   not exist there - so anything built on it (typically a purchase funnel in analytics) goes
-   silent with no other symptom. See the migration table below.
+   `storeKitUpdatedTransaction` is **never called** on StoreKit 2, so anything built on it
+   (typically a purchase funnel in analytics) goes silent with no other symptom. See the
+   migration table below.
+
+   The SDK still registers as a payment-queue observer on `.v2`, but only for
+   `shouldAddStorePayment` - the queue reports no purchases there. `SKStoreKitObserver` reports
+   all four states on both versions, so nothing is lost by the delegate going quiet.
 2. **Stop using `SKOfferPackage.storeProduct`.** It is `nil` on StoreKit 2 and deprecated. Use
    `priceLocale`, `period`, `numberOfUnits`, `discountPeriod`, `discountPeriodDuration`,
    `introductoryOffer` instead - all available on both versions.

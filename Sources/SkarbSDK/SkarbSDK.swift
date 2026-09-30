@@ -22,9 +22,13 @@ public class SkarbSDK {
   
 //  MARK: Private
   static let agentName: String = "SkarbSDK-iOS"
-  static let version: String = "0.6.32"
+  static let version: String = "0.6.33"
   
   static var clientId: String = ""
+
+  private static var isInitialized: Bool = false
+  private static var isAutomaticSearchAdsEnabled: Bool = false
+  private static let resetDeviceIdSerialQueue = DispatchQueue(label: "com.skarbSDK.resetDeviceId")
     
   public static func initialize(clientId: String,
                                 isObservable: Bool,
@@ -42,6 +46,7 @@ public class SkarbSDK {
     SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId)
     SKServiceRegistry.commandStore.createIDFACommandIfNeeded(automaticCollectIDFA: automaticCollectIDFA)
     SKServiceRegistry.initialize(isObservable: isObservable)
+    isInitialized = true
     useAutomaticAppleSearchAdsAttributionCollection(true)
   }
   
@@ -90,7 +95,47 @@ public class SkarbSDK {
   }
   
   public static func useAutomaticAppleSearchAdsAttributionCollection(_ enable: Bool) {
+    isAutomaticSearchAdsEnabled = enable
     SKServiceRegistry.commandStore.createAutomaticSearchAdsCommand(enable)
+  }
+  
+  /// Switches the SDK to a new device id, so from now on this device is reported as a fresh
+  /// install. Intended for the moment the user's data has been erased on their request.
+  ///
+  /// - Install, source, test, IDFA and Apple Search Ads commands are dropped in any status,
+  ///   together with pending logs - they carry the old id. `sendSource`, `sendTest` and
+  ///   `sendIDFA` are sent once per install, so call them again if the new install needs them.
+  /// - Purchase data is kept: queued purchase, receipt, transaction and price commands are still
+  ///   delivered with the device id they were created with, and the cached `SKUserPurchaseInfo`
+  ///   stays - it belongs to the store account, not to the install. The next `validateReceipt`
+  ///   verifies it for the new id.
+  /// - A new install command is queued, plus IDFA and Search Ads ones following
+  ///   `automaticCollectIDFA` and `useAutomaticAppleSearchAdsAttributionCollection(_:)`.
+  ///   Before `initialize` nothing is queued: the id is only saved, and `initialize` sends
+  ///   the install for it.
+  /// - If you pass your own `deviceId` to `initialize`, pass the returned one from now on:
+  ///   `initialize` stores whatever id it is given.
+  ///
+  /// Nothing is erased on the server. Can be called on any thread.
+  /// - Parameter newDeviceId: the id to switch to. A new UUID is generated when `nil` or blank.
+  /// - Returns: the device id in use from now on.
+  @discardableResult
+  public static func resetDeviceId(newDeviceId: String? = nil) -> String {
+    let isBlank = newDeviceId?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? false
+    if isBlank {
+      SKLogger.logError("SkarbSDK: resetDeviceId() - blank deviceId passed, generating a random one",
+                        features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name])
+    }
+    // `getDeviceId` treats only a missing id as missing, so a blank one must never be saved
+    let deviceId = (isBlank ? nil : newDeviceId) ?? UUID().uuidString
+    
+    // Serialized so two resets can't interleave and queue two install commands
+    resetDeviceIdSerialQueue.sync {
+      resetDeviceScopedData(newDeviceId: deviceId)
+    }
+    
+    SKLogger.logInfo("SkarbSDK: device id was reset. deviceId = \(deviceId), isInitialized = \(isInitialized)")
+    return deviceId
   }
   
   public static func sendIDFA(idfa: String?) {
@@ -233,6 +278,26 @@ public class SkarbSDK {
   }
   
   //  MARK: Private
+  private static func resetDeviceScopedData(newDeviceId: String) {
+    // The id goes first: a command or log created from here on carries the new one,
+    // so the drop below can't miss an old-id command created in between.
+    saveDeviceId(newDeviceId)
+    SKServiceRegistry.commandStore.dropDeviceScopedCommands()
+    
+    // Not read since V3 was removed, but may still hold analytics data of the old install
+    let userDefaultsService = SKServiceRegistry.userDefaultsService
+    userDefaultsService.removeValue(forKey: .initData)
+    userDefaultsService.removeValue(forKey: .brokerData)
+    userDefaultsService.removeValue(forKey: .testData)
+    
+    // Same order as in `initialize`, without touching the StoreKit service
+    if isInitialized {
+      SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId)
+      SKServiceRegistry.commandStore.createIDFACommandIfNeeded(automaticCollectIDFA: automaticCollectIDFA)
+      SKServiceRegistry.commandStore.createAutomaticSearchAdsCommand(isAutomaticSearchAdsEnabled)
+    }
+  }
+  
   private static func saveDeviceId(_ deviceId: String) {
     SKServiceRegistry.userDefaultsService.setValue(deviceId, forKey: .deviceId)
   }

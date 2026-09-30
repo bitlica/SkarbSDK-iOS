@@ -10,12 +10,30 @@ import Foundation
 
 class SKCommandStore {
   
+  /// Commands that belong to one install: each carries the device id it was created with,
+  /// and most of them double as a "sent once per install" marker.
+  /// Purchase-related types are deliberately not here - they survive a device id reset.
+  private static let deviceScopedCommandTypes: Set<SKCommandType> = [
+    .installV4, .sourceV4, .testV4, .idfaV4, .fetchIdfa, .automaticSearchAds, .logging
+  ]
+  
   private let exclusionSerialQueue = DispatchQueue(label: "com.bitlica.skcommandStore.exclusion")
   
   private var localAppgateCommands: [SKCommand]
   
-  init() {
-    localAppgateCommands = SKServiceRegistry.userDefaultsService.codableArray(forKey: .appgateComands, objectType: SKCommand.self)
+  /// Commands removed by `dropDeviceScopedCommands()`. A request that was in flight
+  /// at that moment still calls `saveCommand` on completion, and must not bring its command back.
+  /// In memory only: no request outlives the process.
+  private var droppedCommands: Set<SKCommand> = []
+  
+  private let userDefaultsService: SKUserDefaultsService
+  private let syncAllCommands: () -> Void
+  
+  init(userDefaultsService: SKUserDefaultsService = SKServiceRegistry.userDefaultsService,
+       syncAllCommands: @escaping () -> Void = { SKServiceRegistry.syncService.syncAllCommands() }) {
+    self.userDefaultsService = userDefaultsService
+    self.syncAllCommands = syncAllCommands
+    localAppgateCommands = userDefaultsService.codableArray(forKey: .appgateComands, objectType: SKCommand.self)
   }
   
   var hasInstallV4Command: Bool {
@@ -76,6 +94,7 @@ class SKCommandStore {
   
   func saveCommand(_ command: SKCommand) {
     var isNew: Bool = false
+    var isDropped: Bool = false
     exclusionSerialQueue.sync {
       if let existingCommand = localAppgateCommands.first(where: { $0 == command }),
          let index = localAppgateCommands.firstIndex(where: { $0 == existingCommand }) {
@@ -85,16 +104,24 @@ class SKCommandStore {
         if !(existingCommand.status == .done && command.status == .pending) {
           localAppgateCommands[index] = command
         }
+      } else if !droppedCommands.isEmpty, // skips hashing the payload (a receipt, say) on every save
+                droppedCommands.contains(command) {
+        // Finished after `dropDeviceScopedCommands()` removed it
+        isDropped = true
       } else {
         localAppgateCommands.append(command)
         isNew = true
       }
     }
+    guard !isDropped else {
+      SKLogger.logInfo("Command was dropped by device id reset and is not saved: \(command.description)")
+      return
+    }
     // if new command was added we want to execute all pending
     // commands ASAP in one transaction, except logging command
     if isNew && command.commandType != .logging {
       resetFireDateAndRetryCountForPendingCommands()
-      SKServiceRegistry.syncService.syncAllCommands()
+      syncAllCommands()
     }
     saveState()
     SKLogger.logInfo("Command saved: \(command.description)")
@@ -119,10 +146,26 @@ class SKCommandStore {
     saveState()
   }
   
+  /// Removes every command of `deviceScopedCommandTypes` in any status, and remembers them
+  /// so a request still in flight can't re-insert its command via `saveCommand`.
+  /// Purchase-related commands are kept as they are.
+  func dropDeviceScopedCommands() {
+    var droppedCount = 0
+    exclusionSerialQueue.sync {
+      let isDeviceScoped: (SKCommand) -> Bool = { Self.deviceScopedCommandTypes.contains($0.commandType) }
+      let dropped = localAppgateCommands.filter(isDeviceScoped)
+      droppedCount = dropped.count
+      droppedCommands.formUnion(dropped)
+      localAppgateCommands.removeAll(where: isDeviceScoped)
+    }
+    saveState()
+    SKLogger.logInfo("Dropped \(droppedCount) device scoped commands")
+  }
+  
   func saveState() {
     exclusionSerialQueue.sync {
       let data = localAppgateCommands.map { $0.getData() }.compactMap { $0 }
-      SKServiceRegistry.userDefaultsService.setValue(data, forKey: .appgateComands)
+      userDefaultsService.setValue(data, forKey: .appgateComands)
     }
   }
   
@@ -193,7 +236,7 @@ class SKCommandStore {
   
   func createInstallCommandIfNeeded(clientId: String) {
 //    V4
-    if !SKServiceRegistry.commandStore.hasInstallV4Command {
+    if !hasInstallV4Command {
       let nowDate = Date()
       let initDataV4 = Installapi_DeviceRequest(clientId: clientId,
                                                 sdkInstallDate: nowDate)
@@ -201,7 +244,7 @@ class SKCommandStore {
                                        commandType: .installV4,
                                        status: .pending,
                                        data: initDataV4.getData())
-      SKServiceRegistry.commandStore.saveCommand(installCommandV4)
+      saveCommand(installCommandV4)
     }
   }
   
@@ -225,7 +268,7 @@ class SKCommandStore {
     let searchAdsCommand = SKCommand(commandType: .automaticSearchAds,
                                    status: .pending,
                                    data: Data())
-    SKServiceRegistry.commandStore.saveCommand(searchAdsCommand)
+    saveCommand(searchAdsCommand)
   }
   
   func createIDFACommandIfNeeded(automaticCollectIDFA: Bool) {

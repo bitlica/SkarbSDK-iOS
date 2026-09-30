@@ -158,7 +158,7 @@ class SKSyncServiceImplementation: SKSyncService {
           for idfaCommands in notDoneIDFACommands {
             var editCommand = idfaCommands
             editCommand.changeStatus(to: .done)
-            SKServiceRegistry.commandStore.saveCommand(idfaCommand)
+            SKServiceRegistry.commandStore.saveCommand(editCommand)
           }
       }
     }

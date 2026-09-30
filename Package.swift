@@ -35,6 +35,8 @@ let package = Package(
         .linkedFramework("AdServices"),
         .linkedFramework("AppTrackingTransparency")
       ]),
-    
+    .testTarget(
+      name: "SkarbSDKTests",
+      dependencies: ["SkarbSDK"]),
   ]
 )

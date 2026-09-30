@@ -162,10 +162,17 @@ extension SKCommand: SKCodableStruct {
   }
 }
 
-extension SKCommand: Equatable {
+extension SKCommand: Hashable {
   public static func == (lhs: Self, rhs: Self) -> Bool {
     return lhs.timestamp == rhs.timestamp &&
            lhs.commandType == rhs.commandType &&
            lhs.data == rhs.data
+  }
+  
+  // The same fields as `==`: status, retries and fire date change while it's the same command
+  public func hash(into hasher: inout Hasher) {
+    hasher.combine(timestamp)
+    hasher.combine(commandType)
+    hasher.combine(data)
   }
 }

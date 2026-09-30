@@ -108,6 +108,27 @@ Also you can sent idfa after getting ```status``` from ```ATTrackingManager.requ
 SkarbSDK.sendIDFA(idfa: String?)
 ```
 
+### Reset device id
+After the user's data has been erased on their request, switch the SDK to a new device id so
+the device is reported as a fresh install from then on:
+
+```swift
+import SkarbSDK
+
+let newDeviceId = SkarbSDK.resetDeviceId() // or SkarbSDK.resetDeviceId(newDeviceId: "YOUR_NEW_DEVICE_ID")
+```
+
+- A new install is sent for the new id, together with IDFA and Apple Search Ads attribution if
+  they are enabled. Everything tied to the old install - install, `sendSource`, `sendTest` and
+  `sendIDFA` data, pending logs - is dropped, sent or not. Call `sendSource` / `sendTest` /
+  `sendIDFA` again if the new install needs them.
+- Purchase data is kept: queued purchases are still delivered with the old device id, and the
+  cached purchase info stays, so a subscriber keeps access. The next `validateReceipt` verifies
+  it for the new id.
+- If you pass your own `deviceId` to `initialize`, pass the new one on every launch from now on.
+- Called before `initialize`, it only saves the new id; `initialize` sends the install for it.
+- Nothing is erased on the server.
+
 ### Logging
 If you want to see errors and warning from SkarbSDK , please use set ```true``` before  ```SkarbSDK.initialize()``` method.  The default value is ```false```
 ```swift

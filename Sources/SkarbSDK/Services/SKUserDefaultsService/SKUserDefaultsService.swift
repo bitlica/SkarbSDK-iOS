@@ -45,8 +45,8 @@ class SKUserDefaultsService {
   }
   
   private let userDefaults: UserDefaults
-  init() {
-    self.userDefaults = UserDefaults.standard
+  init(userDefaults: UserDefaults = .standard) {
+    self.userDefaults = userDefaults
   }
   
   func removeValue(forKey key: SKKey) {

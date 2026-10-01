@@ -40,6 +40,16 @@ enum SKCommandType: Int {
     }
   }
   
+  /// Sent only with the user's analytics consent, see `SkarbSDK.setAnalyticsEnabled(_:)`.
+  var requiresAnalyticsConsent: Bool {
+    switch self {
+      case .sourceV4, .testV4, .idfaV4, .fetchIdfa, .automaticSearchAds, .logging:
+        return true
+      case .fetchProducts, .installV4, .purchaseV4, .transactionV4, .priceV4, .setReceipt:
+        return false
+    }
+  }
+  
   var isV4: Bool {
     switch self {
       case .logging, .fetchProducts, .automaticSearchAds, .fetchIdfa:

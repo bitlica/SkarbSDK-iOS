@@ -24,7 +24,7 @@ Once you have your Swift package set up, adding SkarbSDK as a dependency is as e
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/bitlica/SkarbSDK.git", .upToNextMajor(from: "0.6.33"))
+    .package(url: "https://github.com/bitlica/SkarbSDK.git", .upToNextMajor(from: "0.6.34"))
 ]
 ```
 
@@ -49,6 +49,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 ```isObservable``` Automatically sends all events about purchases that are in your app. If you want to send a purchase event manually you should set this param to ```false``` and see ```Send purchase event``` section. Default value is ```true```.
 
 ```deviceId``` If you want to can use your own generated deviceId. Default value is ```nil```.
+
+```isAnalyticsEnabled``` The user's analytics consent, see ```Analytics consent``` section. Default value is ```nil```: the last value set, on by default.
 
 ### Send features 
 
@@ -128,6 +130,25 @@ let newDeviceId = SkarbSDK.resetDeviceId() // or SkarbSDK.resetDeviceId(newDevic
 - If you pass your own `deviceId` to `initialize`, pass the new one on every launch from now on.
 - Called before `initialize`, it only saves the new id; `initialize` sends the install for it.
 - Nothing is erased on the server.
+
+### Analytics consent
+Apply the user's analytics consent (GDPR), e.g. when it is revoked from the app's settings.
+The value is saved, so pass it to `initialize` too if consent can change while the app is not running:
+
+```swift
+import SkarbSDK
+
+SkarbSDK.setAnalyticsEnabled(false)
+```
+
+- Off, purchases keep working (install, receipt and purchase validation), and the rest stops:
+  `sendSource`, `sendTest` and `sendIDFA` are ignored, IDFA and Apple Search Ads attribution are
+  not collected, the install and purchase requests go without IDFV and with a zeroed IDFA, and the
+  SDK's error logs are not sent.
+- Queued source, test, IDFA, Search Ads and log data is dropped, sent or not, so it is sent again
+  once consent is given back. Call `sendSource` / `sendTest` / `sendIDFA` again then if they are
+  needed.
+- Can be called on any thread, before `initialize` too. Nothing is erased on the server.
 
 ### Logging
 If you want to see errors and warning from SkarbSDK , please use set ```true``` before  ```SkarbSDK.initialize()``` method.  The default value is ```false```

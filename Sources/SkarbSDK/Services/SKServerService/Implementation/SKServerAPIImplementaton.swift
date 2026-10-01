@@ -46,12 +46,16 @@ class SKServerAPIImplementaton: SKServerAPI {
       
       switch command.commandType {
         case .installV4:
-          guard let deviceRequest = try? decoder.decode(Installapi_DeviceRequest.self, from: command.data) else {
+          guard var deviceRequest = try? decoder.decode(Installapi_DeviceRequest.self, from: command.data) else {
             let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
             SKLogger.logError("SyncCommand called with installV4. Installapi_DeviceRequest cannt be decoded",
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                          SKLoggerFeatureType.internalValue.name: value])
             return
+          }
+          if !SkarbSDK.isAnalyticsEnabled {
+            deviceRequest.idfa = SkarbSDK.noConsentIDFA
+            deviceRequest.idfv = ""
           }
           let call = installService.setDevice(deviceRequest)
           call.initialMetadata.whenComplete({ [weak self] result in
@@ -97,12 +101,16 @@ class SKServerAPIImplementaton: SKServerAPI {
                                            completion: completion)
           }
         case .purchaseV4, .setReceipt:
-          guard let purchaseRequest = try? decoder.decode(Purchaseapi_ReceiptRequest.self, from: command.data) else {
+          guard var purchaseRequest = try? decoder.decode(Purchaseapi_ReceiptRequest.self, from: command.data) else {
             let value = String(data: command.data, encoding: .utf8) ?? "Cannt decode to String"
             SKLogger.logError("SyncCommand called with purchaseV4. Purchaseapi_ReceiptRequest cannt be decoded",
                               features: [SKLoggerFeatureType.internalError.name: SKLoggerFeatureType.internalError.name,
                                          SKLoggerFeatureType.internalValue.name: value])
             return
+          }
+          if !SkarbSDK.isAnalyticsEnabled {
+            purchaseRequest.idfa = SkarbSDK.noConsentIDFA
+            purchaseRequest.idfv = ""
           }
           let call = purchaseService.setReceipt(purchaseRequest)
           call.initialMetadata.whenComplete({ [weak self] result in

@@ -79,6 +79,13 @@ class SKSyncServiceImplementation: SKSyncService {
     
     let executeCommands = SKServiceRegistry.commandStore.getCommandsForExecuting()
     for executeCommand in executeCommands {
+      // Checked at send time, so it also covers a command queued in the moment of a revocation
+      // or picked above right before its drop
+      if executeCommand.commandType.requiresAnalyticsConsent && !SkarbSDK.isAnalyticsEnabled {
+        SKLogger.logInfo("Analytics disabled, command is deleted unsent: \(executeCommand.description)")
+        SKServiceRegistry.commandStore.deleteCommand(executeCommand)
+        continue
+      }
       var command = executeCommand
       command.changeStatus(to: .inProgress)
       command.updateFireDate(Date())
@@ -146,11 +153,7 @@ class SKSyncServiceImplementation: SKSyncService {
             return
           }
           let idfa = ASIdentifierManager.shared().advertisingIdentifier.uuidString
-          let idfaRequest = Installapi_IDFARequest(idfa: idfa)
-          let idfaCommand = SKCommand(commandType: .idfaV4,
-                                      status: .pending,
-                                      data: idfaRequest.getData())
-          SKServiceRegistry.commandStore.saveCommand(idfaCommand)
+          SkarbSDK.sendIDFA(idfa: idfa)
           
         // also need to set for all other fetchIDFACommands "done" status
         // no need to send twice idfa to the server

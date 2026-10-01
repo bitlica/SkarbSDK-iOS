@@ -58,28 +58,35 @@ enum SKLoggerFeatureType {
 class SKLogger {
   
   static func logError(_ message: String, features: [String: Any]?) {
-    var features = features ?? [:]
-    features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
-    features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
-    features[SKLoggerFeatureType.installId.name] = SkarbSDK.getDeviceId()
-    features[SKLoggerFeatureType.proxy.name] = getProxySettings()
-    let command = SKCommand(commandType: .logging,
-                            status: .pending,
-                            data: SKCommand.prepareApplogData(message: message, features: features))
-    SKServiceRegistry.commandStore.saveCommand(command)
+    if SkarbSDK.isAnalyticsEnabled {
+      var features = features ?? [:]
+      features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
+      features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
+      features[SKLoggerFeatureType.installId.name] = SkarbSDK.getDeviceId()
+      features[SKLoggerFeatureType.proxy.name] = getProxySettings()
+      saveLogCommand(message: message, features: features)
+    }
     if SkarbSDK.isLoggingEnabled {
       print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [ERROR] \(message)")
     }
   }
   
   static func logWarn(_ message: String, features: [String: Any]?) {
+    if SkarbSDK.isAnalyticsEnabled {
+      saveLogCommand(message: message, features: features)
+    }
+    if SkarbSDK.isLoggingEnabled {
+      print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [WARN] \(message)")
+    }
+  }
+  
+  /// Logs are sent to the server with the install id, so callers only queue them with
+  /// analytics consent.
+  private static func saveLogCommand(message: String, features: [String: Any]?) {
     let command = SKCommand(commandType: .logging,
                             status: .pending,
                             data: SKCommand.prepareApplogData(message: message, features: features))
     SKServiceRegistry.commandStore.saveCommand(command)
-    if SkarbSDK.isLoggingEnabled {
-      print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [WARN] \(message)")
-    }
   }
   
   static func logInfo(_ message: String) {

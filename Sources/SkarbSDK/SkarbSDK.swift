@@ -20,23 +20,48 @@ public class SkarbSDK {
   public static var isLoggingEnabled: Bool = false
   public static var automaticCollectIDFA: Bool = true
   
+  /// The user's analytics consent, saved on disk. On by default. See `setAnalyticsEnabled(_:)`.
+  public static var isAnalyticsEnabled: Bool {
+    return !SKServiceRegistry.userDefaultsService.bool(forKey: .analyticsDisabled)
+  }
+  
 //  MARK: Private
   static let agentName: String = "SkarbSDK-iOS"
-  static let version: String = "0.6.33"
+  static let version: String = "0.6.34"
   
   static var clientId: String = ""
+  
+  /// Without analytics consent the install and receipt requests are sent with this IDFA and no
+  /// IDFV. It is the zeroed IDFA iOS reports without ATT authorization, so the server gets the
+  /// value it already gets from most installs.
+  static let noConsentIDFA: String = "00000000-0000-0000-0000-000000000000"
 
   private static var isInitialized: Bool = false
   private static var isAutomaticSearchAdsEnabled: Bool = false
-  private static let resetDeviceIdSerialQueue = DispatchQueue(label: "com.skarbSDK.resetDeviceId")
-    
+  /// Serializes the switches of device-scoped data: a device id reset, an analytics consent change
+  /// and the automatic IDFA and Search Ads commands they drop or queue. A source, test or IDFA
+  /// command queued in the moment of a revocation is caught by the sync service's consent check.
+  private static let deviceScopedDataSerialQueue = DispatchQueue(label: "com.skarbSDK.deviceScopedData")
+  
+  /// - Parameter isAnalyticsEnabled: the user's analytics consent, see `setAnalyticsEnabled(_:)`.
+  ///   Pass it on every launch if consent can change while the app is not running;
+  ///   `nil` keeps the last value set (on by default).
   public static func initialize(clientId: String,
                                 isObservable: Bool,
-                                deviceId: String? = nil) {
+                                deviceId: String? = nil,
+                                isAnalyticsEnabled: Bool? = nil) {
     
     SkarbSDK.clientId = clientId
     if let deviceId = deviceId {
       saveDeviceId(deviceId)
+    }
+    
+    // Before any command is created, and before the sync service starts sending
+    // the ones queued while consent was given
+    if let isAnalyticsEnabled = isAnalyticsEnabled {
+      deviceScopedDataSerialQueue.sync {
+        saveAnalyticsEnabled(isAnalyticsEnabled)
+      }
     }
     
     // Order is matter:
@@ -44,15 +69,23 @@ public class SkarbSDK {
     // because some data are used in other commands and should not be nil
     SKServiceRegistry.migrationService.doMigrationIfNeeded()
     SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId)
-    SKServiceRegistry.commandStore.createIDFACommandIfNeeded(automaticCollectIDFA: automaticCollectIDFA)
     SKServiceRegistry.initialize(isObservable: isObservable)
-    isInitialized = true
+    // Together on the queue, so a consent switch from another thread lands either before
+    // the IDFA commands are created, or after `isInitialized` is set and queues them itself
+    deviceScopedDataSerialQueue.sync {
+      SKServiceRegistry.commandStore.createIDFACommandIfNeeded(automaticCollectIDFA: shouldCollectIDFA)
+      isInitialized = true
+    }
     useAutomaticAppleSearchAdsAttributionCollection(true)
   }
   
   //    MARK: Public
+  /// Ignored while analytics is disabled, see `setAnalyticsEnabled(_:)`.
   public static func sendTest(name: String,
                               group: String) {
+    guard isAnalyticsAllowed(command: "test") else {
+      return
+    }
     // V4
     if !SKServiceRegistry.commandStore.hasTestV4Command {
       let testRequest = Installapi_TestRequest(name: name, group: group)
@@ -65,9 +98,13 @@ public class SkarbSDK {
   
   /// For brokerUserID use the unique userID for this SKBroker.
   /// For example, for Appsflyer - AppsFlyerLib.shared().getAppsFlyerUID()
+  /// Ignored while analytics is disabled, see `setAnalyticsEnabled(_:)`.
   public static func sendSource(broker: SKBroker,
                                 features: [AnyHashable: Any],
                                 brokerUserID: String?) {
+    guard isAnalyticsAllowed(command: "source") else {
+      return
+    }
     // V4
     if !SKServiceRegistry.commandStore.hasSendSourceV4Command(broker: broker) {
       let attributionRequest = Installapi_AttribRequest(
@@ -94,9 +131,34 @@ public class SkarbSDK {
     return deviceId
   }
   
+  /// Collected only while analytics is enabled, see `setAnalyticsEnabled(_:)`.
   public static func useAutomaticAppleSearchAdsAttributionCollection(_ enable: Bool) {
-    isAutomaticSearchAdsEnabled = enable
-    SKServiceRegistry.commandStore.createAutomaticSearchAdsCommand(enable)
+    deviceScopedDataSerialQueue.sync {
+      isAutomaticSearchAdsEnabled = enable
+      SKServiceRegistry.commandStore.createAutomaticSearchAdsCommand(shouldCollectSearchAds)
+    }
+  }
+  
+  /// Applies the user's analytics consent, e.g. a revocation from the app's settings.
+  /// Saved on disk, so it also holds for the following launches. On by default.
+  ///
+  /// - Off, the SDK keeps what purchases need (install, receipt and purchase validation)
+  ///   and stops the rest: `sendSource`, `sendTest` and `sendIDFA` are ignored, IDFA and
+  ///   Apple Search Ads attribution are not collected, the install and purchase requests go
+  ///   without IDFV and with a zeroed IDFA (queued ones included), and the SDK's error logs are
+  ///   not sent. Queued source, test, IDFA, Search Ads and log commands are dropped in any status,
+  ///   so they are sent again once consent is given back. A request already being sent at that
+  ///   moment may still complete, and nothing already delivered is erased on the server.
+  ///   After a first launch without consent, IDFV is never sent: the install is sent once.
+  /// - Back on, IDFA and Search Ads collection is queued again, following `automaticCollectIDFA`
+  ///   and `useAutomaticAppleSearchAdsAttributionCollection(_:)`. Call `sendSource`, `sendTest`
+  ///   and `sendIDFA` again if they are needed: the SDK does not keep what it was given while off.
+  ///
+  /// Can be called on any thread, before `initialize` too.
+  public static func setAnalyticsEnabled(_ enabled: Bool) {
+    deviceScopedDataSerialQueue.sync {
+      saveAnalyticsEnabled(enabled)
+    }
   }
   
   /// Switches the SDK to a new device id, so from now on this device is reported as a fresh
@@ -130,7 +192,7 @@ public class SkarbSDK {
     let deviceId = (isBlank ? nil : newDeviceId) ?? UUID().uuidString
     
     // Serialized so two resets can't interleave and queue two install commands
-    resetDeviceIdSerialQueue.sync {
+    deviceScopedDataSerialQueue.sync {
       resetDeviceScopedData(newDeviceId: deviceId)
     }
     
@@ -138,8 +200,10 @@ public class SkarbSDK {
     return deviceId
   }
   
+  /// Ignored while analytics is disabled, see `setAnalyticsEnabled(_:)`.
   public static func sendIDFA(idfa: String?) {
-    guard !SKServiceRegistry.commandStore.hasIDFACommand else {
+    guard isAnalyticsAllowed(command: "IDFA"),
+          !SKServiceRegistry.commandStore.hasIDFACommand else {
       return
     }
     
@@ -293,8 +357,43 @@ public class SkarbSDK {
     // Same order as in `initialize`, without touching the StoreKit service
     if isInitialized {
       SKServiceRegistry.commandStore.createInstallCommandIfNeeded(clientId: clientId)
-      SKServiceRegistry.commandStore.createIDFACommandIfNeeded(automaticCollectIDFA: automaticCollectIDFA)
-      SKServiceRegistry.commandStore.createAutomaticSearchAdsCommand(isAutomaticSearchAdsEnabled)
+      SKServiceRegistry.commandStore.createIDFACommandIfNeeded(automaticCollectIDFA: shouldCollectIDFA)
+      SKServiceRegistry.commandStore.createAutomaticSearchAdsCommand(shouldCollectSearchAds)
+    }
+  }
+  
+  private static var shouldCollectIDFA: Bool {
+    return automaticCollectIDFA && isAnalyticsEnabled
+  }
+  
+  private static var shouldCollectSearchAds: Bool {
+    return isAutomaticSearchAdsEnabled && isAnalyticsEnabled
+  }
+  
+  private static func isAnalyticsAllowed(command: String) -> Bool {
+    guard isAnalyticsEnabled else {
+      SKLogger.logInfo("SkarbSDK: analytics disabled, \(command) command skipped")
+      return false
+    }
+    return true
+  }
+  
+  /// Must be called on `deviceScopedDataSerialQueue`.
+  private static func saveAnalyticsEnabled(_ enabled: Bool) {
+    guard isAnalyticsEnabled != enabled else {
+      return
+    }
+    SKServiceRegistry.userDefaultsService.setValue(!enabled, forKey: .analyticsDisabled)
+    SKLogger.logInfo("SkarbSDK: analytics enabled = \(enabled), isInitialized = \(isInitialized)")
+    
+    guard enabled else {
+      SKServiceRegistry.commandStore.dropAnalyticsCommands()
+      return
+    }
+    // Before `initialize` nothing is queued: `initialize` queues them itself
+    if isInitialized {
+      SKServiceRegistry.commandStore.createIDFACommandIfNeeded(automaticCollectIDFA: shouldCollectIDFA)
+      SKServiceRegistry.commandStore.createAutomaticSearchAdsCommand(shouldCollectSearchAds)
     }
   }
   

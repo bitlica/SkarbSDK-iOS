@@ -79,17 +79,17 @@ class SKSyncServiceImplementation: SKSyncService {
     
     let executeCommands = SKServiceRegistry.commandStore.getCommandsForExecuting()
     for executeCommand in executeCommands {
+      // Checked at send time, so it also covers a command queued in the moment of a revocation
+      // or picked above right before its drop
+      if executeCommand.commandType.requiresAnalyticsConsent && !SkarbSDK.isAnalyticsEnabled {
+        SKLogger.logInfo("Analytics disabled, command is deleted unsent: \(executeCommand.description)")
+        SKServiceRegistry.commandStore.deleteCommand(executeCommand)
+        continue
+      }
       var command = executeCommand
       command.changeStatus(to: .inProgress)
       command.updateFireDate(Date())
       SKServiceRegistry.commandStore.saveCommand(command)
-      // Checked at send time, so it also covers a command queued in the moment of a revocation
-      // or picked above right before its drop
-      if command.commandType.requiresAnalyticsConsent && !SkarbSDK.isAnalyticsEnabled {
-        SKLogger.logInfo("Analytics disabled, command is deleted unsent: \(command.description)")
-        SKServiceRegistry.commandStore.deleteCommand(command)
-        continue
-      }
       
       SKLogger.logInfo("Command start executing: \(command.description)")
       

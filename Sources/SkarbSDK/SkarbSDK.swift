@@ -151,8 +151,8 @@ public class SkarbSDK {
   ///   moment may still complete, and nothing already delivered is erased on the server.
   ///   After a first launch without consent, IDFV is never sent: the install is sent once.
   /// - Back on, IDFA and Search Ads collection is queued again, following `automaticCollectIDFA`
-  ///   and `useAutomaticAppleSearchAdsAttributionCollection(_:)`. Call `sendSource` and
-  ///   `sendTest` again if they are needed: the SDK does not keep what it was given while off.
+  ///   and `useAutomaticAppleSearchAdsAttributionCollection(_:)`. Call `sendSource`, `sendTest`
+  ///   and `sendIDFA` again if they are needed: the SDK does not keep what it was given while off.
   ///
   /// Can be called on any thread, before `initialize` too.
   public static func setAnalyticsEnabled(_ enabled: Bool) {

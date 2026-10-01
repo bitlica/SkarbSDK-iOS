@@ -58,17 +58,13 @@ enum SKLoggerFeatureType {
 class SKLogger {
   
   static func logError(_ message: String, features: [String: Any]?) {
-    var features = features ?? [:]
-    features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
-    features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
-    features[SKLoggerFeatureType.installId.name] = SkarbSDK.getDeviceId()
-    features[SKLoggerFeatureType.proxy.name] = getProxySettings()
-    // Sent with the install id, so only with analytics consent
     if SkarbSDK.isAnalyticsEnabled {
-      let command = SKCommand(commandType: .logging,
-                              status: .pending,
-                              data: SKCommand.prepareApplogData(message: message, features: features))
-      SKServiceRegistry.commandStore.saveCommand(command)
+      var features = features ?? [:]
+      features[SKLoggerFeatureType.agentName.name] = SkarbSDK.agentName
+      features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
+      features[SKLoggerFeatureType.installId.name] = SkarbSDK.getDeviceId()
+      features[SKLoggerFeatureType.proxy.name] = getProxySettings()
+      saveLogCommand(message: message, features: features)
     }
     if SkarbSDK.isLoggingEnabled {
       print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [ERROR] \(message)")
@@ -76,16 +72,21 @@ class SKLogger {
   }
   
   static func logWarn(_ message: String, features: [String: Any]?) {
-    // Sent to the server, so only with analytics consent
     if SkarbSDK.isAnalyticsEnabled {
-      let command = SKCommand(commandType: .logging,
-                              status: .pending,
-                              data: SKCommand.prepareApplogData(message: message, features: features))
-      SKServiceRegistry.commandStore.saveCommand(command)
+      saveLogCommand(message: message, features: features)
     }
     if SkarbSDK.isLoggingEnabled {
       print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [WARN] \(message)")
     }
+  }
+  
+  /// Logs are sent to the server with the install id, so callers only queue them with
+  /// analytics consent.
+  private static func saveLogCommand(message: String, features: [String: Any]?) {
+    let command = SKCommand(commandType: .logging,
+                            status: .pending,
+                            data: SKCommand.prepareApplogData(message: message, features: features))
+    SKServiceRegistry.commandStore.saveCommand(command)
   }
   
   static func logInfo(_ message: String) {

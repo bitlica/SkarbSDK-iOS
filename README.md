@@ -146,7 +146,8 @@ SkarbSDK.setAnalyticsEnabled(false)
   not collected, the install and purchase requests go without IDFV and with a zeroed IDFA, and the
   SDK's error logs are not sent.
 - Queued source, test, IDFA, Search Ads and log data is dropped, sent or not, so it is sent again
-  once consent is given back. Call `sendSource` / `sendTest` again then if they are needed.
+  once consent is given back. Call `sendSource` / `sendTest` / `sendIDFA` again then if they are
+  needed.
 - Can be called on any thread, before `initialize` too. Nothing is erased on the server.
 
 ### Logging

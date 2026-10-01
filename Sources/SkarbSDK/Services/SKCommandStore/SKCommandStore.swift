@@ -11,11 +11,12 @@ import Foundation
 class SKCommandStore {
   
   /// Commands that belong to one install: each carries the device id it was created with,
-  /// and most of them double as a "sent once per install" marker.
-  /// Purchase-related types are deliberately not here - they survive a device id reset.
-  private static let deviceScopedCommandTypes: Set<SKCommandType> = [
-    .installV4, .sourceV4, .testV4, .idfaV4, .fetchIdfa, .automaticSearchAds, .logging
-  ]
+  /// and most of them double as a "sent once per install" marker. These are the install and
+  /// the analytics commands. Purchase-related types are deliberately not here - they survive
+  /// a device id reset.
+  private static func isDeviceScoped(_ commandType: SKCommandType) -> Bool {
+    return commandType == .installV4 || commandType.requiresAnalyticsConsent
+  }
   
   private let exclusionSerialQueue = DispatchQueue(label: "com.bitlica.skcommandStore.exclusion")
   
@@ -146,11 +147,11 @@ class SKCommandStore {
     saveState()
   }
   
-  /// Removes every command of `deviceScopedCommandTypes` in any status, and remembers them
+  /// Removes every device-scoped command in any status, and remembers them
   /// so a request still in flight can't re-insert its command via `saveCommand`.
   /// Purchase-related commands are kept as they are.
   func dropDeviceScopedCommands() {
-    let droppedCount = dropCommands(where: { Self.deviceScopedCommandTypes.contains($0) })
+    let droppedCount = dropCommands(where: Self.isDeviceScoped)
     SKLogger.logInfo("Dropped \(droppedCount) device scoped commands")
   }
   

@@ -63,20 +63,26 @@ class SKLogger {
     features[SKLoggerFeatureType.agentVer.name] = SkarbSDK.version
     features[SKLoggerFeatureType.installId.name] = SkarbSDK.getDeviceId()
     features[SKLoggerFeatureType.proxy.name] = getProxySettings()
-    let command = SKCommand(commandType: .logging,
-                            status: .pending,
-                            data: SKCommand.prepareApplogData(message: message, features: features))
-    SKServiceRegistry.commandStore.saveCommand(command)
+    // Sent with the install id, so only with analytics consent
+    if SkarbSDK.isAnalyticsEnabled {
+      let command = SKCommand(commandType: .logging,
+                              status: .pending,
+                              data: SKCommand.prepareApplogData(message: message, features: features))
+      SKServiceRegistry.commandStore.saveCommand(command)
+    }
     if SkarbSDK.isLoggingEnabled {
       print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [ERROR] \(message)")
     }
   }
   
   static func logWarn(_ message: String, features: [String: Any]?) {
-    let command = SKCommand(commandType: .logging,
-                            status: .pending,
-                            data: SKCommand.prepareApplogData(message: message, features: features))
-    SKServiceRegistry.commandStore.saveCommand(command)
+    // Sent to the server, so only with analytics consent
+    if SkarbSDK.isAnalyticsEnabled {
+      let command = SKCommand(commandType: .logging,
+                              status: .pending,
+                              data: SKCommand.prepareApplogData(message: message, features: features))
+      SKServiceRegistry.commandStore.saveCommand(command)
+    }
     if SkarbSDK.isLoggingEnabled {
       print("\(Formatter.milliSec.string(from: Date())) [SkarbSDK-\(SkarbSDK.version)] [WARN] \(message)")
     }

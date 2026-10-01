@@ -19,6 +19,7 @@ class SKUserDefaultsService {
     case deviceId
     case userPurchasedInfo
     case userPurchasedInfoCacheDate
+    case analyticsDisabled
     
     var keyName: String {
       switch self {
@@ -40,6 +41,8 @@ class SKUserDefaultsService {
         return "sk_user_purchased_info"
       case .userPurchasedInfoCacheDate:
         return "sk_user_purchased_info_cache_date"
+      case .analyticsDisabled:
+        return "sk_analytics_disabled"
       }
     }
   }

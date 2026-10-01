@@ -21,7 +21,7 @@ class SKCommandStore {
   
   private var localAppgateCommands: [SKCommand]
   
-  /// Commands removed by `dropDeviceScopedCommands()`. A request that was in flight
+  /// Commands removed by `dropDeviceScopedCommands()` or `dropAnalyticsCommands()`. A request that was in flight
   /// at that moment still calls `saveCommand` on completion, and must not bring its command back.
   /// In memory only: no request outlives the process.
   private var droppedCommands: Set<SKCommand> = []
@@ -106,7 +106,7 @@ class SKCommandStore {
         }
       } else if !droppedCommands.isEmpty, // skips hashing the payload (a receipt, say) on every save
                 droppedCommands.contains(command) {
-        // Finished after `dropDeviceScopedCommands()` removed it
+        // Finished after `dropDeviceScopedCommands()` or `dropAnalyticsCommands()` removed it
         isDropped = true
       } else {
         localAppgateCommands.append(command)
@@ -114,7 +114,7 @@ class SKCommandStore {
       }
     }
     guard !isDropped else {
-      SKLogger.logInfo("Command was dropped by device id reset and is not saved: \(command.description)")
+      SKLogger.logInfo("Command was dropped and is not saved: \(command.description)")
       return
     }
     // if new command was added we want to execute all pending
@@ -150,16 +150,29 @@ class SKCommandStore {
   /// so a request still in flight can't re-insert its command via `saveCommand`.
   /// Purchase-related commands are kept as they are.
   func dropDeviceScopedCommands() {
+    let droppedCount = dropCommands(where: { Self.deviceScopedCommandTypes.contains($0) })
+    SKLogger.logInfo("Dropped \(droppedCount) device scoped commands")
+  }
+  
+  /// Removes every command that requires analytics consent in any status, the same way as
+  /// `dropDeviceScopedCommands()`. Most of them mark their data as sent once, so their data
+  /// is sent again once consent is given back. Install and purchase-related commands are kept.
+  func dropAnalyticsCommands() {
+    let droppedCount = dropCommands(where: { $0.requiresAnalyticsConsent })
+    SKLogger.logInfo("Dropped \(droppedCount) analytics commands")
+  }
+  
+  private func dropCommands(where shouldDrop: @escaping (SKCommandType) -> Bool) -> Int {
     var droppedCount = 0
     exclusionSerialQueue.sync {
-      let isDeviceScoped: (SKCommand) -> Bool = { Self.deviceScopedCommandTypes.contains($0.commandType) }
-      let dropped = localAppgateCommands.filter(isDeviceScoped)
+      let isDropped: (SKCommand) -> Bool = { shouldDrop($0.commandType) }
+      let dropped = localAppgateCommands.filter(isDropped)
       droppedCount = dropped.count
       droppedCommands.formUnion(dropped)
-      localAppgateCommands.removeAll(where: isDeviceScoped)
+      localAppgateCommands.removeAll(where: isDropped)
     }
     saveState()
-    SKLogger.logInfo("Dropped \(droppedCount) device scoped commands")
+    return droppedCount
   }
   
   func saveState() {
